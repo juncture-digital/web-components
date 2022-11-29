@@ -1,0 +1,56 @@
+{
+  "name": "visual-essays",
+  "version": "0.4.0",
+  "description": "Juncture Web Components",
+  "main": "dist/index.cjs.js",
+  "module": "dist/index.js",
+  "es2015": "dist/esm/index.mjs",
+  "es2017": "dist/esm/index.mjs",
+  "types": "dist/types/components.d.ts",
+  "collection": "dist/collection/collection-manifest.json",
+  "collection:main": "dist/collection/index.js",
+  "unpkg": "dist/visual-essays/visual-essays.esm.js",
+  "files": [
+    "dist/",
+    "loader/"
+  ],
+  "scripts": {
+    "build": "stencil build --docs",
+    "start": "stencil build --dev --watch --serve",
+    "generate": "stencil generate"
+  },
+  "dependencies": {
+    "@iiif/parser": "^1.0.8",
+    "@openseadragon-imaging/openseadragon-viewerinputhook": "^2.2.1",
+    "@recogito/annotorious-openseadragon": "2.6.0",
+    "@recogito/annotorious-toolbar": "^1.1.0",
+    "@shoelace-style/shoelace": "^2.0.0-beta.76",
+    "@stencil/core": "^2.15.1",
+    "@types/leaflet": "^1.7.11",
+    "@vimeo/player": "^2.17.1",
+    "exifr": "^7.1.3",
+    "highlight.js": "^11.6.0",
+    "js-md5": "^0.7.3",
+    "js-sha256": "^0.9.0",
+    "jwt-decode": "^3.1.2",
+    "leaflet": "^1.8.0",
+    "leaflet.control.opacity": "^1.6.0",
+    "lodash.debounce": "^4.0.8",
+    "lodash.throttle": "^4.1.1",
+    "openseadragon": "2.4.2",
+    "stencil-click-outside": "^1.8.0",
+    "tippy.js": "^6.3.7",
+    "uuid": "^9.0.0",
+    "youtube-player": "^5.5.2"
+  },
+  "devDependencies": {
+    "@types/jest": "^27.5.0",
+    "@types/lodash.debounce": "^4.0.7",
+    "@types/openseadragon": "^3.0.3",
+    "jest": "^27.5.1",
+    "jest-cli": "^27.5.1",
+    "puppeteer": "^13.7.0",
+    "rollup-plugin-node-polyfills": "^0.2.1"
+  },
+  "license": "MIT"
+}

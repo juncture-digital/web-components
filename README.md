@@ -1,2 +1,2 @@
 # web-components
-Juncture Web Components
+Web components for Visual Essays

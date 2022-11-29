@@ -1,0 +1,170 @@
+* { box-sizing: border-box; }
+
+:host {
+  display: block;
+  font-family: Roboto, sans-serif;
+  width: 100%;
+  border: 1px solid #444;
+  padding: 6px;
+  z-index: 9;
+  background-color: white;
+}
+
+.workspace {
+  display: flex;
+  align-items: center;
+}
+.workspace-selector {
+  display: flex;
+  gap: 12px;
+}
+.workspace-selector div {
+  display: inline-flex;
+  position: relative;
+  padding-left: 6px;
+  font-size: 1rem;
+}
+.selectors {
+  display: flex;
+  gap: 6px;
+}
+.ws-path {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+  margin: 3px;
+}
+.workspace-selector > sl-icon {
+  vertical-align: middle;
+  padding-right: 6px;
+}
+sl-drawer::part(base), sl-drawer::part(panel), sl-drawer::part(body) {
+  padding: 0;
+  overflow: visible;
+}
+
+.github-select {
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #5A162E;
+}
+
+sl-divider {
+  margin: 6px;
+}
+.values {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.values > div {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.value {
+  display: inline-block;
+}
+
+div.path {
+}
+
+sl-breadcrumb-item::part(label) {
+  font-size: 1rem;
+  color: var(--sl-color-primary-600);
+}
+
+.dir-items li {
+  cursor: pointer;
+}
+
+.dir-items {
+  height: 40vh;
+  overflow-y: scroll;
+}
+
+.dir-items li:hover {
+  color: var(--sl-color-primary-600);
+}
+
+sl-icon-button::part(base) {
+  padding: 0;
+}
+
+.content-path {
+  display: flex;
+  flex-direction: column;
+  /* gap: 12px; */
+}
+
+sl-icon-button {
+  align-self: start;
+  margin-top:6px;;
+}
+
+sl-menu::part(base) {
+  max-height: 300px;
+  overflow-y: scroll;
+}
+
+.dirs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.dirs sl-button::part(base) {
+  border-radius: 12px;
+  font-weight: 500;
+}
+
+sl-button.dir::part(base) {
+  background-color: #eee;
+  /*
+  background-color: rgba(91,21,46,.6);
+  color: white;
+  */
+}
+
+sl-button.file::part(base) {
+}
+
+sl-button.add-item::part(base) {
+  background-color: #eee;
+  color: black;
+}
+
+.delete {
+  margin-left: 18px;
+}
+
+sl-icon-button.delete::part(base) {
+  color: red;
+}
+
+.add-repo {
+  background-color: #ddd;
+}
+
+sl-menu {
+  text-align: left;
+}
+
+sl-breadcrumb {
+  display: inline-block;
+}
+
+.breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding-left: 12px;;
+}

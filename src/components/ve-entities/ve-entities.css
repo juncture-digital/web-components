@@ -1,0 +1,10 @@
+* { box-sizing: border-box; }
+
+:host {
+  display: block;
+  font-family: Roboto, sans-serif;
+  width: 100%;
+  padding: 6px;
+  border: 1px solid #444;
+  min-height: 300px;
+}
