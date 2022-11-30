@@ -21,7 +21,7 @@
 | `right`    | `right`    |             | `boolean` | `undefined` |
 | `sticky`   | `sticky`   |             | `boolean` | `undefined` |
 | `width`    | `width`    |             | `string`  | `undefined` |
-| `zoom`     | `zoom`     |             | `number`  | `10`        |
+| `zoom`     | `zoom`     |             | `number`  | `7`         |
 
 
 ## Dependencies
@@ -29,11 +29,13 @@
 ### Used by
 
  - [ve-image-grid](../ve-image-grid)
+ - [ve-media](../ve-media)
 
 ### Graph
 ```mermaid
 graph TD;
   ve-image-grid --> ve-map
+  ve-media --> ve-map
   style ve-map fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

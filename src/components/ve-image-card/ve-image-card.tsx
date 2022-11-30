@@ -5,8 +5,8 @@ import '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js'
 
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js'
-// setBasePath(location.hostname === 'localhost' ? 'http://localhost:3333' : 'https://visual-essays.github.io/web-components/src')
-setBasePath('https://visual-essays.github.io/web-components/src')
+// setBasePath(location.hostname === 'localhost' ? 'http://localhost:3333' : 'https://juncture-digital.github.io/web-components/src')
+setBasePath('https://juncture-digital.github.io/web-components/src')
 
 @Component({
   tag: 've-image-card',
@@ -134,7 +134,7 @@ export class ImageCard {
           }
           <div class="card-links">
             <sl-tooltip content="Copy IIIF Manifest URL">
-              <img onClick={this.copyTextToClipboard.bind(this, this._manifest.id)} src="https://visual-essays.github.io/web-app/static/iiif.png" alt="IIIF manifest icon"/>
+              <img onClick={this.copyTextToClipboard.bind(this, this._manifest.id)} src="https://juncture-digital.github.io/web-app/static/iiif.png" alt="IIIF manifest icon"/>
             </sl-tooltip>
             {this.location && <sl-tooltip content="Show location on map">
               <sl-icon name="map-fill" style={{cursor: 'pointer'}} onClick={this.imageSelected.bind(this, 'map')}></sl-icon>

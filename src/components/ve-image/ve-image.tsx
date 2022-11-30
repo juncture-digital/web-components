@@ -22,8 +22,8 @@ import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js'
 import SLDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js';
 
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js'
-// setBasePath(location.hostname === 'localhost' ? 'http://localhost:3333' : 'https://visual-essays.github.io/web-components/src')
-setBasePath('https://visual-essays.github.io/web-components/src')
+// setBasePath(location.hostname === 'localhost' ? 'http://localhost:3333' : 'https://juncture-digital.github.io/web-components/src')
+setBasePath('https://juncture-digital.github.io/web-components/src')
 
 @Component({
   tag: 've-image',
@@ -327,8 +327,8 @@ export class ImageViewer {
     let region
     let annoRegex = new RegExp('[0-9a-f]{8}')
     if (annoRegex.test(found[3])) {
-      // let endpoint = location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://api.visual-essays.net'
-      let endpoint = 'https://api.visual-essays.net'
+      // let endpoint = location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://api.juncture-digital.org'
+      let endpoint = 'https://api.juncture-digital.org'
       let annoId = `${endpoint}/annotation/${this.annoTarget(this._images[imgIdx].manifest, this._images[imgIdx].seq)}/${found[3]}/`
       let resp = await fetch(annoId)
       if (resp.ok) {

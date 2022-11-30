@@ -42,6 +42,8 @@
 ### Depends on
 
 - [ve-media](.)
+- [ve-image-card](../ve-image-card)
+- [ve-map](../ve-map)
 
 ### Graph
 ```mermaid

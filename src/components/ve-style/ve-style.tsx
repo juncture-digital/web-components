@@ -12,8 +12,8 @@ export class Style {
   }
 
   connectedCallback() {
-    // let server = location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://visual-essays.net'
-    let server = 'https://visual-essays.net'
+    // let server = location.hostname === 'localhost' ? 'http://localhost:8080' : 'https://juncture-digital.org'
+    let server = 'https://juncture-digital.org'
     // console.log(`layout=${this.layout} theme=${this.theme}`)
     if (this.href) {
       let link = document.createElement('link')

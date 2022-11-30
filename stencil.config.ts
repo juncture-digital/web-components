@@ -2,7 +2,7 @@ import { Config } from '@stencil/core';
 import nodePolyfills from 'rollup-plugin-node-polyfills';
 
 export const config: Config = {
-  namespace: 'visual-essays',
+  namespace: 'juncture-digital',
   globalStyle: 'src/global/global.css',
   globalScript: 'src/global/global.ts',
   rollupPlugins: {

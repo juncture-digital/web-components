@@ -202,7 +202,7 @@ export async function getManifest(manifestId: string, refresh: boolean=false) {
 
 export async function prezi2to3(manifest: any) {
   /* Converts IIIF v2 manifest to v3 */
-  let resp = await fetch('https://iiif.visual-essays.net/prezi2to3/', {
+  let resp = await fetch('https://iiif.juncture-digital.org/prezi2to3/', {
     method: 'POST', 
     body: JSON.stringify(manifest)
   })

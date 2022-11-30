@@ -4,7 +4,7 @@ import '@shoelace-style/shoelace/dist/components/icon/icon.js'
 import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js'
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js'
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js'
-setBasePath('https://visual-essays.github.io/web-components/src')
+setBasePath('https://juncture-digital.github.io/web-components/src')
 
 @Component({
   tag: "ve-site-search",

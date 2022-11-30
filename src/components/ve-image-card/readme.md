@@ -25,12 +25,14 @@
 
  - [ve-image](../ve-image)
  - [ve-image-grid](../ve-image-grid)
+ - [ve-media](../ve-media)
 
 ### Graph
 ```mermaid
 graph TD;
   ve-image --> ve-image-card
   ve-image-grid --> ve-image-card
+  ve-media --> ve-image-card
   style ve-image-card fill:#f9f,stroke:#333,stroke-width:4px
 ```
 

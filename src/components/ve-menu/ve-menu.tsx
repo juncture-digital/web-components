@@ -2,7 +2,7 @@ import { Component, Element, Method, Prop, State, Watch, h } from '@stencil/core
 
 import '@shoelace-style/shoelace/dist/components/icon/icon.js'
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js'
-setBasePath(location.hostname === 'localhost' ? 'http://localhost:3333' : 'https://visual-essays.github.io/web-components/src')
+setBasePath(location.hostname === 'localhost' ? 'http://localhost:3333' : 'https://juncture-digital.github.io/web-components/src')
 
 const clientIds = {
   'beta.juncture-digital.org': 'f30ce4168a0bb95ecaa3',
@@ -73,7 +73,7 @@ export class VeNav {
       )
   }
 
-  @State() contentPath: string = '/visual-essays/content'
+  @State() contentPath: string = '/juncture-digital/essays'
 
   connectedCallback() {
     this.getNavItems()
@@ -239,7 +239,7 @@ export class VeNav {
       ]}
       </div>,
       <ve-contact contact={this.contact}></ve-contact>,
-      <ve-content-viewer id="help" path="/visual-essays/content/help" format="html"></ve-content-viewer>,
+      <ve-content-viewer id="help" path="/juncture-digital/essays/help" format="html"></ve-content-viewer>,
       <ve-content-viewer id="markdown" path={this.contentPath} format="markdown"></ve-content-viewer>
     ]
   }

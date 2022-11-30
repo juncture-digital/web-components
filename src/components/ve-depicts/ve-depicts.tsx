@@ -5,8 +5,8 @@ import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js'
 import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js'
 
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js'
-// setBasePath(location.hostname === 'localhost' ? 'http://localhost:3333' : 'https://visual-essays.github.io/web-components/src')
-setBasePath('https://visual-essays.github.io/web-components/src')
+// setBasePath(location.hostname === 'localhost' ? 'http://localhost:3333' : 'https://juncture-digital.github.io/web-components/src')
+setBasePath('https://juncture-digital.github.io/web-components/src')
 
 @Component({
   tag: 've-depicts',
