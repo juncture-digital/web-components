@@ -95,7 +95,7 @@ export class GithubClient {
       let content
       let url = `https://api.github.com/repos/${acct}/${repo}/contents/${path}`
       if (ref) url += `?ref=${ref}`
-      let resp: any = await fetch(url, {headers: {Authorization:`Token ${this.authToken}`}})
+      let resp: any = await fetch(url, {cache: 'no-cache', headers: {Authorization:`Token ${this.authToken}`}})
       if (resp.ok) {
         resp = await resp.json()
         content = decodeURIComponent(escape(atob(resp.content)))
@@ -117,7 +117,7 @@ export class GithubClient {
     async putFile(acct:string, repo:string, path:string, content:any, ref:string, isBinaryString=false, sha:string=''): Promise<any> {
       let url = `https://api.github.com/repos/${acct}/${repo}/contents/${path}`
       sha = sha || this._shas[url] || await this.getSha(acct, repo, path, ref)
-      console.log(`putFile: acct=${acct} repo=${repo} path=${path} ref=${ref} sha=${sha} isBinaryString=${isBinaryString}`)
+      // console.log(`putFile: acct=${acct} repo=${repo} path=${path} ref=${ref} sha=${sha} isBinaryString=${isBinaryString}`)
       // let payload:any = { message: 'API commit', content: btoa(unescape(encodeURIComponent(content))) }
       let payload:any = { 
         message: 'API commit', 
