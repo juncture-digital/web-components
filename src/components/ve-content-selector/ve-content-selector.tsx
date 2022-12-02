@@ -177,24 +177,28 @@ export class ContentSelector {
   }
 
   // Ensure 'essays' repository exists
-  createSubmitted: boolean = false
-  async waitForRepo() {
-    if (this.acct) {
+  @State() createSubmitted: boolean = false
+  async waitForRepoInit() {
+    if (this.username && this.username === this.acct) {
       let repos = await this.githubClient.repos(this.acct)
       this.ready = repos.find(repo => repo.name === 'essays') !== undefined
-      // console.log(`waitForRepoReady: repo=${this.repo} repos=${repos.map(repo => repo.name)} found=${this.ready} createSubmitted=${this.createSubmitted}`)
+      console.log(`waitForRepoInit: repo=${this.repo} repos=${repos.map(repo => repo.name)} found=${this.ready} createSubmitted=${this.createSubmitted}`)
       if (!this.ready && !this.createSubmitted) {
         this.githubClient.createRepository({name:'essays', description:'Juncture visual essays'})
+        this.githubClient.createRepository({name:'media', description:'Juncture media'})
         this.createSubmitted = true
-        this.notReadyText = 'Waiting for creation of "essays" repository...'
+        this.notReadyText = 'Waiting for repository creation...'
       }
+    } else {
+      this.ready = true
+      this.getRepositories()
     }
-    if (!this.ready) setTimeout(() => this.waitForRepo(), 2000)
+    if (!this.ready) setTimeout(() => this.waitForRepoInit(), 5000)
   }
 
   componentWillLoad() {
     if (this.sticky) makeSticky(this.el)
-    this.waitForRepo()
+    this.waitForRepoInit()
   }
 
   // componentWillRender() { console.log('componentWillRender') }
