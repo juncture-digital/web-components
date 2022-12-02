@@ -15,12 +15,16 @@ ve-media > ul {
   background-color: white;
 }
 
-ve-media.right .mirador-wrapper {
+ve-media.right .mirador-wrapper, ve-media.right .gif-wrapper {
   margin-left: 12px;
 }
 
-ve-media.left .mirador-wrapper {
+ve-media.left .mirador-wrapper, ve-media.left .gif-wrapper {
   margin-right: 12px;
+}
+
+.gif-wrapper img {
+  width: 100%;
 }
 
 sl-dialog .mirador-canvas-nav {

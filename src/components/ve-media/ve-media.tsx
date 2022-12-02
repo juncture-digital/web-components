@@ -65,6 +65,7 @@ export class VeMirador {
   @State() mediaPlayer: HTMLMediaElement
   @State() miradorReady: boolean = false
   @State() mediaType: string = null // image, audio, video
+  @State() isGif: boolean = false
   sourceDimensions: any = {}
   computedDimensions: any
 
@@ -209,7 +210,8 @@ export class VeMirador {
     this.el.classList.add('ve-component')
     if (this.manifest) {
       if (this.manifest.indexOf('http') !== 0) this.manifest = `https://iiif.juncture-digital.org/${this.manifest}/manifest.json`
-      this.id = `mirador-${uuidv4().split('-')[0]}`
+      this.isGif = /\.gif\/manifest\.json$/.test(this.manifest)
+      this.id = this.isGif ? `gif-${uuidv4().split('-')[0]}` : `mirador-${uuidv4().split('-')[0]}`
     } else {
       this.buildImagesList()
       this.listenForSlotChanges()
@@ -234,7 +236,7 @@ export class VeMirador {
   doOnFirstRender() {
     this.wrapperEl = document.getElementById(`ve-media-${this.id}`)
     // console.log('doOnFirstRender', this.id, this.wrapperEl)
-    if (this.compare || this.grid) {
+    if (this.compare || this.grid || this.isGif) {
       this.doLayout()
     } else {
       this.miradorEl = this.wrapperEl.querySelector(`#mirador-${this.id}`)
@@ -746,6 +748,14 @@ export class VeMirador {
     ]
   }
 
+  renderGif() {
+    return [
+      <div id={`ve-media-${this.id}`} class="gif-wrapper">
+        <img src={'https://upload.wikimedia.org/wikipedia/commons/1/19/DART-impact-SAAO-Lesedi-Mookodi.gif'} alt={'DART-impact-SAAO-Lesedi-Mookodi'}/>
+      </div>
+    ]
+  }
+
   renderAsCards() {
     return [
       <div id={`ve-media-${this.id}`} class="cards grid-wrapper">
@@ -784,7 +794,9 @@ export class VeMirador {
   }
 
   render() {
-    return this.compare
+    return this.isGif
+      ? this.renderGif()
+      : this.compare
         ? this.renderCompareViewer()
         : this.grid
           ? this.cards
