@@ -1,0 +1,5 @@
+* { box-sizing: border-box; }
+
+.entityBox:hover {
+	fill: yellow;
+}

@@ -1,237 +1,33 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
   <head>
+    <base href="">
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=5.0" />
-    <meta name="format-detection" content="telephone=no" />
     <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" />
     <link rel="stylesheet" href="/build/juncture-digital.css" />
-    <script src="/build/juncture-digital.esm.js" type="module"></script> 
+    <script src="/build/juncture-digital.esm.js" type="module"></script>
+    <script src="/build/juncture-digital.js" nomodule></script>
     <style>
-      body {
-        max-width: 1000px;
-        margin: auto;
-        font-family: apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
-        font-size: 18px;
-        line-height: 28.8px;
-        margin-block-start: 24px;
-        -webkit-font-smoothing: antialiased;
+      rect:hover {
+        fill: red !important;
       }
-      main {
-        background-color: white;
-      }
-      main > * {
-        background-color: inherit;
-      }
-      mark {
-        background-color: inherit;
-        border-bottom: 3px solid olivedrab;
-      }
-      mark:hover {
-        background-color: olivedrab;
-        color: white;
-        cursor: pointer;
-      }
-      .sticky.right + section, 
-      .sticky.right ~ section,
-      .sticky.right + div, 
-      .sticky.right ~ div,
-      .sticky.right + p, 
-      .sticky.right ~ p,
-      .sticky.right + ol, 
-      .sticky.right ~ ol
-      .sticky.right + ul, 
-      .sticky.right ~ ul,
-      .sticky.right + blockquote, 
-      .sticky.right ~ blockquote {
-        width: 50%;
-        margin-left: 0;
-        padding-right: 9px;
-      }
-    
-      .ve-component.sticky.left + section, 
-      .ve-component.sticky.left ~ section,
-      .ve-component.sticky.left + div, 
-      .ve-component.sticky.left ~ div,
-      .ve-component.sticky.left + p, 
-      .ve-component.sticky.left ~ p,
-      .ve-component.sticky.left + ol, 
-      .ve-component.sticky.left ~ ol
-      .ve-component.sticky.left + ul, 
-      .ve-component.sticky.left ~ ul,
-      .ve-component.sticky.left + blockquote, 
-      .ve-component.sticky.left ~ blockquote {
-        margin-left: 50%;
-        padding-left: 9px;
-      }
-
-      /* Used for placing left vertical bar on active paragraphs */
-      .show-active p {
-        border-left: 8px solid transparent;
-      }
-      .show-active p.active {
-        border-left: 4px solid #ccc;
-        padding-left: 4px;
-      }
-
-      main > section {
-        clear: both;
-        margin-top: 2rem;
+      .entityBox:hover {
+        fill: yellow;
       }
     </style>
   </head>
   <body>
 
     <main>
-
-      <section>
-        <ve-media grid>
-          <ul>
-            <li>gh:rsnyder/media/michigan-up/Arched_Rock</li>
-            <li>wc:AmalfiCoast11.jpg</li>
-          </ul>
-        </ve-media>
-      </section>
-
-    <!--
-
-    </section>
-      <section class="show-active">
-        <ve-media manifest="wc:Colourful_Fashions_From_Paris_(1926).webm" right></ve-media>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat <mark play="20">nulla</mark> pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <p enter="play|60" exit="pause">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-      </section>
-
-      <section class="show-active">
-        <ve-media manifest="https://iiif.harvardartmuseums.org/manifests/object/299843" right></ve-media>
-        <p>
-          Lorem ipsum dolor sit amet, <mark zoomto="pct:25,25,50,50">consectetur</mark> adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-      </section>
-      <section class="show-active">
-        <ve-media manifest="wc:AmalfiCoast11.jpg" right></ve-media>
-        <p>
-          Lorem ipsum dolor sit amet, <mark zoomto="pct:25,25,50,50">consectetur</mark> adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-      </section>
-
-      <section>
-        <ve-media grid>
-          <ul>
-            <li>gh:rsnyder/media/michigan-up/Arched_Rock</li>
-            <li>wc:AmalfiCoast11.jpg</li>
-          </ul>
-        </ve-media>
-
-      </section>
-
-      <section class="show-active">
-        <ve-media manifest="wc:Colourful_Fashions_From_Paris_(1926).webm" right></ve-media>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat <mark play="20">nulla</mark> pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <p enter="play|60" exit="pause">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-      </section>
-
-      <section>
-        <ve-media compare>
-          <ul>
-            <li>gh:rsnyder/media/michigan-up/Arched_Rock</li>
-            <li>wc:AmalfiCoast11.jpg</li>
-          </ul>
-        </ve-media>
-      </section>
-
-      <section class="show-active">
-        <ve-media manifest="wc:Battle_Hymn_of_the_Republic_(USAFB).ogg" right></ve-media>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat <mark play="10">nulla</mark> pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-      </section>
-      -->
-      <!--
-
-      <section class="show-active">
-        <ve-media manifest="https://iiif.io/api/cookbook/recipe/0003-mvm-video/manifest.json" right></ve-media>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat <mark play="20">nulla</mark> pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <p enter="play|60" exit="pause">
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-        <p>
-          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam,
-          quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum
-          dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-        </p>
-      </section>
-
-      <div>
-        <ve-media manifest="https://iiif.harvardartmuseums.org/manifests/object/299843" right sticky></ve-media>
-
-        <ve-media manifest="https://iiif.juncture-digital.org/gh:rsnyder/media/michigan-up/Arched_Rock/manifest.json" right></ve-media>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-      </div>
-
-      <div>
-        <ve-media manifest="https://iiif.io/api/cookbook/recipe/0003-mvm-video/manifest.json" right></ve-media>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-      </div>
-
-      <div>
-        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
-      </div>
-      -->
-
+      
+      <ve-mermaid>
+          erDiagram
+            "Vincent van Gogh" ||--o{ "Customer Order" : places
+            "Customer Order" ||--|{ LINE-ITEM : contains
+            "Vincent van Gogh" }|..|{ DELIVERY-ADDRESS : uses
+      </ve-mermaid>
+      
     </main>
 
   </body>

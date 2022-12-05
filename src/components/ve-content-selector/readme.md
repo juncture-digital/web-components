@@ -34,7 +34,7 @@ Type: `Promise<any[]>`
 
 
 
-### `getFile(path: string) => Promise<any>`
+### `getFile(contentPath: string) => Promise<any>`
 
 
 

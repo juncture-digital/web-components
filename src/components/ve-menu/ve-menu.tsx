@@ -10,21 +10,22 @@ const clientIds = {
 }
 
 const nav = {
-  home: {icon: 'house-fill'},
   about: {icon: 'info-circle-fill'},
   contact: {icon: 'envelope-fill'},
   documentation: {icon: 'book'},
   docs: {icon: 'book'},
+  editor: {icon: 'pencil', loginRequired: true},
+  essays: {icon: 'pencil'},
   help: {icon: 'question-circle'},
+  home: {icon: 'house-fill'},
+  'how to': {icon: 'book-fill'},
   link: {icon: 'link-45deg'},
   login: {icon: 'person-circle'},
   logout: {icon: 'person-circle'},
   markdown: {icon: 'markdown'},
-  tools: {icon: 'tools', loginRequired: true},
-  essays: {icon: 'pencil'},
-  editor: {icon: 'pencil', loginRequired: true},
   media: {icon: 'images', loginRequired: true},
-  'how to': {icon: 'book-fill'}
+  showcase: {icon: 'easel2'},
+  tools: {icon: 'tools', loginRequired: true}
 }
 
 @Component({

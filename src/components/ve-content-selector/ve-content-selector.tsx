@@ -22,6 +22,8 @@ import SLDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js'
 setBasePath('https://juncture-digital.github.io/web-components/src')
 
+const igmore = new Set(['CNAME', 'index.html', '404.html', '.nojekyll'])
+
 @Component({
   tag: 've-content-selector',
   styleUrl: 've-content-selector.css',
@@ -268,7 +270,7 @@ export class ContentSelector {
     let dirList = await this.githubClient.dirlist(this.acct, this.repo, this.path.join('/'), this.ref)
     //if (dirList.length === 0 && this.path.length > 0) dirList = await this.githubClient.dirlist(this.acct, this.repo, this.path.slice(0,-1).join('/'), this.ref)
     let dirs = dirList.filter(item => item.type === 'dir')
-    let files = dirList.filter(item => item.type === 'file')
+    let files = dirList.filter(item => item.type === 'file' && !igmore.has(item.name))
 
     if (this.useReadme && files.find(file => file.name === 'README.md') && dirs.length === 0) {
       this.path = [...this.path, `README.md`]
@@ -289,8 +291,13 @@ export class ContentSelector {
   }
 
   @Method()
-  async getFile(path:string) {
-    return this.githubClient.getFile(this.acct, this.repo, path, this.ref)
+  async getFile(contentPath:string) {
+    let [path, args] = contentPath.split(':').pop().split('?')
+    let qargs = args ? Object.fromEntries(args.split('&').map(arg => arg.split('='))) : {}
+    let pathElems = path.split('/').filter(pe => pe)
+    let [acct, repo] = pathElems.slice(0,2)
+    path = pathElems.slice(2).filter(pe => pe).join('/')
+    return this.githubClient.getFile(acct, repo, path, qargs.ref || this.ref)
   }
 
   @Method()
@@ -513,7 +520,7 @@ export class ContentSelector {
       { this.path?.length > 0 && this.path.map((pathElem, idx) => 
         <sl-breadcrumb-item>
         
-          { idx === (this.path.length-1) && pathElem.split('.').pop() === 'md'
+          { idx === (this.path.length-1)
             ? [
                 <sl-button pill size="medium" onClick={this.prunePath.bind(this, idx+1)}>
                   {pathElem}

@@ -28,7 +28,7 @@ export namespace Components {
     interface VeContentSelector {
         "contentPath": string;
         "getDirList": () => Promise<any[]>;
-        "getFile": (path: string) => Promise<any>;
+        "getFile": (contentPath: string) => Promise<any>;
         "mode": string;
         "putFile": (contentPath: string, content: string) => Promise<any>;
         "repositoryIsWriteable": () => Promise<boolean>;
@@ -170,6 +170,16 @@ export namespace Components {
         "contact": string;
         "position": string;
         "showHelpWindow": () => Promise<void>;
+    }
+    interface VeMermaid {
+        "caption": string;
+        "full": boolean;
+        "height": string;
+        "left": boolean;
+        "right": boolean;
+        "sticky": boolean;
+        "type": string;
+        "width": string;
     }
     interface VeMeta {
         "description": string;
@@ -349,6 +359,12 @@ declare global {
         prototype: HTMLVeMenuElement;
         new (): HTMLVeMenuElement;
     };
+    interface HTMLVeMermaidElement extends Components.VeMermaid, HTMLStencilElement {
+    }
+    var HTMLVeMermaidElement: {
+        prototype: HTMLVeMermaidElement;
+        new (): HTMLVeMermaidElement;
+    };
     interface HTMLVeMetaElement extends Components.VeMeta, HTMLStencilElement {
     }
     var HTMLVeMetaElement: {
@@ -405,6 +421,7 @@ declare global {
         "ve-map": HTMLVeMapElement;
         "ve-media": HTMLVeMediaElement;
         "ve-menu": HTMLVeMenuElement;
+        "ve-mermaid": HTMLVeMermaidElement;
         "ve-meta": HTMLVeMetaElement;
         "ve-navbar": HTMLVeNavbarElement;
         "ve-site-search": HTMLVeSiteSearchElement;
@@ -578,6 +595,16 @@ declare namespace LocalJSX {
         "contact"?: string;
         "position"?: string;
     }
+    interface VeMermaid {
+        "caption"?: string;
+        "full"?: boolean;
+        "height"?: string;
+        "left"?: boolean;
+        "right"?: boolean;
+        "sticky"?: boolean;
+        "type"?: string;
+        "width"?: string;
+    }
     interface VeMeta {
         "description"?: string;
         "title"?: string;
@@ -641,6 +668,7 @@ declare namespace LocalJSX {
         "ve-map": VeMap;
         "ve-media": VeMedia;
         "ve-menu": VeMenu;
+        "ve-mermaid": VeMermaid;
         "ve-meta": VeMeta;
         "ve-navbar": VeNavbar;
         "ve-site-search": VeSiteSearch;
@@ -672,6 +700,7 @@ declare module "@stencil/core" {
             "ve-map": LocalJSX.VeMap & JSXBase.HTMLAttributes<HTMLVeMapElement>;
             "ve-media": LocalJSX.VeMedia & JSXBase.HTMLAttributes<HTMLVeMediaElement>;
             "ve-menu": LocalJSX.VeMenu & JSXBase.HTMLAttributes<HTMLVeMenuElement>;
+            "ve-mermaid": LocalJSX.VeMermaid & JSXBase.HTMLAttributes<HTMLVeMermaidElement>;
             "ve-meta": LocalJSX.VeMeta & JSXBase.HTMLAttributes<HTMLVeMetaElement>;
             "ve-navbar": LocalJSX.VeNavbar & JSXBase.HTMLAttributes<HTMLVeNavbarElement>;
             "ve-site-search": LocalJSX.VeSiteSearch & JSXBase.HTMLAttributes<HTMLVeSiteSearchElement>;
