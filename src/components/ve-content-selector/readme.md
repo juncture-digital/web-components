@@ -18,6 +18,7 @@
 
 | Event                | Description | Type               |
 | -------------------- | ----------- | ------------------ |
+| `accessChanged`      |             | `CustomEvent<any>` |
 | `addMediaResource`   |             | `CustomEvent<any>` |
 | `contentPathChanged` |             | `CustomEvent<any>` |
 
