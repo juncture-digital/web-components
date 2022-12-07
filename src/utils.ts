@@ -587,7 +587,9 @@ export function thumbnail(manifest: any, width:number=400) {
     let _imageInfo = imageInfo(manifest)
     return _imageInfo.service
       ? `${_imageInfo.service[0].id || _imageInfo.service[0]['@id']}/full/${width},/0/default.jpg`
-      : _imageInfo.id
+      : _imageInfo.type === 'Video'
+        ? `https://iiif.juncture-digital.org/thumbnail?url=${_imageInfo.id}`
+        : _imageInfo.id
   //}
 }
 

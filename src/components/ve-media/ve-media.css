@@ -13,6 +13,7 @@ ve-media > ul {
 
 .mirador-wrapper {
   background-color: white;
+  margin-bottom: 0.5em !important;
 }
 
 ve-media.right .mirador-wrapper, ve-media.right .gif-wrapper {

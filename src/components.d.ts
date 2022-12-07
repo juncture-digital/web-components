@@ -453,6 +453,7 @@ declare namespace LocalJSX {
     interface VeContentSelector {
         "contentPath"?: string;
         "mode"?: string;
+        "onAccessChanged"?: (event: VeContentSelectorCustomEvent<any>) => void;
         "onAddMediaResource"?: (event: VeContentSelectorCustomEvent<any>) => void;
         "onContentPathChanged"?: (event: VeContentSelectorCustomEvent<any>) => void;
         "sticky"?: boolean;

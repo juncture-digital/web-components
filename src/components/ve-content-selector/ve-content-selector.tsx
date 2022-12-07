@@ -22,7 +22,7 @@ import SLDrawer from '@shoelace-style/shoelace/dist/components/drawer/drawer.js'
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js'
 setBasePath('https://juncture-digital.github.io/web-components/src')
 
-const igmore = new Set(['CNAME', 'index.html', '404.html', '.nojekyll'])
+const igmore = new Set(['config.yaml', 'CNAME', 'index.html', '404.html', '.nojekyll'])
 
 @Component({
   tag: 've-content-selector',
@@ -38,11 +38,12 @@ export class ContentSelector {
   @State() _contentPath: string
   @Watch('_contentPath')
   _contentPathChanged(path) {
-    this.contentPath = path
-    if (this.el.getAttribute('content-path')) {
+      console.log(`ve-content-selector.contentPath=${path}`)
+      this.contentPath = path
+    //if (this.el.getAttribute('content-path')) {
       // console.log(`ve-content-selector.contentPath=${path}`)
       this.contentPathChanged.emit(path)
-    }
+    //}
   }
 
   @Prop() sticky: boolean
@@ -52,6 +53,7 @@ export class ContentSelector {
 
   @Event({ bubbles: true, composed: true }) contentPathChanged: EventEmitter<any>
   @Event({ bubbles: true, composed: true }) addMediaResource: EventEmitter<any>
+  @Event({ bubbles: true, composed: true }) accessChanged: EventEmitter<any>
 
   drawer: SLDrawer
 
@@ -60,6 +62,11 @@ export class ContentSelector {
   @State() isLoggedIn: boolean = false
   @State() userCanUpdateRepo: boolean = false
   useReadme: boolean = true
+
+  @Watch('userCanUpdateRepo')
+  userCanUpdateRepoChanged() {
+    this.accessChanged.emit({acct: this.acct, repo: this.repo, canUpdate: this.userCanUpdateRepo})
+  }
 
   @State() fileToDelete: string
   @Watch('fileToDelete')
