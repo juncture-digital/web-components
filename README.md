@@ -1,1 +1,2 @@
-# Vue WC
+# juncture-vue-wc
+
