@@ -1,2 +1,1 @@
-# vue-wc
-Vue Web Components
+# Vue WC
