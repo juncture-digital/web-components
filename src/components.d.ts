@@ -131,6 +131,7 @@ export namespace Components {
         "cards": string;
         "center": string;
         "entities": string;
+        "essayBase": string;
         "full": boolean;
         "height": string;
         "left": boolean;
@@ -557,6 +558,7 @@ declare namespace LocalJSX {
         "cards"?: string;
         "center"?: string;
         "entities"?: string;
+        "essayBase"?: string;
         "full"?: boolean;
         "height"?: string;
         "left"?: boolean;

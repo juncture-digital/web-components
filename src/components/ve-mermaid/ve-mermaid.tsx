@@ -26,7 +26,6 @@ export class VeMermaid {
   componentWillLoad() {
     this.diagramText = this.el.textContent
     this.el.textContent = ''
-    console.log(this.diagramText)
   }
   // componentWillRender() {}
   // componentDidRender() {}

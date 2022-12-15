@@ -36,6 +36,8 @@ export class MapViewer {
   @Prop() entities: string
   @Prop() cards: string
 
+  @Prop() essayBase: string
+
   @Element() el: HTMLElement;
 
   position: string
@@ -44,6 +46,7 @@ export class MapViewer {
   @State() opacitySlider: HTMLInputElement
   @State() _entities: string[] = []
 
+  @State() latLngZoom: string 
 
   @State() _layerObjs: any[] = []
   @State() _layers: any = {tileLayers:[], geoJsonLayers:[]}
@@ -56,11 +59,21 @@ export class MapViewer {
   @Watch('_layerObjs')
   async _layerObjsChanged() {
     let _layerObjs = await Promise.all(this._layerObjs)
-    
+    console.log(_layerObjs)
     let layers: any = {}
-
     let locations = _layerObjs.filter(item => item.coords || item.qid)
-    let _geoJsonLayers = []
+
+    let responses = await Promise.all(_layerObjs
+      .filter(layer => layer.geojson)
+      .map (layer => {
+        if (layer.geojson.indexOf('http') === -1) layer.geojson = `https://raw.githubusercontent.com/${this.essayBase}/${layer.geojson}`
+        return layer
+      })
+      .map(layer => fetch(layer.geojson)))
+
+    let geoJSONs = await Promise.all(responses.map((resp:any) => resp.json()))
+    let _geoJsonLayers = geoJSONs.map(geoJSON => L.geoJSON(geoJSON))
+
     if (locations.length > 0) _geoJsonLayers.push(this.toGeoJSON(locations))
     layers.geoJsonLayers = _geoJsonLayers
     
@@ -183,6 +196,7 @@ export class MapViewer {
   }
 
   async _toObj(s:string) {
+    let geoJsonRegex = /\.(geo)?json$/i
     let tokens = []
     s = s.replace(/“/,'"').replace(/”/,'"').replace(/’/,"'")
     s.match(/[^\s"]+|"([^"]*)"/gmi).forEach(token => {
@@ -204,6 +218,8 @@ export class MapViewer {
         let entity = await getEntity(token)
         obj.coords = this.latLng(entity.coords)
         obj.caption = entity.label
+      } else if (geoJsonRegex.test(token)) {
+        obj.geojson = token
       } else {
         obj.caption = token[0] === '"' && token[token.length-1] === '"' ? token.slice(1,-1) : token
       }
@@ -263,16 +279,17 @@ export class MapViewer {
         })
       ]
     })
-    
+    this.map.on('click', (e) => this.getLatLngZoom(e))
     this.map.on('zoomend', (e) => this.getLatLngZoom(e))
     this.map.on('moveend', (e) => this.getLatLngZoom(e))
-
+    this.latLngZoom = `${Number((center.lat).toFixed(5))},${Number((center.lng).toFixed(5))} ${this.zoom}`
   }
 
   getLatLngZoom(e) {
-    let center = e.target.getCenter()
+    let point = e.type === 'click' ? e.latlng : e.target.getCenter()
     let zoom = e.target.getZoom()
-    let resp = [center.lat, center.lng, zoom]
+    let resp = [point.lat, point.lng, zoom]
+    this.latLngZoom = `${Number((point.lat).toFixed(5))},${Number((point.lng).toFixed(5))} ${zoom}`
     return resp
   }
 
@@ -307,6 +324,10 @@ export class MapViewer {
     return geoJSON
   }
 
+  copyTextToClipboard(text: string) {
+    if (navigator.clipboard) navigator.clipboard.writeText(text)
+  }
+
   updateOpacity() {
     this._layers.tileLayers[0].setOpacity(parseFloat(this.opacitySlider.value))
   }
@@ -325,6 +346,7 @@ export class MapViewer {
           {this.renderMap()}
           {this.caption && this.renderCaption()}
         </div>,
+        <div id="lat-lng-zoom" innerHTML={this.latLngZoom} onClick={this.copyTextToClipboard.bind(this, this.latLngZoom)}></div>,
         this._layers.tileLayers.length > 0 && <input id="opacity-slider" type="range" min="0" max="1" step="0.02" value="1" onInput={this.updateOpacity.bind(this)}></input>
       ]
     }

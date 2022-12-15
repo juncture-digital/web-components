@@ -38,6 +38,29 @@
 	z-index: 1000;
 }
 
+#lat-lng-zoom {
+	position: absolute;
+	font-family: sans-serif;
+	bottom: 24px;
+	right: 0;
+	width: 150px;
+	height: 32px;
+	padding: 3px 6px;
+	font-size: 0.8rem;
+	background-color: rgba(255, 255, 255, 0.5);
+	color: black;
+	z-index: 2;
+	opacity: 0;
+	text-align: right;
+  }
+  #lat-lng-zoom:hover {
+	visibility: visible;
+	opacity: 1;
+	transition: all 0.3s ease-in;
+	cursor: copy;
+	z-index: 1000;
+  }
+
 .card {
 	display: grid;
 	grid-template-columns: 1fr;
