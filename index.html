@@ -3,9 +3,16 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Juncture Digital Web Components</title>
     <style>
+      body {
+        font-family: Roboto, sans-serif;
+        margin: 0;
+        background-color: white;
+        font-size: 1.2rem;
+      }
       main {
         max-width: 1000px;
         margin: auto;
@@ -16,20 +23,79 @@
   <body>
     <main>
 
-      <ve-media-beta
-        manifest="https://iiif.harvardartmuseums.org/manifests/object/299843" 
-        idx="3"
-        base="rsnyder/essays/anno-test"
-        editable
-      ></ve-media-beta>
+      <section>
 
-      <ve-media-beta
-        manifest="https://iiif.juncture-digital.org/gh:rsnyder/media/italy/amalfi-coast/Amalfi_Coast.jpg/manifest.json" 
-        base="rsnyder/essays/anno-test"
-        editable
-      ></ve-media-beta>
+        <!--
+        <ve-media-beta
+          manifest="https://iiif.harvardartmuseums.org/manifests/object/299843" 
+          seq="3"
+          region="626,632,758,855"
+          base="rsnyder/essays/anno-test"
+          editable
+          right
+          sticky
+        >
+        </ve-media-beta>
+        -->
 
+        <ve-media-beta right>
+          <ul>
+            <li>
+              https://iiif.harvardartmuseums.org/manifests/object/299843 3 626,632,758,855
+            </li>
+            <li>
+              gh:rsnyder/media/italy/amalfi-coast/Amalfi_Coast.jpg
+            </li>
+
+          </ul>
+        </ve-media-beta>
+
+        <p>
+          Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+          Sit amet cursus sit amet. Rhoncus urna neque viverra justo nec ultrices dui sapien eget. Egestas pretium aenean pharetra magna.
+          Tincidunt eget nullam non nisi est sit amet facilisis. In fermentum et sollicitudin ac orci phasellus egestas tellus. Egestas
+          diam in arcu cursus euismod. Commodo sed egestas egestas fringilla phasellus faucibus scelerisque eleifend. Tempus urna et 
+          pharetra pharetra massa. Laoreet sit amet cursus sit amet dictum sit. Netus et malesuada fames ac turpis egestas integer eget 
+          aliquet. A iaculis at erat pellentesque adipiscing commodo elit at imperdiet. Pharetra diam sit amet nisl suscipit adipiscing 
+          bibendum. At tempor commodo ullamcorper a lacus. At consectetur lorem donec massa sapien. Tincidunt dui ut ornare lectus sit amet.
+        </p>
+        <p>
+          Vivamus arcu felis bibendum ut tristique et egestas. Facilisis leo vel fringilla est ullamcorper eget. Commodo elit at imperdiet
+          dui. Ac odio tempor orci dapibus ultrices in iaculis nunc sed. Velit sed ullamcorper morbi tincidunt. Placerat orci nulla
+          pellentesque dignissim enim sit amet venenatis urna. Vivamus arcu felis bibendum ut tristique et egestas quis. Sit amet mauris
+          commodo quis imperdiet. A arcu cursus vitae congue mauris rhoncus aenean. Est ultricies integer quis auctor. Parturient montes
+          nascetur ridiculus mus mauris vitae ultricies leo. Eget gravida cum sociis natoque penatibus et magnis dis. Tempus urna et pharetra
+          pharetra massa massa ultricies mi quis. Malesuada fames ac turpis egestas maecenas pharetra convallis posuere morbi. Arcu dictum
+          varius duis at consectetur lorem donec.
+        </p>
+        <p>
+          Accumsan tortor posuere ac ut consequat semper viverra. Lectus proin nibh nisl condimentum id venenatis. Ornare arcu dui vivamus
+          arcu felis bibendum ut. Libero nunc consequat interdum varius. Enim eu turpis egestas pretium aenean pharetra. Vitae tempus quam 
+          pellentesque nec. Amet mauris commodo quis imperdiet. Suscipit tellus mauris a diam maecenas sed enim ut. Proin sagittis nisl rhoncus
+          mattis. Porta nibh venenatis cras sed felis eget velit aliquet sagittis. Eleifend donec pretium vulputate sapien nec sagittis aliquam
+          malesuada bibendum. Ac tortor dignissim convallis aenean et. Sed arcu non odio euismod lacinia at.
+        </p>
+        <p>
+          Risus quis varius quam quisque id diam vel quam. Mi tempus imperdiet nulla malesuada pellentesque elit eget gravida cum. Amet dictum
+          sit amet justo donec enim diam. Sed lectus vestibulum mattis ullamcorper velit sed ullamcorper. Habitant morbi tristique senectus et
+          netus et. Ullamcorper velit sed ullamcorper morbi tincidunt. Habitasse platea dictumst vestibulum rhoncus est pellentesque elit. Ac felis
+          donec et odio pellentesque diam volutpat commodo. Tristique nulla aliquet enim tortor. Volutpat est velit egestas dui id ornare. In
+          pellentesque massa placerat duis ultricies. Tortor posuere ac ut consequat semper viverra nam libero justo. Tincidunt arcu non sodales 
+          neque.
+        </p>
+        <p>
+          Posuere urna nec tincidunt praesent semper feugiat nibh sed pulvinar. Amet mauris commodo quis imperdiet massa. Volutpat consequat mauris
+          nunc congue nisi vitae suscipit tellus mauris. Nisi est sit amet facilisis magna etiam tempor orci eu. Enim ut tellus elementum sagittis
+          vitae et. Quisque sagittis purus sit amet volutpat consequat mauris. Cras sed felis eget velit aliquet sagittis id consectetur. Aliquet
+          sagittis id consectetur purus ut faucibus. Et ligula ullamcorper malesuada proin libero nunc. Habitant morbi tristique senectus et netus et
+          malesuada. Ac turpis egestas sed tempus urna et. Aliquet sagittis id consectetur purus. Sed vulputate odio ut enim blandit volutpat
+          maecenas volutpat. Nulla posuere sollicitudin aliquam ultrices sagittis orci a scelerisque purus. Tristique et egestas quis ipsum suspendisse.
+          Nullam vehicula ipsum a arcu cursus vitae.
+        </p>
+
+      </section>
     </main>
+    
     <script src="src/main.ts" type="module"></script>
   </body>
 </html>

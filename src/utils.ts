@@ -45,8 +45,7 @@ function _findItems(toMatch: object, current: any, found: object[] = []) {
 export function getItemInfo(manifest:any, seq=1) {
   // console.log(`itemInfo: seq=${seq}`, manifest)
   let _itemInfo = findItem({type:'Annotation', motivation:'painting'}, manifest, seq).body
-  if (_itemInfo.service) _itemInfo.service = _itemInfo.service
-    .map((svc:any) => ({...svc, ...{id: (svc.id || svc['@id']).replace(/\/info\.json$/,'')}}))
+  // if (_itemInfo.service) _itemInfo.service = _itemInfo.service.map((svc:any) => ({...svc, ...{id: (svc.id || svc['@id']).replace(/\/info\.json$/,'')}}))
   return _itemInfo
 }
 
@@ -129,4 +128,22 @@ export function thumbnail(manifest: any, width:number=400) {
         ? `https://iiif.juncture-digital.org/thumbnail?url=${_imageInfo.id}`
         : _imageInfo.id
   //}
+}
+
+export function parseRegionString(region: string, viewer: OpenSeadragon.Viewer) {
+  let viewportRect
+  const s1 = region.split(':')
+  let [x,y,w,h] = s1[s1.length-1].split(',').map(v => parseInt(v))
+  const size = viewer.world.getItemAt(0).getContentSize()
+  console.log(region, size, x,y,w,h)
+  if (s1.length === 2 && (s1[0] === 'pct' || s1[0] === 'percent')) {
+    x = Math.round(size.x * x/100),
+    y = Math.round(size.y * y/100),
+    w = Math.round(size.x * w/100), 
+    h = Math.round(size.y * h/100)
+  }
+  // viewportRect = viewer.viewport.imageToViewportRectangle(rect)
+  viewportRect = viewer.viewport.imageToViewportRectangle(x,y,w,h)
+  console.log(viewportRect)
+  return viewportRect
 }
