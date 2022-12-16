@@ -4,20 +4,34 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
+    <title>Juncture Digital Web Components</title>
+    <style>
+      main {
+        max-width: 1000px;
+        margin: auto;
+      }
+    </style>
     <script type="module" crossorigin src="/assets/js/index.js"></script>
     <link rel="stylesheet" href="/assets/css/index.css">
   </head>
 
   <body>
-    <div>
-      <h1>Hello Vue Web Components!</h1>
-      <current-time></current-time>
-      <current-time time-zone="America/New_York"></current-time>
-      <current-time>
-        <span slot="prefix">The time is</span>
-      </current-time>
-    </div>
+    <main>
+
+      <ve-media-beta
+        manifest="https://iiif.harvardartmuseums.org/manifests/object/299843" 
+        idx="3"
+        base="rsnyder/essays/anno-test"
+        editable
+      ></ve-media-beta>
+
+      <ve-media-beta
+        manifest="https://iiif.juncture-digital.org/gh:rsnyder/media/italy/amalfi-coast/Amalfi_Coast.jpg/manifest.json" 
+        base="rsnyder/essays/anno-test"
+        editable
+      ></ve-media-beta>
+
+    </main>
     
   </body>
 </html>

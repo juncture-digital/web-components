@@ -4,13 +4,8 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Juncture Digital Web Components</title>
-    <style>
-      main {
-        max-width: 1000px;
-        margin: auto;
-      }
-    </style>
+    <title>Vite App</title>
+    <link rel="stylesheet" href="https://unpkg.com/@rdsnyderjr/juncture@0.0.1/dist/assets/css/index.css">
   </head>
 
   <body>
@@ -20,7 +15,6 @@
         manifest="https://iiif.harvardartmuseums.org/manifests/object/299843" 
         idx="3"
         base="rsnyder/essays/anno-test"
-        editable
       ></ve-media-beta>
 
       <ve-media-beta
@@ -30,6 +24,8 @@
       ></ve-media-beta>
 
     </main>
-    <script src="src/main.ts" type="module"></script>
-  </body>
+
+    <script src="https://unpkg.com/juncture-digital/dist/juncture-digital/juncture-digital.esm.js" type="module"></script>
+    <script src="https://unpkg.com/juncture-digital-vue3/dist/assets/js" type="module"></script>
+    </body>
 </html>

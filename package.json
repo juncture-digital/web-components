@@ -1,7 +1,7 @@
 {
-  "name": "juncture-vue-wc",
-  "version": "0.0.0",
-  "private": true,
+  "name": "juncture-digital-vue3",
+  "version": "1.0.0-beta.4",
+  "private": false,
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -11,10 +11,16 @@
     "type-check": "vue-tsc --noEmit"
   },
   "dependencies": {
+    "@ant-design/icons-vue": "^6.1.0",
+    "@recogito/annotorious-openseadragon": "^2.7.8",
+    "ant-design-vue": "^3.2.15",
+    "js-sha256": "^0.9.0",
+    "openseadragon": "^3.1.0",
     "vue": "^3.2.45"
   },
   "devDependencies": {
     "@types/node": "^18.11.9",
+    "@types/openseadragon": "^3.0.4",
     "@vitejs/plugin-vue": "^3.2.0",
     "@vue/tsconfig": "^0.1.3",
     "npm-run-all": "^4.1.5",
