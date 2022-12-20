@@ -24,6 +24,44 @@ export async function prezi2to3(manifest: any) {
   if (resp.ok) return (await resp).json()
 }
 
+function observeNavbar(navbar:HTMLElement, target:HTMLElement) {
+  const setTop = () => {
+    let top = parseInt(navbar.style.top.replace(/^-/,'').replace(/px$/,''))
+    let height = parseInt(navbar.style.height.replace(/px$/,''))
+    let topOffset = height - top
+    if (target.style.top) topOffset += parseInt(target.style.marginTop.slice(0,-2))
+    target.style.top = `${topOffset}px`
+  }
+  setTop()
+  const observer = new MutationObserver(setTop)
+  observer.observe(navbar, { attributes: true })
+}
+
+export function makeSticky(el:HTMLElement) {
+  el.classList.add('sticky')
+  el.style.position = 'sticky'
+  let stickyNavbar:any = document.querySelector('ve-navbar[sticky="true"]') as HTMLElement
+  if (stickyNavbar) {
+    observeNavbar(stickyNavbar, el)
+  } else {
+    let header = (document.querySelector('ve-header[sticky]') as HTMLElement)
+    if (header) {
+      stickyNavbar = header?.shadowRoot?.querySelector('ve-navbar')
+      if (stickyNavbar) {
+        observeNavbar(stickyNavbar, el)
+      } else {
+        const observer = new MutationObserver(() => {
+          stickyNavbar = header?.shadowRoot?.querySelector('ve-navbar')
+          if (stickyNavbar) observeNavbar(stickyNavbar, el)
+        })
+        observer.observe(header, { childList: true, subtree: true, attributes: true })
+      }
+    } else {
+      el.style.top = '0'
+    }
+  }
+}
+
 export function findItem(toMatch: object, current: object, seq: number = 1): any {
   const found = _findItems(toMatch, current)
   return found.length >= seq ? found[seq-1] : null
@@ -135,7 +173,6 @@ export function parseRegionString(region: string, viewer: OpenSeadragon.Viewer) 
   const s1 = region.split(':')
   let [x,y,w,h] = s1[s1.length-1].split(',').map(v => parseInt(v))
   const size = viewer.world.getItemAt(0).getContentSize()
-  console.log(region, size, x,y,w,h)
   if (s1.length === 2 && (s1[0] === 'pct' || s1[0] === 'percent')) {
     x = Math.round(size.x * x/100),
     y = Math.round(size.y * y/100),
@@ -144,6 +181,5 @@ export function parseRegionString(region: string, viewer: OpenSeadragon.Viewer) 
   }
   // viewportRect = viewer.viewport.imageToViewportRectangle(rect)
   viewportRect = viewer.viewport.imageToViewportRectangle(x,y,w,h)
-  console.log(viewportRect)
   return viewportRect
 }

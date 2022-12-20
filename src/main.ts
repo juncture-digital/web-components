@@ -1,5 +1,6 @@
 import './style.css'
 import { defineCustomElement } from 'vue'
+import "ant-design-vue/dist/antd.css"
 
 // import CurrentTime from './components/CurrentTime.ce.vue'
 import Manifest from './components/Manifest.ce.vue';

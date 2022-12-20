@@ -1,117 +1,168 @@
 <template>
-  <div ref="root" id="wrapper" :class="isEditable ? 'edit' : 'view'">
-    <div id="content">
-      <!-- <div v-if="type === 'image'" id="osd" @click="showModal = !showModal"></div> -->
-      
-      <div v-if="type === 'image'" id="osd" class="media-item">
-        <div v-if="type === 'image'" class="info-icon">
-          <a-tooltip placement="bottom">
-            <template #title>Click to {{itemsList[0].id === popoverId ? 'Hide' : 'Show'}} Details</template>
-            <a-popover trigger="click" :visible="itemsList[0].id === popoverId" :style="`width:${width}px;height${height}px;`" placement="leftTop">
-              <template #content>
-                <div>
-                  <ve-manifest-beta :manifest="itemsList[0].manifest" :width="width" :height="height"></ve-manifest-beta>
-                  <a @click="popoverId = null">Close</a>
-                </div>
-              </template>
-              <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
-            </a-popover>
-          </a-tooltip>      
-        </div>
-      </div>
+  <div ref="root" id="outer" :class="isEditable ? 'edit' : 'view'">
 
-      <div v-else-if="type === 'image-grid'" class="grid-wrapper">
-        <div v-for="item, idx in itemsList" class="media-item">
-          <img :src="thumbnail(manifests[idx])"/>
+    <div id="inner">
+
+      <div id="content">
+        
+        <!--<div v-if="type === 'image'" id="osd" class="media-item" @click="modalId = props.zoomOnScroll ? null : itemsList[0].manifest"> -->
+        <div v-if="type === 'image'" id="osd" class="media-item">
           <div class="info-icon">
-            <a-popover trigger="click" :visible="item.id === popoverId" style="width:300px;height:400px;" placement="leftTop">
-              <template #content>
-                <div>
-                  <ve-manifest-beta :manifest="item.manifest" ></ve-manifest-beta>
-                  <a @click="popoverId = null">Close</a>
-                </div>
-              </template>
-              <info-circle-outlined @click="popoverId = popoverId === item.id ? null : item.id"/>
-            </a-popover>
+            <tooltip placement="bottom">
+              <template #title>Click to {{itemsList[0].id === popoverId ? 'Hide' : 'Show'}} Details</template>
+              <popover trigger="click" :visible="itemsList[0].id === popoverId" :style="`width:${width}px;height${height}px;`" placement="leftTop">
+                <template #content>
+                  <div>
+                    <ve-manifest-beta :manifest="itemsList[0].manifest" :width="width" :height="height"></ve-manifest-beta>
+                    <a @click="popoverId = null">Close</a>
+                  </div>
+                </template>
+                <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
+              </popover>
+            </tooltip>      
           </div>
         </div>
+
+        <div v-else-if="type === 'image-grid'" class="grid-wrapper">
+          <div v-for="item, idx in itemsList" class="media-item">
+            <img :src="thumbnail(manifests[idx])" @click="modalId = item.manifest"/>
+            <div class="info-icon">
+              <popover trigger="click" :visible="item.id === popoverId" style="width:300px;height:400px;" placement="leftTop">
+                <template #content>
+                  <div>
+                    <ve-manifest-beta :manifest="item.manifest" ></ve-manifest-beta>
+                    <a @click="popoverId = null">Close</a>
+                  </div>
+                </template>
+                <info-circle-outlined @click="popoverId = popoverId === item.id ? null : item.id"/>
+              </popover>
+            </div>
+          </div>
+        </div>
+
+        <div v-else-if="type === 'video'" class="media-item">
+          <video
+            id="html5-player"
+            controls
+            playsinline
+            :muted="props.muted"
+            :autoplay="props.autoplay"
+          >
+            <source :src="src" :type="mime"/>
+            <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
+          </video>
+
+          <div class="info-icon">
+            <tooltip placement="bottom">
+              <template #title>Click to {{itemsList[0].id === popoverId ? 'Hide' : 'Show'}} Details</template>
+              <popover trigger="click" :visible="itemsList[0].id === popoverId" :style="`width:${width}px;height${height}px;`" placement="leftTop">
+                <template #content>
+                  <div>
+                    <ve-manifest-beta :manifest="itemsList[0].manifest" :width="width" :height="height"></ve-manifest-beta>
+                    <a @click="popoverId = null">Close</a>
+                  </div>
+                </template>
+                <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
+              </popover>
+            </tooltip>      
+          </div>
+        </div>
+
+        <div v-else-if="type === 'audio'" class="media-item">
+          <audio
+            id="html5-player"
+            controls
+          >
+            <source :src="src" :type="mime"/>
+            <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
+        </audio>
+
+          <div class="info-icon">
+            <tooltip placement="bottom">
+              <template #title>Click to {{itemsList[0].id === popoverId ? 'Hide' : 'Show'}} Details</template>
+              <popover trigger="click" :visible="itemsList[0].id === popoverId" :style="`width:${width}px;height${height}px;`" placement="leftTop">
+                <template #content>
+                  <div>
+                    <ve-manifest-beta :manifest="itemsList[0].manifest" :width="width" :height="height"></ve-manifest-beta>
+                    <a @click="popoverId = null">Close</a>
+                  </div>
+                </template>
+                <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
+              </popover>
+            </tooltip>      
+          </div>
+        </div>
+
+        <div v-else-if="type === 'image-compare'" class="compare">
+          <img v-for="src, idx in scaleImages()" :key="`img=${idx}`" :id="`compare-img-${idx+1}`" :src="src" />
+          <input type="range" min="0" max="1000" value="500" id="slider" @input="slide">
+        </div>
+
+        <!--
+        <drawer
+          title="Annotations"
+          placement="left"
+          :closable="true"
+          :visible="showAnnotations"
+          :get-container="false"
+          :style="{ position: 'absolute' }"
+          @close="showAnnotations = false"
+          :headerStyle="{padding: 0}"
+        >
+          <ul class="annotations">
+            <li v-for="anno, idx in annotations" :key="`anno-${idx}`" @mouseover="showAnnotation(anno.id.split('/').pop())">
+              <copy-outlined @click="copyTextToClipboard(anno.id.split('/').pop())"/>
+              <span class="anno-text" v-html="anno.body[0].value"></span>
+            </li>
+          </ul>
+        </drawer>
+        -->
+
       </div>
 
-      <video v-else-if="type === 'video'"
-        id="html5-player"
-        controls
-        playsinline
-        :muted="props.muted"
-        :autoplay="props.autoplay"
-      >
-        <source :src="src" :type="mime"/>
-      </video>
+      <!-- Image navigator -->
+      <div v-if="type === 'image'" id="image-navigator">
+        <pagination :current="currentImage" :pageSize="1" @change="onPageChange" :total="totalImages" hide-on-single-page ></pagination>
+      </div>
+      <!-- Image navigator end -->
 
-      <sl-image-comparer v-else-if="type === 'image-compare'">
-        <img v-for="src, idx in scaleImages()" :key="`img=${idx}`" :src="src" :slot="idx === 0 ? 'before' : 'after'" :alt="label(manifests[idx])"/>
-      </sl-image-comparer>
+      <!-- Caption bar -->
+      <div v-if="caption" id="caption-bar">
 
-      <!--
-      <a-drawer
-        title="Annotations"
-        placement="left"
-        :closable="true"
-        :visible="showAnnotations"
-        :get-container="false"
-        :style="{ position: 'absolute' }"
-        @close="showAnnotations = false"
-        :headerStyle="{padding: 0}"
-      >
-        <ul class="annotations">
-          <li v-for="anno, idx in annotations" :key="`anno-${idx}`" @mouseover="showAnnotation(anno.id.split('/').pop())">
-            <copy-outlined @click="copyTextToClipboard(anno.id.split('/').pop())"/>
-            <span class="anno-text" v-html="anno.body[0].value"></span>
-          </li>
-        </ul>
-      </a-drawer>
-      -->
+        <!--
+        <tooltip placement="top">
+          <template #title>Click Annotate Image</template>
+          <edit-outlined v-if="isEditable" @click="annotator.toggleDrawingEnabled()"/>
+        </tooltip>
+        -->    
 
-    </div>
+        <tooltip>
+          <template #title>{{annotator.visible ? 'Hide' : 'Show'}} Annotations</template>
+          <badge v-if="annotations.length > 0" :count="annotations.length" title="Show annotations" 
+            @click="annotator.toggleVisibility($event)" :number-style="{ backgroundColor:'#FFFF66', color:'#444'}">
+            <comment-outlined @click="annotator.toggleVisibility($event)"/>
+          </badge>
+        </tooltip>      
 
-    <!-- Image navigator -->
-    <div v-if="type === 'image'" id="image-navigator">
-      <a-pagination :current="currentImage" :pageSize="1" @change="onPageChange" :total="totalImages" hide-on-single-page ></a-pagination>
-    </div>
-    <!-- Image navigator end -->
+        <tooltip placement="bottom">
+          <template #title>Click to {{itemsList[0].id === popoverId ? 'Hide' : 'Show'}} Details</template>
+          <div class="label" v-html="caption" @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"></div>
+        </tooltip>      
 
-    <!-- Caption bar -->
-    <div v-if="type === 'image'" id="caption-bar">
+      </div>
+      <!-- Caption bar end -->
 
-      <a-tooltip placement="top">
-        <template #title>Click Annotate Image</template>
-        <edit-outlined v-if="isEditable" @click="annotator.toggleDrawingEnabled()"/>
-      </a-tooltip>      
-
-      <a-tooltip>
-        <template #title>{{annotator.visible ? 'Hide' : 'Show'}} Annotations</template>
-        <a-badge v-if="annotations.length > 0" :count="annotations.length" title="Show annotations" 
-          @click="annotator.toggleVisibility($event)" :number-style="{ backgroundColor:'#FFFF66', color:'#444'}">
-          <comment-outlined @click="annotator.toggleVisibility($event)"/>
-        </a-badge>
-      </a-tooltip>      
-
-      <a-tooltip placement="bottom">
-        <template #title>Click to {{itemsList[0].id === popoverId ? 'Hide' : 'Show'}} Details</template>
-        <div class="label" v-html="label(manifest)" @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"></div>
-      </a-tooltip>      
+      <div v-if="coords" id="coords" v-html="coords" @click="copyTextToClipboard(coords || '')"></div>
 
     </div>
-    <!-- Caption bar end -->
-
-    <div v-if="coords" id="coords" v-html="coords" @click="copyTextToClipboard(coords || '')"></div>
-
   </div>
 
-  <a-modal
+  <modal
+    destroy-on-close
     :bodyStyle="{padding: 0}"
-    v-model:visible="showModal" title="Basic Modal" width="40%" @ok="showModal = false">
-    <ve-media-beta :manifest="manifest.id" :idx="currentImage" :base="props.base" width="100%"></ve-media-beta>
-  </a-modal>
+    v-model:visible="showModal" width="50%" @ok="showModal = false">
+    <ve-media-beta :manifest="modalId" :seq="currentImage" :base="props.base" width="100%" zoom-on-scroll></ve-media-beta>
+  </modal>
 
 </template>
   
@@ -119,21 +170,19 @@
 
   import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
   import OpenSeadragon from 'openseadragon'
-  import { getItemInfo, imageCount, loadManifests, label, parseRegionString, sha256, thumbnail } from '../utils'
+  import OpenSeadragonViewerInputHook from '@openseadragon-imaging/openseadragon-viewerinputhook'
+  import { getItemInfo, imageCount, loadManifests, label, makeSticky, parseRegionString, sha256, thumbnail } from '../utils'
   import { Annotator } from '../annotator'
 
   // https://antdv.com/components/overview
-  import { CommentOutlined, EditOutlined, CopyOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
+  import { CommentOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
   import 'ant-design-vue/dist/antd.css'
 
-  import { Badge as ABadge } from 'ant-design-vue'
-  import { Drawer as ADrawer } from 'ant-design-vue'
-  import { Modal as AModal } from 'ant-design-vue'
-  import { Pagination as APagination } from 'ant-design-vue'
-  import { Popover as APopover } from 'ant-design-vue'
-  import { Tooltip as ATooltip } from 'ant-design-vue'
-
-  import SLImageComparer from '@shoelace-style/shoelace/dist/components/image-comparer/image-comparer.js'
+  import Badge from 'ant-design-vue/es/badge'
+  import Modal from 'ant-design-vue/es/modal'
+  import Pagination from 'ant-design-vue/es/pagination'
+  import Popover from 'ant-design-vue/es/popover'
+  import Tooltip from 'ant-design-vue/es/tooltip'
 
   const props = defineProps({
     manifest: { type: String },
@@ -150,6 +199,7 @@
     caption: { type: String },
     fit: { type: String },
     entities: { type: String },
+    zoomOnScroll: { type: Boolean, default: false },
 
     // Multiple display options
     grid: { type: Boolean, default: false },
@@ -158,10 +208,10 @@
 
     // Positioning props
     position: { type: String },
-    full: { type: Boolean, default: false },
-    left: { type: Boolean, default: false },
-    right: { type: Boolean, default: false },
-    sticky: { type: Boolean, default: false },
+    full: { type: String },
+    left: { type: String  },
+    right: { type: String },
+    sticky: { type: String  },
     width: { type: String },
     height: { type: String },
 
@@ -179,6 +229,8 @@
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
 
   const showModal = ref<boolean>(false)
+  watch(showModal, () => { if (!showModal.value) modalId.value = null })
+
   // const showAnnotations = ref<boolean>(false)
   const annotator = ref<any>()
 
@@ -237,6 +289,8 @@
       }
   }
 
+  const caption = ref(props.caption)
+
   const coords = ref<string>()
   const annotations = ref<any[]>([])
 
@@ -255,7 +309,9 @@
   const type:any = ref(null)
   const tileSource:any = ref(null)
 
-  const popoverId:any  = ref(null)
+  const popoverId:any = ref(null)
+  const modalId:any = ref(null)
+  watch(modalId, () => { showModal.value = modalId.value !== null })
 
   watch(host, () => {
     itemsList.value = buildItemsList()
@@ -273,6 +329,7 @@
   watch(manifest, () => {
     totalImages.value = imageCount(manifest.value)
     itemInfo.value = manifest.value ? getItemInfo(manifest.value, currentImage.value) : null
+    if (!caption.value && manifests.value.length === 1) caption.value = label(manifest.value)
   })
   watch(currentImage, () => itemInfo.value = manifest.value ? getItemInfo(manifest.value, currentImage.value) : null)
 
@@ -303,6 +360,7 @@
   })
 
   watch(type, () => {
+    addInteractionHandlers()
     nextTick(() => {
       if (type.value === 'audio') loadAudio()
       else if (type.value === 'image') loadImage()
@@ -409,57 +467,69 @@
     })
   }
 
-  let position = ref(props.right ? 'right' : props.left ? 'left' : 'full')
+  function slide() {
+    let slideValue = parseInt((shadowRoot.value?.querySelector('#slider') as HTMLInputElement).value);
+    (shadowRoot.value?.querySelector('#compare-img-2') as HTMLImageElement).style.clipPath = `polygon(0 0,${slideValue/10}% 0,${slideValue/10}% 100%, 0 100%)`
+  }
+
+  const position:string = props.position || (props.right === 'true' ? 'right' : props.left === 'true' ? 'left' : 'full')
   
   function doLayout() {
-    let wrapper = shadowRoot?.value?.querySelector('#wrapper') as HTMLElement
+    let outer = shadowRoot?.value?.querySelector('#outer') as HTMLElement
+    let inner = shadowRoot?.value?.querySelector('#inner') as HTMLElement
     let contentContainer = shadowRoot?.value?.querySelector('#content') as HTMLElement
 
     aspect.value = Number((itemInfo.value.width/itemInfo.value.height).toFixed(4))
 
-    wrapper.classList.add(position.value)
-    host.value.classList.add('ve-component')
-    host.value.classList.add(position.value)
-    if (props.sticky) host.value.classList.add('sticky')
+    // console.log(`width=${itemInfo.value.width} height=${itemInfo.value.height} aspect=${aspect.value}`)
 
-    // wrapper.style.width = props.width || (position.value === 'full' ? '100%' : '50%')
-    wrapper.style.width = props.width || '100%'
+    outer.classList.add(position)
+    host.value.classList.add('ve-component')
+    host.value.classList.add(position)
+    if (props.sticky) makeSticky(host.value)
+
+    if (position === 'left' || position === 'right') {
+      outer.style.float = position
+      outer.style.width = '50%'
+      outer.style.margin = position === 'left' ? '0 12px 6px 0' : '0 0 6px 12px'
+    }
+    inner.style.width = props.width || '100%'
     width.value = parseInt(window.getComputedStyle(contentContainer).width.slice(0,-2))   
       
     contentContainer.style.height = props.height || (
       type.value === 'image-grid'
-        ? '100%'
+        ? ''
         : type.value === 'audio'
-          ? '200px'
+          ? '80px'
           : `${Math.round(width.value / aspect.value)}px`)
     height.value = parseInt(window.getComputedStyle(contentContainer).height.slice(0,-2)) || (aspect.value >= 1 ? Math.round(width.value / aspect.value) : Math.round(width.value * aspect.value))  
     
-    if (position.value === 'full' && (props.compare || props.sticky)) {
+    if (position === 'full' && (props.compare || props.sticky)) {
       let maxHeight = Math.round(window.innerHeight * .5)
       if (height.value > maxHeight) {
         height.value = maxHeight
         contentContainer.style.height = `${height.value}px`
-        contentContainer.style.width = `${Math.round(height.value / aspect.value)}px`
+        inner.style.width = `${Math.round(height.value / aspect.value)}px`
         // contentContainer.style.margin = 'auto'
         // contentContainer.classList.add('shadow')
       }
     }
 
-    // console.log(`doLayout: position=${position.value} width=${width.value} height=${height.value} aspect=${aspect.value}`)
+    // console.log(`doLayout: type=${type.value} position=${position.value} width=${width.value} height=${height.value} aspect=${aspect.value}`)
   }
 
   function loadImage() {
-    console.log('loadImage', toRaw(itemInfo.value))
     viewer.value = initOsdViewer()
+    configureScrollBehavior()
     tileSource.value && viewer.value.open(tileSource.value)
   }
 
   function loadVideo() {
-    console.log('loadVideo', itemInfo)
+    mediaPlayer.value = shadowRoot.value?.querySelector('#html5-player') as HTMLMediaElement
   }
 
   function loadAudio() {
-    console.log('loadAudio', itemInfo)
+    mediaPlayer.value = shadowRoot.value?.querySelector('#html5-player') as HTMLMediaElement
   }
 
   onMounted(async () => {
@@ -494,6 +564,44 @@
     return OpenSeadragon(osdOptions)
   }
 
+  function configureScrollBehavior() {
+    // console.log(`configureScrollBehavior: isMobile=${isMobile()} isTouchEnabled=${this.isTouchEnabled()} zoomOnScroll=${this.zoomOnScroll} isFullPage=${this._viewer.isFullPage()}`)
+    /* This is intended to provide touch-based scrolling of OSD images in mobile mode.  Pan/zoom is
+    disabled to permit scrolling.  The technique for doing this is as described in this
+    OSD Github issue - https://github.com/openseadragon/openseadragon/issues/1791#issuecomment-1000045888
+    Unfortunately, this only works with OSD v2.4.2, which is not compatible with the latest version of the
+    Annotorious plugin (requires 3.0).  As a result, the current configuration is pinned 
+    to OSD 2.4.2 and annotorious 2.6.0
+    */
+    //const canvas: any = this.el.shadowRoot.querySelector('.openseadragon-canvas')
+    //canvas.style.touchAction = 'pan-y'
+
+    if (!props.zoomOnScroll) {
+
+      new OpenSeadragonViewerInputHook({ viewer: viewer.value, hooks: [
+        {tracker: 'viewer', handler: 'scrollHandler', hookHandler: (event:any) => {
+          if (!viewer.value?.isFullPage() && !event.originalEvent.ctrlKey) {
+            event.preventDefaultAction = true
+            event.stopHandlers = true
+          }
+          return true
+        }}
+      ]})
+
+      /*
+      new OpenSeadragonViewerInputHook({ viewer: viewer.value, hooks: [
+        {tracker: 'viewer', handler: 'clickHandler', hookHandler: (event:any) => {
+          if (!viewer.value?.isFullPage() && !event.originalEvent.ctrlKey) {
+            event.preventDefaultAction = true
+            event.stopHandlers = true
+          }
+          return true
+        }}
+      ]})
+      */
+    }
+  }
+
   function copyTextToClipboard(text: string) {
     if (navigator.clipboard) navigator.clipboard.writeText(text)
   }
@@ -502,22 +610,222 @@
     annotator.value.select(annoId)
   }
 
+  function isImageZoomTo(attr:Attr) {
+    let name = attr.name.toLowerCase()
+    let value = attr.value
+     if ((name === 'enter' || name === 'exit') && value.indexOf('|') > 0) [name, value] = value.split('|')
+    return ['zoom', 'zoomto'].indexOf(name.toLowerCase()) === 0 || /^((pct:|pixel:|px:)?[\d.]+,[\d.]+,[\d.]+,[\d.]+)?\|?([0-9a-f]{8})?$/.test(value)
+  }
+
+  function isPlayMedia(attr:Attr) {
+    let name = attr.name.toLowerCase()
+    let value = attr.value
+    if ((name === 'enter' || name === 'exit') && value.indexOf('|') > 0) [name, value] = value.split('|')
+    return name.toLowerCase() === 'play' || /^([0-9:]+)+,?([0-9:]+)?$/.test(value)
+  }
+
+  function isPauseMedia(attr:Attr) {
+    let name = attr.name.toLowerCase()
+    let value = attr.value.toLowerCase()
+    return name === 'pause' || value === 'pause'
+  }
+
+  function addInteractionHandlers() {
+
+    Array.from(host.value.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
+      let veMedia = findVeMedia(el)
+      if (veMedia) addMutationObserver(el)
+    });
+
+    (Array.from(document.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
+      Array.from(mark.attributes).forEach(attr => {
+        if (type.value === 'image' && isImageZoomTo(attr) ||
+            (type.value !== 'image' && (isPlayMedia(attr) || isPauseMedia(attr)))) {
+          let veMedia = findVeMedia(mark.parentElement)
+          if (veMedia) {
+            mark.classList.add(type.value === 'image' ? 'zoom' : 'play')
+            mark.addEventListener('click', () => {
+              if (type.value === 'image') zoomto(attr.value)
+              else if (isPlayMedia(attr)) playMedia(attr.value)
+              else pauseMedia()
+            })
+          }
+        }
+      })
+    })
+  }
+
+  function findVeMedia(el:any) {
+    let sib = el.previousSibling
+    while (sib) {
+      if (sib.nodeName === 'VE-MEDIA-BETA') return sib === host.value ? sib : null
+      sib = sib.previousSibling
+    }
+    while (el.parentElement && el.tagName !== 'MAIN') {
+      el = el.parentElement
+      let veMedia = el.querySelector(':scope > ve-media-beta')
+      if (veMedia) return veMedia === host.value ? veMedia : null
+    }
+  }
+
+  function addMutationObserver(el: HTMLElement) {
+    let prevClassState = el.classList.contains('active')
+    let observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName == 'class') {
+          let currentClassState = (mutation.target as HTMLElement).classList.contains('active')
+          if (prevClassState !== currentClassState) {
+            prevClassState = currentClassState
+            let attr = el.attributes.getNamedItem(currentClassState ? 'enter' : 'exit')
+            if (attr) {
+              if (type.value === 'image' && isImageZoomTo(attr)) zoomto(attr.value)
+              if (type.value !== 'image') {
+                if (isPlayMedia(attr)) playMedia(attr.value)
+                else if (isPauseMedia(attr)) pauseMedia()
+              } 
+            }
+          }
+        }
+      })
+    })
+    observer.observe(el, {attributes: true})
+  }
+
+  function playMedia(arg: string) {
+    // console.log('playMedia', arg)
+    arg = arg.replace(/^play\|/i,'')
+    const match = arg.match(/^([0-9:]+)+,?([0-9:]+)?$/)
+    if (match) seekTo(match[1], match[2])
+  }
+
+  function pauseMedia() {
+    // pause()
+  }
+
+  function zoomto(arg: string) {
+    arg = arg.replace(/^zoomto\|/i,'')
+    const match = arg?.match(/^(?<region>(pct:|pixel:|px:)?[\d.]+,[\d.]+,[\d.]+,[\d.]+)?\|?(?<annoid>[0-9a-f]{8})?$/)
+    if (match) {
+      let region = match?.groups?.region
+      let annoid = match?.groups?.annoid
+      // console.log(`ve-media.zoomto: region=${region} annoid=${annoid}`)
+      if (annoid && annotator.value.selected && annotator.value.selected.id === annoid) {
+        viewer.value?.viewport.goHome()
+      } else {
+        if (region) viewer.value?.viewport.fitBounds(parseRegionString(region, viewer.value), false)
+      }
+      if (annoid) annotator.value.select(annoid)
+    }
+  }
+
+  /******************* Audio/Video Player Methods *******************/
+
+  const mediaPlayer = ref<HTMLMediaElement>()
+  let isMuted: boolean = true
+  let isPlaying: boolean = true
+  let timeoutId: any = null
+  let forceMuteOnPlay = true
+
+  watch(mediaPlayer, () => monitor())
+
+  function monitor() {
+    setInterval(async () => {
+      isMuted = getIsMuted()
+      isPlaying = getIsPlaying()
+      // if (isPlaying) console.log(`${type.value}: isMuted=${isMuted} isPlaying=${isPlaying} currentTime=${getCurrentTime()}`)
+    }, 1000)
+  }
+
+  function play() {
+    mediaPlayer.value?.play()
+  }
+
+  function pause() {
+    mediaPlayer.value?.pause()
+  }
+
+  function getCurrentTime() {
+    return Math.round(mediaPlayer.value?.currentTime || 0)
+  }
+
+  function getIsPlaying() {
+    return !(mediaPlayer.value?.ended || mediaPlayer.value?.paused)
+  }
+
+  function getIsMuted() {
+    return mediaPlayer.value?.muted || true
+  }
+
+  function setMuted(mute:boolean) {
+    if (mediaPlayer.value) mediaPlayer.value.muted = mute
+  }
+
+  function hmsToSeconds(str:string) {
+    var p = str.split(':').slice(0,3).map(pe => parseInt(pe, 10))
+    let secs = 0, m = 1
+    while (p.length > 0) {
+      let val = p.pop() || 0 
+      secs += m * val
+      m *= 60
+    }
+    return secs
+  }
+
+  function seekTo(start:string, end:string) {
+    let startSecs = start ? hmsToSeconds(start) : 0
+    let endSecs = end ? hmsToSeconds(end) : -1
+    // console.log(`seekTo: start=${startSecs} end=${endSecs} isMuted=${this.isMuted} forceMuteOnPlay=${this.forceMuteOnPlay}`)
+    
+    // clear delayed pause
+    if (timeoutId) {
+      clearTimeout(timeoutId)
+      timeoutId = null
+    }
+
+    let wasMuted = isMuted
+    if (forceMuteOnPlay) setMuted(true)
+
+    setTimeout(() => {
+      play()
+      if (mediaPlayer.value) mediaPlayer.value.currentTime = startSecs
+      if (endSecs >= startSecs) {
+        timeoutId = setTimeout(() => {
+          timeoutId = null
+          mediaPlayer.value?.pause()
+          if (!wasMuted && forceMuteOnPlay) setMuted(false)
+        }, endSecs === startSecs ? 200 : (endSecs-startSecs)*1000)
+      }
+    }, 200)
+  }
+
+  /******************* End Audio/Video Player Methods *******************/
+
 </script>
 
 <style>
 
+
   @import 'ant-design-vue/lib/badge/style';
-  @import 'ant-design-vue/lib/drawer/style';
   @import 'ant-design-vue/lib/pagination/style';
   @import '../annotator/annotorious.css';
 
   * { box-sizing: border-box; }
 
-  #wrapper {
+  #outer {
     position: relative;
     overflow: hidden;
+    width: 100%;
+    background-color: white;
+    display: grid;
+    justify-items: center;
+  }
+
+  #inner {
+    position: relative;
     height: 100%;
-    /* box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; */
+    width: 100%;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    margin-bottom: 12px;
   }
 
   #content {
@@ -750,6 +1058,48 @@
   .ant-badge-count {
     margin-right: 6px;
     cursor: pointer;
+  }
+
+  .compare{
+    height: 100%;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    border: 5px solid #bfc0c1;
+    box-shadow:-3px 5px 15px #000;
+
+  }
+  .compare img {
+      width: 100%;
+      height: 100%;
+      position: absolute;
+  }
+  #compare-img-2{
+      clip-path: polygon(0 0 , 50% 0, 50% 100%, 0 100%);
+  }
+  #slider {
+      position: relative;
+      -webkit-appearance: none;
+      width: calc( 100% + 40px);
+      height: 100%;
+      margin-left: -20px;
+      background-color: transparent;
+      outline: none;
+  }
+  #slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      height: 45px;
+      width: 45px;
+      background: url("@/assets/img/split-cells.svg"), rgba(255,255,255,0.3);
+      border: 4px solid white;
+      border-radius: 50%;
+      background-size: contain;
+      cursor: pointer;
+  }
+
+  audio#html5-player {
+    width: calc(100% - 60px);
+    max-width: 50vh;
   }
 
 </style>
