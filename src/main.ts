@@ -13,12 +13,14 @@ import MediaViewer from './components/MediaViewer.ce.vue'
 import MediaCard from './components/MediaCard.ce.vue'
 import Manifest from './components/Manifest.ce.vue'
 import Pager from './components/Pager.ce.vue'
+import ContentSelector from './components/ContentSelector.ce.vue'
 
 customElements.define('current-time', defineCustomElement(CurrentTime))
 customElements.define('ve-media', defineCustomElement(MediaViewer))
 customElements.define('ve-media-card', defineCustomElement(MediaCard))
 customElements.define('ve-manifest', defineCustomElement(Manifest))
 customElements.define('ve-pager', defineCustomElement(Pager))
+customElements.define('ve-content-selector', defineCustomElement(ContentSelector));
 
 /*
 document.querySelector('current-time')?.addEventListener('datechange', recordTime)
@@ -26,3 +28,5 @@ function recordTime(event:Event) {
   console.log((event as CustomEvent).detail[0].value)
 }
 */
+
+(window as any).previewInit = function(){ console.log('TODO: previewInit')}
