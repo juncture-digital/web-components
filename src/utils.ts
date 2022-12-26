@@ -183,3 +183,124 @@ export function parseRegionString(region: string, viewer: OpenSeadragon.Viewer) 
   viewportRect = viewer.viewport.imageToViewportRectangle(x,y,w,h)
   return viewportRect
 }
+
+export function getMetadata(manifest:any, language:string = 'en'): any[] {
+  let metadata:any[] = []
+  if (manifest.metadata) {
+    manifest.metadata.forEach((md:any) => {
+      metadata.push({label: _value(md.label, language)[0], value: _value(md.value, language)})
+    })
+  }
+  return metadata
+}
+
+export function top() {
+  return stickyElems.length > 0 && stickyElems[0].localName.toLowerCase() === 've-navbar'
+    ? parseInt(window.getComputedStyle(stickyElems[0]).height.slice(0,-2))
+    : 0
+}
+
+function findStickyElems() {
+  // initTippy()
+  let stickyElems = Array.from(document.querySelectorAll('.sticky'))
+    // .filter(el => el.localName.toLowerCase() !== 've-content-selector')
+  
+  let stickyNavBarIdx = stickyElems.findIndex(el => el.localName.toLowerCase() === 've-navbar')
+  if (stickyNavBarIdx < 0) {
+    let headerIdx = stickyElems.findIndex(el => el.localName.toLowerCase() === 've-header')
+    if (headerIdx >= 0) {
+      let stickyNavBar = stickyElems[headerIdx]?.shadowRoot?.querySelector('ve-navbar.sticky')
+      if (stickyNavBar) {
+        stickyElems[headerIdx] = stickyNavBar
+        stickyNavBarIdx = headerIdx
+      }
+    }
+  }
+  // let main = document.querySelector('main')
+  // if (main) main.style.paddingBottom = '75vh'
+  stickyElems.forEach((el:any) => setTop(el))
+  return stickyElems
+}
+
+function activeRegionOffset() {
+  let stickyNavBar = stickyElems.find(el => el.localName.toLowerCase() === 've-navbar')
+  let offset = stickyNavBar ? stickyNavBar.getBoundingClientRect().top : 0
+  stickyElems.forEach(el => {
+    let bcr = el.getBoundingClientRect()
+    let col = bcr.x < bcr.width ? 0 : 1
+    if (col === 0 && bcr.top === offset) {
+      let computedHeightStyle = window.getComputedStyle(el).height
+      if (computedHeightStyle.length >= 3 && computedHeightStyle.slice(-2) === 'px') {
+        offset += parseInt(window.getComputedStyle(el).height.slice(0,-2))
+      }
+    }
+  })
+  return offset
+}
+
+function setTop(el:HTMLElement) {
+  if (el.localName.toLowerCase() === 'section') {
+    let stickyNavBar = stickyElems.find(el => el.localName.toLowerCase() === 've-navbar')
+    // let offset = stickyNavBar ? stickyNavBar.getBoundingClientRect().top : 0
+    let offset = stickyNavBar ? stickyNavBar.clientHeight : 0
+    el.style.top = `${offset}px`
+  }
+}
+
+let stickyElems:any[] = []
+const mutationObserver = new MutationObserver(() => stickyElems = findStickyElems())
+mutationObserver.observe(document, { childList: true, subtree: true })
+
+let targets:any = {}
+let active: HTMLElement
+
+let offset = 0
+
+const intersectionObserver = new IntersectionObserver (
+  (entries) => {
+    offset = activeRegionOffset()
+    // console.log(offset)
+    entries.forEach(entry => targets[domPath(entry.target)] = entry)
+    let intersecting = Object.values(targets)
+      .filter((entry:any) => entry.isIntersecting)
+      .filter((entry:any) => entry.target.getBoundingClientRect().y >= offset)
+      .sort((a:any,b:any) => a.target.getBoundingClientRect().y > b.target.getBoundingClientRect().y ? 1 : -1)
+    let selected:any = (intersecting.find((entry:any) => entry.intersectionRatio === 1) || intersecting[0])
+    if (selected) {
+      let selectedEl = selected.target as HTMLElement
+      if (Array.from(selectedEl.classList).indexOf('active') < 0) {
+        if (active) active.classList.remove('active')
+        selectedEl.classList.add('active')
+        active = selectedEl
+      }
+    }
+  },
+  { root: null, threshold: [0, 0.25, 0.5, 0.75, 1], rootMargin: `-${offset}px 0px 0px 0px` }
+)
+Array.from(document.querySelectorAll('p')).forEach(el => intersectionObserver.observe(el))
+
+export function domPath(el: any) {
+  var stack = []
+  while ( el.parentNode != null ) {
+    let sibCount = 0
+    let sibIndex = 0
+    for ( var i = 0; i < el.parentNode.childNodes.length; i++ ) {
+      let sib = el.parentNode.childNodes[i];
+      if ( sib.nodeName == el.nodeName ) {
+        if ( sib === el ) {
+          sibIndex = sibCount;
+        }
+        sibCount++
+      }
+    }
+    if ( el.hasAttribute('id') && el.id != '' ) {
+      stack.unshift(el.nodeName.toLowerCase() + `#${el.id}`)
+    } else if ( sibCount > 1 ) {
+      stack.unshift(el.nodeName.toLowerCase() + (sibIndex > 0 ? `[${sibIndex}]` : ''))
+    } else {
+      stack.unshift(el.nodeName.toLowerCase())
+    }
+    el = el.parentNode as HTMLElement
+  }
+  return stack.join('.')
+}

@@ -1,6 +1,6 @@
 <template>
 
-  <div ref="root" class="manifest" :style="`width:${width}px;height:${height}px;`">
+  <div ref="root" class="manifest">
     
     <div class="main">
       <img class="thumbnail" :src="parsed?.thumbnail"/>
@@ -103,6 +103,7 @@
     </div>
 
   </div>
+  
 </template>
   
 <script lang="ts">
@@ -113,9 +114,7 @@ import { getItemInfo, getManifest } from '../utils'
 export default {
   components: {},
   props: {
-    manifest: { required: true },
-    width: { type: Number },
-    height: { type: Number }
+    manifest: { required: true }
   },
   setup(props) {
 
@@ -126,8 +125,6 @@ export default {
     watch(manifest, () => parsed.value = parseManifest(manifest.value))
       
     const licenseBadge = computed(() => parsed.value && _getLicenseBadge(parsed.value))
-    const width = computed(() => props.width ? props.width - 120 : 300)
-    const height = computed(() => props.height ? props.height - 100 : 400)
 
     if (typeof props.manifest === 'object') manifest.value = props.manifest
     else getManifest(<string>props.manifest).then(resp => manifest.value = resp )
@@ -223,12 +220,10 @@ export default {
     }
   
     return {
-      height,
       licenseBadge,
       parsed,
       props,
       root,
-      width
     }
 
   }
@@ -241,8 +236,8 @@ export default {
   * { box-sizing: border-box; }
 
   .manifest {
-    width: 300px;
-    height: 400px;
+    width: 100%;
+    height: 100%;
     overflow-y: scroll;
   }
 

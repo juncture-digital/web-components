@@ -2,9 +2,8 @@ import { default as Annotorious } from '@recogito/annotorious-openseadragon'
 import { sha256 } from '../utils'
 
 const ENV = location.hostname === 'localhost' ? 'DEV' : 'PROD'
-const annotationsEndpoint = ENV === 'DEV'
-? 'http://localhost:8000'
-: 'https://api.juncture-digital.org'
+// const annotationsEndpoint = ENV === 'DEV' ? 'http://localhost:8000' : 'https://api.juncture-digital.org'
+const annotationsEndpoint = 'https://api.juncture-digital.org'
 
 export class Annotator {
 

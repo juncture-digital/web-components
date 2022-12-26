@@ -1,191 +1,141 @@
 <template>
   <div ref="root" id="outer" :class="isEditable ? 'edit' : 'view'">
-
     <div id="inner">
-
       <div id="content">
         
-        <!--<div v-if="type === 'image'" id="osd" class="media-item" @click="modalId = props.zoomOnScroll ? null : itemsList[0].manifest"> -->
-        <div v-if="type === 'image'" id="osd" class="media-item">
-          <div class="info-icon">
-            <tooltip placement="bottom">
-              <template #title>Click to {{itemsList[0].id === popoverId ? 'Hide' : 'Show'}} Details</template>
-              <popover trigger="click" :visible="itemsList[0].id === popoverId" :style="`width:${width}px;height${height}px;`" placement="leftTop">
-                <template #content>
-                  <div>
-                    <ve-manifest-beta :manifest="itemsList[0].manifest" :width="width" :height="height"></ve-manifest-beta>
-                    <a @click="popoverId = null">Close</a>
-                  </div>
-                </template>
-                <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
-              </popover>
-            </tooltip>      
-          </div>
-        </div>
-
-        <div v-else-if="type === 'image-grid'" class="grid-wrapper">
-          <div v-for="item, idx in itemsList" class="media-item">
-            <img :src="thumbnail(manifests[idx])" @click="modalId = item.manifest"/>
-            <div class="info-icon">
-              <popover trigger="click" :visible="item.id === popoverId" style="width:300px;height:400px;" placement="leftTop">
-                <template #content>
-                  <div>
-                    <ve-manifest-beta :manifest="item.manifest" ></ve-manifest-beta>
-                    <a @click="popoverId = null">Close</a>
-                  </div>
-                </template>
-                <info-circle-outlined @click="popoverId = popoverId === item.id ? null : item.id"/>
-              </popover>
+        <!-- Single image -->
+        <div v-if="type === 'image'" class="image-wrapper media-item">
+          <div id="osd"></div>
+          <sl-popup placement="left-start" distance="8">
+            <sl-icon-button slot="anchor" class="info-icon" @click="onInfoClick" name="info-circle-fill" label="Media Info"></sl-icon-button>
+            <div class="manifest-popover">
+              <ve-manifest :manifest="manifests[0]"></ve-manifest>
             </div>
-          </div>
+          </sl-popup>
         </div>
+        
+        <!-- image Grid -->
+        <div v-else-if="type === 'image-grid'" class="grid-wrapper">
+          <template v-for="item, idx in iiifItemsList">
+            
+            <ve-media-card v-if="props.cards" style="width:100%;" :manifest="item.manifest"></ve-media-card>
 
-        <div v-else-if="type === 'video'" class="media-item">
-          <video
-            id="html5-player"
-            controls
-            playsinline
-            :muted="props.muted"
-            :autoplay="props.autoplay"
-          >
-            <source :src="src" :type="mime"/>
-            <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
-          </video>
-
-          <div class="info-icon">
-            <tooltip placement="bottom">
-              <template #title>Click to {{itemsList[0].id === popoverId ? 'Hide' : 'Show'}} Details</template>
-              <popover trigger="click" :visible="itemsList[0].id === popoverId" :style="`width:${width}px;height${height}px;`" placement="leftTop">
-                <template #content>
-                  <div>
-                    <ve-manifest-beta :manifest="itemsList[0].manifest" :width="width" :height="height"></ve-manifest-beta>
-                    <a @click="popoverId = null">Close</a>
+            <div v-else>
+              <div class="media-item">
+                <img :src="thumbnail(manifests[idx])" @click="toggleDialogId(item.manifest)"/>
+                <sl-popup placement="left" distance="8" arrow>
+                  <sl-icon-button slot="anchor" class="info-icon" @click="onInfoClick" name="info-circle-fill" label="Media Info"></sl-icon-button>
+                  <div class="manifest-popover">
+                    <ve-manifest :manifest="manifests[idx]"></ve-manifest>
                   </div>
-                </template>
-                <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
-              </popover>
-            </tooltip>      
-          </div>
+                </sl-popup>
+              </div>
+            </div>
+
+          </template>
         </div>
 
+        <!-- image Compare -->
+        <div v-else-if="type === 'image-compare'">
+          <sl-image-comparer>
+            <img v-for="src, idx in scaledImages" :key="`img-${idx}`"
+              :slot="idx === 0 ? 'before' : 'after'"
+              :src="src"
+              :alt="label(manifests[idx])" />
+          </sl-image-comparer>
+        </div>
+
+        <!-- HTML5 Audio -->
         <div v-else-if="type === 'audio'" class="media-item">
-          <audio
-            id="html5-player"
-            controls
-          >
+          <audio id="html5-player" controls>
             <source :src="src" :type="mime"/>
-            <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
-        </audio>
+          </audio>
+            
+          <sl-popup placement="left-start" distance="8">
+            <sl-icon-button slot="anchor" class="info-icon" @click="onInfoClick" name="info-circle-fill" label="Media Info"></sl-icon-button>
+            <div class="manifest-popover">
+              <ve-manifest :manifest="manifests[0]"></ve-manifest>
+            </div>
+          </sl-popup>
 
-          <div class="info-icon">
-            <tooltip placement="bottom">
-              <template #title>Click to {{itemsList[0].id === popoverId ? 'Hide' : 'Show'}} Details</template>
-              <popover trigger="click" :visible="itemsList[0].id === popoverId" :style="`width:${width}px;height${height}px;`" placement="leftTop">
-                <template #content>
-                  <div>
-                    <ve-manifest-beta :manifest="itemsList[0].manifest" :width="width" :height="height"></ve-manifest-beta>
-                    <a @click="popoverId = null">Close</a>
-                  </div>
-                </template>
-                <info-circle-outlined @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"/>
-              </popover>
-            </tooltip>      
-          </div>
         </div>
 
-        <div v-else-if="type === 'image-compare'" class="compare">
-          <img v-for="src, idx in scaleImages()" :key="`img=${idx}`" :id="`compare-img-${idx+1}`" :src="src" />
-          <input type="range" min="0" max="1000" value="500" id="slider" @input="slide">
+        <!-- Video -->
+        <div v-else-if="type === 'video'" class="media-item">
+      
+          <div v-if="isYouTube" id="youtube-placeholder"></div>
+
+          <div v-else-if="isVimeo" id="ve-video-vimeo" data-vimeo-playsinline="true"></div>
+
+          <template v-else>
+
+            <video
+              id="html5-player"
+              controls
+              playsinline
+              :muted="props.muted"
+              :autoplay="props.autoplay"
+            >
+              <source :src="src" :type="mime"/>
+            </video>
+            
+            <sl-popup placement="left-start" distance="8">
+              <sl-icon-button slot="anchor" class="info-icon" @click="onInfoClick" name="info-circle-fill" label="Media Info"></sl-icon-button>
+              <div class="manifest-popover">
+                <ve-manifest :manifest="manifests[0]"></ve-manifest>
+              </div>
+            </sl-popup>
+
+          </template>
+
         </div>
 
-        <!--
-        <drawer
-          title="Annotations"
-          placement="left"
-          :closable="true"
-          :visible="showAnnotations"
-          :get-container="false"
-          :style="{ position: 'absolute' }"
-          @close="showAnnotations = false"
-          :headerStyle="{padding: 0}"
-        >
-          <ul class="annotations">
-            <li v-for="anno, idx in annotations" :key="`anno-${idx}`" @mouseover="showAnnotation(anno.id.split('/').pop())">
-              <copy-outlined @click="copyTextToClipboard(anno.id.split('/').pop())"/>
-              <span class="anno-text" v-html="anno.body[0].value"></span>
-            </li>
-          </ul>
-        </drawer>
-        -->
-
       </div>
 
-      <!-- Image navigator -->
-      <div v-if="type === 'image'" id="image-navigator">
-        <pagination :current="currentImage" :pageSize="1" @change="onPageChange" :total="totalImages" hide-on-single-page ></pagination>
+      <ve-pager v-if="type === 'image' && totalImages > 1" :total="totalImages" :current="currentImage" @image-selected="onPageChange"></ve-pager>
+
+      <div v-if="caption" id="caption-bar" @click="onInfoClick">
+        <div v-if="annotations.length > 0" class="button-icon-with-badge" @click="annotator.toggleVisibility">
+          <sl-icon-button id="annotations-icon" name="chat-square-text" label="Show annotations"></sl-icon-button>
+          <sl-badge variant="danger" pill>{{annotations.length}}</sl-badge>
+        </div>
+        <div class="label" v-html="caption"></div>
       </div>
-      <!-- Image navigator end -->
-
-      <!-- Caption bar -->
-      <div v-if="caption" id="caption-bar">
-
-        <!--
-        <tooltip placement="top">
-          <template #title>Click Annotate Image</template>
-          <edit-outlined v-if="isEditable" @click="annotator.toggleDrawingEnabled()"/>
-        </tooltip>
-        -->    
-
-        <tooltip>
-          <template #title>{{annotator.visible ? 'Hide' : 'Show'}} Annotations</template>
-          <badge v-if="annotations.length > 0" :count="annotations.length" title="Show annotations" 
-            @click="annotator.toggleVisibility($event)" :number-style="{ backgroundColor:'#FFFF66', color:'#444'}">
-            <comment-outlined @click="annotator.toggleVisibility($event)"/>
-          </badge>
-        </tooltip>      
-
-        <tooltip placement="bottom">
-          <template #title>Click to {{itemsList[0].id === popoverId ? 'Hide' : 'Show'}} Details</template>
-          <div class="label" v-html="caption" @click="popoverId = popoverId === itemsList[0].id ? null : itemsList[0].id"></div>
-        </tooltip>      
-
-      </div>
-      <!-- Caption bar end -->
 
       <div v-if="coords" id="coords" v-html="coords" @click="copyTextToClipboard(coords || '')"></div>
 
     </div>
+
+    <sl-dialog ref="dialog" id="image-dialog" no-header style="--body-spacing:0;--footer-spacing:0;">
+      <ve-media v-if="dialogId" :manifest="dialogId" zoom-on-scroll></ve-media>
+      <sl-button slot="footer" class="close" @click="toggleDialogId" variant="primary">Close</sl-button>
+    </sl-dialog>
+  
   </div>
-
-  <modal
-    destroy-on-close
-    :bodyStyle="{padding: 0}"
-    v-model:visible="showModal" width="50%" @ok="showModal = false">
-    <ve-media-beta :manifest="modalId" :seq="currentImage" :base="props.base" width="100%" zoom-on-scroll></ve-media-beta>
-  </modal>
-
 </template>
   
 <script setup lang="ts">
 
   import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
+  import YouTubePlayer from 'youtube-player'
+  import VimeoPlayer from '@vimeo/player'
   import OpenSeadragon from 'openseadragon'
   import OpenSeadragonViewerInputHook from '@openseadragon-imaging/openseadragon-viewerinputhook'
-  import { getItemInfo, imageCount, loadManifests, label, makeSticky, parseRegionString, sha256, thumbnail } from '../utils'
+  import { getItemInfo, imageCount, loadManifests, label, makeSticky, parseRegionString, sha256, thumbnail, top } from '../utils'
   import { Annotator } from '../annotator'
 
-  // https://antdv.com/components/overview
-  import { CommentOutlined, InfoCircleOutlined } from '@ant-design/icons-vue'
-  import 'ant-design-vue/dist/antd.css'
+  import '@shoelace-style/shoelace/dist/components/badge/badge.js'
+  import '@shoelace-style/shoelace/dist/components/button/button.js'
+  import '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
+  import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js'
+  import '@shoelace-style/shoelace/dist/components/image-comparer/image-comparer.js'
+  import '@shoelace-style/shoelace/dist/components/popup/popup'
 
-  import Badge from 'ant-design-vue/es/badge'
-  import Modal from 'ant-design-vue/es/modal'
-  import Pagination from 'ant-design-vue/es/pagination'
-  import Popover from 'ant-design-vue/es/popover'
-  import Tooltip from 'ant-design-vue/es/tooltip'
+  import type SLDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
 
   const props = defineProps({
     manifest: { type: String },
+    src: { type: String },
     seq: { type: Number, default: 1 },
     base: { type: String },
     region: { type: String },
@@ -208,18 +158,18 @@
 
     // Positioning props
     position: { type: String },
-    full: { type: String },
-    left: { type: String  },
-    right: { type: String },
-    sticky: { type: String  },
+    full: { type: Boolean },
+    left: { type: Boolean  },
+    right: { type: Boolean },
+    sticky: { type: Boolean  },
     width: { type: String },
     height: { type: String },
 
     // Video props
     autoplay: { type: Boolean, default: false },
     muted: { type: Boolean, default: true },
-    start: { type: String },
-    end: { type: String },
+    start: { type: Number },
+    end: { type: Number },
 
     class: { type: String }
   })
@@ -228,32 +178,45 @@
   const shadowRoot = computed(() => root?.value?.parentNode)
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
 
-  const showModal = ref<boolean>(false)
-  watch(showModal, () => { if (!showModal.value) modalId.value = null })
-
-  // const showAnnotations = ref<boolean>(false)
-  const annotator = ref<any>()
-
-  let loadedImageId: string
-
-  function onImageLoaded() {
-    let item = itemsList.value[0]
-    let imageId = sha256(itemInfo.value.id || itemInfo.value['@id']).slice(0,8)
-    if (imageId !== loadedImageId) {
-      annotator.value.loadAnnotations(imageId).then((annos: any[]) => annotations.value = annos)
-      if (!loadedImageId && item.seq === currentImage.value && item.region) viewer.value?.viewport.fitBounds(parseRegionString(item.region, viewer.value), true)
-      // if (item.region) setTimeout(() => viewer.value?.viewport.fitBounds(parseRegionString(item.region, viewer.value), true), 1)
-      loadedImageId = imageId
+  watch(host, () => {
+    if (props.src) {
+      if (props.src?.indexOf('http') === 0) {
+        let srcUrl = new URL(props.src)
+        let domain = srcUrl.hostname.replace(/^www\./, '')
+        if (youtubeDomains.has(domain)) {
+          type.value = 'video'
+          isYouTube = true
+          videoId.value = srcUrl.searchParams.get('v')
+          nextTick(() => initializeYouTubePlayer())
+        } else if (vimeoDomains.has(domain)) {
+          type.value = 'video'
+          isVimeo = true
+          videoId.value = srcUrl.pathname.slice(1)
+          nextTick(() => initializeVimeoPlayer())
+        } else {
+          iiifItemsList.value = buildIiiFItemsList()
+        }
+      } else {
+        iiifItemsList.value = buildIiiFItemsList()
+      }
+    } else {
+      iiifItemsList.value = buildIiiFItemsList()
     }
+  })
+
+  function onInfoClick(evt:MouseEvent) {
+    const popup:any = (evt.target as HTMLElement).parentElement
+    popup.active = !popup.active;
   }
 
-  let viewer = ref<OpenSeadragon.Viewer>()
+  /************ OpenSeadragon Image viewer ************/
+  const viewer = ref<OpenSeadragon.Viewer>()
   watch(viewer, () => {
     if (viewer.value) {
       let osdViewer = viewer.value
       setTimeout(() => setViewportCoords(), 100)
       osdViewer.addHandler('viewport-change', () => watchCoords())
-      annotator.value = new Annotator(osdViewer, props.base, isEditable.value)
+      if (props.base) annotator.value = new Annotator(osdViewer, props.base, isEditable.value)
 
       let tiledImage = osdViewer.world.getItemAt(0)
       if (tiledImage) {
@@ -269,6 +232,25 @@
     }
   })
 
+  let loadedImageId: string
+  function onImageLoaded() {
+    let item = iiifItemsList.value[0]
+    let imageId = sha256(itemInfo.value.id || itemInfo.value['@id']).slice(0,8)
+    if (imageId !== loadedImageId) {
+      if (annotator.value) annotator.value.loadAnnotations(imageId).then((annos: any[]) => annotations.value = annos)
+      if (!loadedImageId && item.seq === currentImage.value && item.region) viewer.value?.viewport.fitBounds(parseRegionString(item.region, viewer.value), true)
+      // if (item.region) setTimeout(() => viewer.value?.viewport.fitBounds(parseRegionString(item.region, viewer.value), true), 1)
+      loadedImageId = imageId
+    }
+  }
+
+  /************ Image annotations ************/
+  const annotator = ref<any>()
+  const annotations = ref<any[]>([])
+
+  /************ Image region coords ************/
+  const coords = ref<string>()
+  
   let coordsDebounce: any = null
   function watchCoords() {
     if (coordsDebounce !== null) {
@@ -289,35 +271,57 @@
       }
   }
 
-  const caption = ref(props.caption)
+  /************ Image dialog ************/
+  const dialog = ref<SLDialog>()
+  watch(dialog, (_dialog) => {
+    _dialog?.addEventListener('sl-after-hide', () => dialogId.value = null )
+    _dialog?.addEventListener('sl-show', () => {
+      if (dialog.value) dialog.value.panel.style.width = `${calcDialogWidth()}px`
+    })
+  })
+  const dialogId = ref<String | null>()
+  watch(dialogId, (id) => {
+    id ? dialog.value?.show() : dialog.value?.hide()
+  })
+  function toggleDialogId(id:any=null) {
+    dialogId.value = dialogId.value ? null : id
+  }
 
-  const coords = ref<string>()
-  const annotations = ref<any[]>([])
+  function calcDialogWidth() {
+    let width = Math.round(window.innerWidth - 100)
+    let maxHeight = Math.round(window.innerHeight - 150)
+    
+    let selectedManifestId = dialogId.value?.indexOf('http') === 0 ? dialogId.value : `https://iiif.juncture-digital.org/${dialogId.value}/manifest.json`
+    let selected = manifests.value.find((m:any) => m.id === selectedManifestId)
+    if (selected) {
+      let _imageInfo = getItemInfo(selected)
+      let _imageAspect = Number((_imageInfo.width/_imageInfo.height).toFixed(4))
+      width = _imageAspect >= 1
+        ? width / _imageAspect > maxHeight ? width = maxHeight * _imageAspect : width
+        : Math.round(maxHeight * _imageAspect)
+    }
+    return width
+  }
+
+  const caption = ref(props.caption)
 
   const currentImage = ref(props.seq)
   const totalImages = ref(props.seq)
-  function onPageChange(newpage:number) { currentImage.value = newpage }
+  function onPageChange(evt:CustomEvent) { currentImage.value = evt.detail }
 
   const width = ref<number>(0)
   const height = ref<number>(0)
   const aspect = ref<number>(0)
 
-  const itemsList = ref(<any[]>[])
+  const iiifItemsList = ref(<any[]>[])
   const manifests:any = ref([])
   const manifest:any = ref(null)
   const itemInfo:any = ref(null)
   const type:any = ref(null)
   const tileSource:any = ref(null)
 
-  const popoverId:any = ref(null)
-  const modalId:any = ref(null)
-  watch(modalId, () => { showModal.value = modalId.value !== null })
-
-  watch(host, () => {
-    itemsList.value = buildItemsList()
-  })
-  watch(itemsList, () => {
-    let manifestUrls = itemsList.value.map(item => item.manifest)
+  watch(iiifItemsList, () => {
+    let manifestUrls = iiifItemsList.value.map(item => item.manifest)
     loadManifests(manifestUrls).then(resp => {
       manifests.value = resp
       if (manifests.value.length > 1)
@@ -337,7 +341,9 @@
     return props.editable === true || window.location.pathname.indexOf('/editor') === 0
   })
 
-  const src = computed(() => itemInfo.value.id)
+  const scaledImages = ref<string[]>([])
+  
+  const src = computed(() => itemInfo.value?.id)
   const mime = computed(() => {
     let fileExtension = src.value?.split('#')[0].split('.').pop()
     return fileExtension === 'mp4'
@@ -356,19 +362,21 @@
         : { url: itemInfo.value.id, type: 'image', buildPyramid: true }
       : null
     viewer.value && viewer.value.open(tileSource.value)
-    if (!width.value) doLayout()
+    if (!width.value) nextTick(() => doLayout())
   })
 
   watch(type, () => {
     addInteractionHandlers()
     nextTick(() => {
-      if (type.value === 'audio') loadAudio()
-      else if (type.value === 'image') loadImage()
-      else if (type.value === 'video') loadVideo()
+      if (type.value === 'image') loadImage()
+      else if (type.value === 'image-compare') scaledImages.value = scaleImages()
+      else if (type.value === 'video' && iiifItemsList.value.length > 0) initializeHTML5Player()
+      else if (type.value === 'audio') initializeHTML5Player()      
     })
   })
 
   const iiifRegex = RegExp(/^(?<region>(pct:)?([0-9.]+,[0-9.]+,[0-9.]+,[0-9.]+)|full|square)(\/(?<size>full|max|((pct:)?[\d,.!]+)))?(\/(?<rotation>!?\d+))?(\/(?<quality>color|gray|bitonal|default))?(\/(?<format>jpg|tif|png|gif|jp2|pdf|webp))?/)
+  const rotationRegex = RegExp(/^(?<mirror>!?)(?<rotation>0|90|180|270){1}/)
 
   function isIiifArg(str:string) {
     return iiifRegex.test(str)
@@ -378,11 +386,17 @@
     return /^[0-9]+$/.test(str)
   }
 
-  function buildItemsList() {
-    if (props.manifest) {
+  function isRotation(str:string) {
+    return rotationRegex.test(str)
+  }
+
+  function buildIiiFItemsList() {
+    let itemsList = []
+    let manifestUrl = props.manifest || props.src
+    if (manifestUrl) {
       let obj:any = {
-        id: sha256(props.manifest).slice(0,8),
-        manifest: props.manifest
+        id: sha256(manifestUrl).slice(0,8),
+        manifest: manifestUrl
       }
       obj.seq = props.seq
       obj.region = props.region
@@ -391,9 +405,9 @@
       obj.quality = props.quality
       obj.format = props.format
       obj.fit = props.fit
-      return [obj]
+      itemsList.push(obj)
     } else {
-      let itemsList = Array.from(host.value.querySelectorAll('li') as HTMLUListElement[]).map(li => {
+      itemsList = Array.from(host.value.querySelectorAll('li') as HTMLUListElement[]).map(li => {
         let tokens:string[] = []
         let s = li.textContent?.replace(/“/,'"').replace(/”/,'"').replace(/’/,"'").trim()
         s?.match(/[^\s"]+|"([^"]*)"/gmi)?.forEach(token => {
@@ -416,14 +430,19 @@
             if (match) obj = {...obj, ...match.groups}
           } else if (token === 'cover' || token === 'contain') {
             obj.fit = token
+          } else if (isRotation(token)) {
+            let match = token.match(rotationRegex)
+            if (match) obj = {...obj, ...match.groups}
+          } else if (token === 'mirror') {
+            obj.mirror = true
           } else {
             obj.caption = token[0] === '"' && token[token.length-1] === '"' ? token.slice(1,-1) : token
           }
         }
         return obj
       })
-      return itemsList
     }
+    return itemsList
   }
 
   function scaleImages() {
@@ -431,12 +450,22 @@
     let targetHeight = height.value
     let targetAspectRatio = aspect.value
 
-    return itemsList.value.map((img, idx) => {
+    return iiifItemsList.value.map((img, idx) => {
       
-      let x,y,w,h
-      if (img.region) [x,y,w,h] = img.region.split(',').map((s:string) => parseInt(s))
+      let imgInfo = getItemInfo(manifests.value[idx], img.seq)
 
-      let imgInfo = getItemInfo(manifests.value[idx])
+      let x,y,w,h
+      if (img.region) {
+        [x,y,w,h] = img.region.split(':').pop().split(',').map((s:string) => parseFloat(s))
+        let isPct = img.region.split(':')[0] === 'pct'
+        if (isPct) {
+          x = Math.round(x * imgInfo.width / 100)
+          y = Math.round(y * imgInfo.height / 100)
+          w = Math.round(w * imgInfo.width / 100)
+          h = Math.round(h * imgInfo.height / 100)
+        }
+      }
+
       const inputWidth = w || imgInfo.width
       const inputHeight = h || imgInfo.height
       const inputImageAspectRatio = Number((inputWidth/inputHeight).toFixed(4))
@@ -454,34 +483,27 @@
 
       let tileSource = imgInfo.service[0].id || imgInfo.service[0]['@id']
 
-      // console.log(`${tileSource}: ${inputWidth}x${inputHeight} ${outputWidth}x${outputHeight} ${Number((outputWidth/outputHeight).toFixed(4))}`)
-
       const outputX = (x || 0) + Math.abs(Math.round((outputWidth - inputWidth) * 0.5))
       const outputY = (y || 0) + Math.abs(Math.round((outputHeight - inputHeight) * 0.5))
 
       let region = `${outputX},${outputY},${outputWidth},${outputHeight}`
 
-      let imgUrl = `${tileSource}/${region}/${targetWidth},${targetHeight}/${img.rotation || 0}/${img.quality || 'default'}.${img.format || 'jpg'}`
+      let imgUrl = `${tileSource}/${region}/${targetWidth},${targetHeight}/${img.mirror ? '!' : ''}${img.rotation || 0}/${img.quality || 'default'}.${img.format || 'jpg'}`
 
       return imgUrl
     })
   }
 
-  function slide() {
-    let slideValue = parseInt((shadowRoot.value?.querySelector('#slider') as HTMLInputElement).value);
-    (shadowRoot.value?.querySelector('#compare-img-2') as HTMLImageElement).style.clipPath = `polygon(0 0,${slideValue/10}% 0,${slideValue/10}% 100%, 0 100%)`
-  }
-
-  const position:string = props.position || (props.right === 'true' ? 'right' : props.left === 'true' ? 'left' : 'full')
+  const position:string = props.position || (props.right ? 'right' : props.left ? 'left' : 'full')
   
-  function doLayout() {
+  function doLayout(defaultAspect:number=16/9) {
     let outer = shadowRoot?.value?.querySelector('#outer') as HTMLElement
     let inner = shadowRoot?.value?.querySelector('#inner') as HTMLElement
     let contentContainer = shadowRoot?.value?.querySelector('#content') as HTMLElement
 
-    aspect.value = Number((itemInfo.value.width/itemInfo.value.height).toFixed(4))
-
-    // console.log(`width=${itemInfo.value.width} height=${itemInfo.value.height} aspect=${aspect.value}`)
+    aspect.value = itemInfo.value
+      ? Number((itemInfo.value.width/itemInfo.value.height).toFixed(4))
+      : defaultAspect
 
     outer.classList.add(position)
     host.value.classList.add('ve-component')
@@ -494,14 +516,16 @@
       outer.style.margin = position === 'left' ? '0 12px 6px 0' : '0 0 6px 12px'
     }
     inner.style.width = props.width || '100%'
+
     width.value = parseInt(window.getComputedStyle(contentContainer).width.slice(0,-2))   
-      
+    
     contentContainer.style.height = props.height || (
       type.value === 'image-grid'
         ? ''
         : type.value === 'audio'
           ? '80px'
           : `${Math.round(width.value / aspect.value)}px`)
+  
     height.value = parseInt(window.getComputedStyle(contentContainer).height.slice(0,-2)) || (aspect.value >= 1 ? Math.round(width.value / aspect.value) : Math.round(width.value * aspect.value))  
     
     if (position === 'full' && (props.compare || props.sticky)) {
@@ -515,26 +539,14 @@
       }
     }
 
-    // console.log(`doLayout: type=${type.value} position=${position.value} width=${width.value} height=${height.value} aspect=${aspect.value}`)
+    // console.log(`doLayout: type=${type.value} position=${position} width=${width.value} height=${height.value} aspect=${aspect.value}`)
   }
 
   function loadImage() {
     viewer.value = initOsdViewer()
-    configureScrollBehavior()
+    configureImageViewerBehavior()
     tileSource.value && viewer.value.open(tileSource.value)
   }
-
-  function loadVideo() {
-    mediaPlayer.value = shadowRoot.value?.querySelector('#html5-player') as HTMLMediaElement
-  }
-
-  function loadAudio() {
-    mediaPlayer.value = shadowRoot.value?.querySelector('#html5-player') as HTMLMediaElement
-  }
-
-  onMounted(async () => {
-    // props.manifest && loadManifests(itemsList.value.map(item => item.manifest)).then(resp => manifests.value = resp)
-  })
 
   function initOsdViewer() {
     let shadowRoot: any = root.value?.parentNode
@@ -542,7 +554,7 @@
     const osdOptions: OpenSeadragon.Options = {
       element: container,
       prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
-      homeFillsViewer: true,
+      // homeFillsViewer: true,
       showNavigationControl: true,
       minZoomImageRatio: 1,
       maxZoomPixelRatio: 10,
@@ -564,8 +576,7 @@
     return OpenSeadragon(osdOptions)
   }
 
-  function configureScrollBehavior() {
-    // console.log(`configureScrollBehavior: isMobile=${isMobile()} isTouchEnabled=${this.isTouchEnabled()} zoomOnScroll=${this.zoomOnScroll} isFullPage=${this._viewer.isFullPage()}`)
+  function configureImageViewerBehavior() {
     /* This is intended to provide touch-based scrolling of OSD images in mobile mode.  Pan/zoom is
     disabled to permit scrolling.  The technique for doing this is as described in this
     OSD Github issue - https://github.com/openseadragon/openseadragon/issues/1791#issuecomment-1000045888
@@ -606,10 +617,8 @@
     if (navigator.clipboard) navigator.clipboard.writeText(text)
   }
 
-  function showAnnotation(annoId:string) {
-    annotator.value.select(annoId)
-  }
-
+  /************ Viewer interactions ************/
+  
   function isImageZoomTo(attr:Attr) {
     let name = attr.name.toLowerCase()
     let value = attr.value
@@ -631,7 +640,6 @@
   }
 
   function addInteractionHandlers() {
-
     Array.from(host.value.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
       let veMedia = findVeMedia(el)
       if (veMedia) addMutationObserver(el)
@@ -658,12 +666,12 @@
   function findVeMedia(el:any) {
     let sib = el.previousSibling
     while (sib) {
-      if (sib.nodeName === 'VE-MEDIA-BETA') return sib === host.value ? sib : null
+      if (sib.nodeName === 'VE-MEDIA') return sib === host.value ? sib : null
       sib = sib.previousSibling
     }
     while (el.parentElement && el.tagName !== 'MAIN') {
       el = el.parentElement
-      let veMedia = el.querySelector(':scope > ve-media-beta')
+      let veMedia = el.querySelector(':scope > ve-media')
       if (veMedia) return veMedia === host.value ? veMedia : null
     }
   }
@@ -692,14 +700,13 @@
   }
 
   function playMedia(arg: string) {
-    // console.log('playMedia', arg)
     arg = arg.replace(/^play\|/i,'')
     const match = arg.match(/^([0-9:]+)+,?([0-9:]+)?$/)
     if (match) seekTo(match[1], match[2])
   }
 
   function pauseMedia() {
-    // pause()
+    pause()
   }
 
   function zoomto(arg: string) {
@@ -720,44 +727,147 @@
 
   /******************* Audio/Video Player Methods *******************/
 
-  const mediaPlayer = ref<HTMLMediaElement>()
-  let isMuted: boolean = true
-  let isPlaying: boolean = true
+  const youtubeDomains = new Set(['youtube.com', 'youtube.co.uk', 'youtu.be'])
+  const vimeoDomains = new Set(['vimeo.com'])
+
+  let mediaPlayer:any = null
+  const videoId = ref<string | null>()
+
+  const isMuted = ref(true)
+  const isPlaying = ref(false)
+  let isYouTube = false
+  let isVimeo = false
+  let isHTML5 = false
   let timeoutId: any = null
   let forceMuteOnPlay = true
+  let startTimes:any = {}
+  let sticky = false
 
-  watch(mediaPlayer, () => monitor())
+  // watch(mediaPlayer, () => monitor())
 
-  function monitor() {
+  function initializeYouTubePlayer() {
+    doLayout(1.39)
+    let playerEl = shadowRoot.value?.querySelector('#youtube-placeholder') as HTMLElement
+    let playerVars = {
+      color: 'white',
+      rel: 0,
+      modestbranding: 1,
+      playsinline: 1,
+      autoplay: props.autoplay ? 1 : 0,
+      start: props.start
+    }
+    mediaPlayer = YouTubePlayer(
+      playerEl, {
+        videoId: videoId.value,
+        playerVars
+      })
+    mediaPlayer.on('ready', (evt:any) => {
+      let dimensions = evt.target.getSize()
+      // console.log(`youTube: width=${dimensions.width} height=${dimensions.height} aspect=${dimensions.width/dimensions.height}`)
+      doLayout(dimensions.width/dimensions.height)
+      // this.seekTo(this.start, this.autoplay ? this.end : this.start)
+      monitor()
+    })
+  }
+
+  async function initializeVimeoPlayer() {
+    doLayout()
+    let playerEl = shadowRoot.value?.querySelector('#ve-video-vimeo') as HTMLElement
+    mediaPlayer = new VimeoPlayer(playerEl, {
+      id: videoId.value,
+      width: parseInt(window.getComputedStyle(playerEl).width.slice(0,-2))
+    })
+    mediaPlayer.on('loaded', () => {
+      // console.log(`vimeo: width=${playerEl.clientWidth} height=${playerEl.clientHeight}`)
+      doLayout(playerEl.clientWidth/playerEl.clientHeight - 5)
+      // if (this.startSecs > 0) seekTo(props.start, props.autoplay ? props.end : props.start)
+      monitor()
+    })
+  }
+
+  function initializeHTML5Player() {
+    isHTML5 = true
+    nextTick(() => {
+      mediaPlayer = shadowRoot.value?.querySelector('#html5-player') as HTMLVideoElement
+      monitor()
+    })
+    doLayout()
+  }
+  async function monitor() {
+    let playerEl = document.querySelector('ve-video') as HTMLElement
+    let playerScrolledToTop = false
+    
     setInterval(async () => {
-      isMuted = getIsMuted()
-      isPlaying = getIsPlaying()
-      // if (isPlaying) console.log(`${type.value}: isMuted=${isMuted} isPlaying=${isPlaying} currentTime=${getCurrentTime()}`)
+      isMuted.value = await getIsMuted()
+      isPlaying.value = await getIsPlaying()
+
+      // console.log(`ve-video: isMuted=${this.isMuted} isPlaying=${this.isPlaying}`)
+      
+      if (isPlaying.value && sticky && startTimes.length > 0 && !playerScrolledToTop ) {
+        // scroll player to top
+        let y = playerEl.getBoundingClientRect().top + window.scrollY - top()
+        // console.log(`player.scrollTo`, y)
+        window.scrollTo(0, y)
+        // playerScrolledToTop = true
+      }
+
+      if (isPlaying.value) {
+        getCurrentTime().then(time => {
+          time = Math.round(time)
+          // console.log(`${type.value}: isMuted=${isMuted.value} isPlaying=${isPlaying.value} currentTime=${time}`)
+          if (startTimes[time]) {
+            // scroll paragraph into active region
+            let bcr = startTimes[time].getBoundingClientRect()
+            // console.log(`elem.scrollTo`, bcr.top)
+            window.scrollTo(0, bcr.top + window.scrollY - playerEl.getBoundingClientRect().bottom)
+          }
+        })
+      }
     }, 1000)
   }
 
   function play() {
-    mediaPlayer.value?.play()
+    if (isYouTube) mediaPlayer.playVideo()
+    else if (isVimeo) mediaPlayer.play()
+    else if (isHTML5) mediaPlayer.play()
   }
 
   function pause() {
-    mediaPlayer.value?.pause()
+    if (isYouTube) mediaPlayer.pauseVideo()
+    else if (isVimeo) mediaPlayer.pause()
+    else if (isHTML5) mediaPlayer.pause()
   }
 
-  function getCurrentTime() {
-    return Math.round(mediaPlayer.value?.currentTime || 0)
+  async function getCurrentTime() {
+    if (isYouTube) return mediaPlayer.getCurrentTime()
+    else if (isVimeo) return await mediaPlayer.getCurrentTime()
+    else if (isHTML5) return mediaPlayer.currentTime
   }
 
-  function getIsPlaying() {
-    return !(mediaPlayer.value?.ended || mediaPlayer.value?.paused)
+  async function getIsPlaying() {
+    if (isYouTube) return await mediaPlayer.getPlayerState() === 1
+    else if (isVimeo) {
+      return !(await mediaPlayer.getEnded() || await mediaPlayer.getPaused())
+    }
+    else if (isHTML5) {
+      return ! (mediaPlayer.ended || mediaPlayer.paused)
+    }
+    return false
   }
 
-  function getIsMuted() {
-    return mediaPlayer.value?.muted || true
+  async function getIsMuted() {
+    if (isYouTube) return await mediaPlayer.isMuted()
+    else if (isVimeo) return await mediaPlayer.getMuted()
+    else return await props.muted
   }
 
   function setMuted(mute:boolean) {
-    if (mediaPlayer.value) mediaPlayer.value.muted = mute
+    if (isYouTube) {
+      if (mute) mediaPlayer.mute()
+      else mediaPlayer.unMute()
+    } 
+    else if (isVimeo) mediaPlayer.setMuted(mute)
+    else if (isHTML5) mediaPlayer.muted = mute
   }
 
   function hmsToSeconds(str:string) {
@@ -772,30 +882,61 @@
   }
 
   function seekTo(start:string, end:string) {
-    let startSecs = start ? hmsToSeconds(start) : 0
-    let endSecs = end ? hmsToSeconds(end) : -1
-    // console.log(`seekTo: start=${startSecs} end=${endSecs} isMuted=${this.isMuted} forceMuteOnPlay=${this.forceMuteOnPlay}`)
-    
+    console.log(`seekTo: start=${start} end=${end}`)
+    let startSecs = hmsToSeconds(start)
+    let endSecs = end ? hmsToSeconds(end) + 1 : -1
+    // console.log(`seekTo: start=${startSecs} end=${endSecs} isMuted=${isMuted.value} forceMuteOnPlay=${forceMuteOnPlay}`)
+
     // clear delayed pause
     if (timeoutId) {
       clearTimeout(timeoutId)
       timeoutId = null
     }
 
-    let wasMuted = isMuted
+    let wasMuted = isMuted.value
     if (forceMuteOnPlay) setMuted(true)
 
-    setTimeout(() => {
-      play()
-      if (mediaPlayer.value) mediaPlayer.value.currentTime = startSecs
-      if (endSecs >= startSecs) {
-        timeoutId = setTimeout(() => {
-          timeoutId = null
-          mediaPlayer.value?.pause()
-          if (!wasMuted && forceMuteOnPlay) setMuted(false)
-        }, endSecs === startSecs ? 200 : (endSecs-startSecs)*1000)
-      }
-    }, 200)
+    if (isYouTube) {
+      mediaPlayer.playVideo()
+      mediaPlayer.seekTo(startSecs).then((_:any) => {
+        if (endSecs >= startSecs) {
+          timeoutId = setTimeout(() => {
+            mediaPlayer.pauseVideo().then((_:any) => {
+              timeoutId = null
+              if (!wasMuted && forceMuteOnPlay) setMuted(false)
+            })
+          }, endSecs === startSecs ? 200 : (endSecs-startSecs)*1000)
+        }
+      })
+    }
+  
+    else if (isVimeo) {
+      mediaPlayer.setCurrentTime(startSecs)
+      mediaPlayer.play().then((_:any) => {
+        if (endSecs >= startSecs) {
+          timeoutId = setTimeout(() => {
+            mediaPlayer.pause().then((_:any) => {
+              timeoutId = null
+              if (!wasMuted && forceMuteOnPlay) setMuted(false)
+            })
+          }, endSecs === startSecs ? 200 : (endSecs-startSecs)*1000)
+        }
+      })
+    }
+
+    else if (isHTML5) {
+      setTimeout(() => {
+        mediaPlayer.play()
+        mediaPlayer.currentTime = startSecs
+        if (endSecs >= startSecs) {
+          timeoutId = setTimeout(() => {
+            timeoutId = null
+            mediaPlayer.pause()
+            if (!wasMuted && forceMuteOnPlay) setMuted(false)
+          }, endSecs === startSecs ? 200 : (endSecs-startSecs)*1000)
+        }
+      }, 200)
+    } 
   }
 
   /******************* End Audio/Video Player Methods *******************/
@@ -804,32 +945,48 @@
 
 <style>
 
-
-  @import 'ant-design-vue/lib/badge/style';
-  @import 'ant-design-vue/lib/pagination/style';
   @import '../annotator/annotorious.css';
 
   * { box-sizing: border-box; }
 
+  .info-icon {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 24px;
+    height: 24px;
+    font-size: 20px;
+    border: 2px solid rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    background-color: white;
+    display: flex;
+    justify-content: center;
+    visibility: hidden;
+  }
+  .media-item:hover .info-icon {
+    visibility: visible;
+    transition: all 0.3s ease-in;
+  }
+
+  .manifest-popover {
+    background-color: white;
+    border-radius: 6px;
+    width: 300px;
+    height: 400px;
+    overflow-y: scroll;
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  }
+
   #outer {
     position: relative;
-    overflow: hidden;
+    /* overflow: hidden; */
     width: 100%;
     background-color: white;
-    display: grid;
+    display: flex;
     justify-items: center;
   }
 
-  #inner {
-    position: relative;
-    height: 100%;
-    width: 100%;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
-    margin-bottom: 12px;
-  }
-
   #content {
-    position: relative;
     width: 100%;
   }
 
@@ -856,6 +1013,12 @@
     overflow: hidden;
     white-space: nowrap;
     cursor: pointer;
+  }
+
+  .image-wrapper {
+    position: relative;
+    height: 100%;
+    width: 100%;
   }
 
   .grid-wrapper {
@@ -886,34 +1049,6 @@
     box-shadow: 2px 2px 6px 0px  rgba(0,0,0,0.3);
     width: 240px;
     max-width: 100%;
-  }
-
-  .anticon {
-    display: flex;
-    margin: 0 6px;
-    border-radius: 50%;
-    font-size: 20px;
-  }
-
-  .anticon-comment,
-  .anticon-edit,
-  .anticon-info-circle,
-  .anticon-copy {  
-    color: white;
-  }
-
-  .anticon-comment:hover,
-  .anticon-edit:hover,
-  .anticon-info-circle:hover,
-  .anticon-copy:hover {
-    color: black;
-    background-color: white;
-    /* border: 1px solid white; */
-    cursor: pointer;
-  }
-
-  .anticon-copy:hover {
-    cursor: copy;
   }
 
   #coords {
@@ -967,49 +1102,6 @@
     fill: black;
   }
 
-  .ant-drawer-content-wrapper {
-    width: 50% !important;
-  }
-
-  .ant-drawer-content {
-    position: absolute;
-    bottom: 0;
-    height: 50% !important;
-    background-color: rgba(0, 0, 0, 0.6);
-    color: white;
-  }
-
-  .ant-drawer-header {
-    /* background-color: rgba(255, 255, 255, 0.9); */
-  }
-  .ant-drawer-header svg {
-    fill: black;
-    font-size: 16px;
-  }
-  .ant-drawer-body {
-    padding: 0 4px;
-  }
-
-  .ant-drawer-mask {
-    background-color: unset;
-  }
-
-  .full-modal .ant-modal {
-    max-width: 100%;
-    top: 0;
-    padding-bottom: 0;
-    margin: 0;
-  }
-  .full-modal .ant-modal-content {
-    display: flex;
-    flex-direction: column;
-    height: calc(100vh);
-  }
-  .full-modal .ant-modal-body {
-    flex: 1;
-    padding: 0;
-  }
-
   .view .r6o-footer {
     display: none;
   }
@@ -1055,11 +1147,6 @@
     cursor: pointer;
   }
 
-  .ant-badge-count {
-    margin-right: 6px;
-    cursor: pointer;
-  }
-
   .compare{
     height: 100%;
     width: 100%;
@@ -1090,7 +1177,8 @@
       -webkit-appearance: none;
       height: 45px;
       width: 45px;
-      background: url("@/assets/img/split-cells.svg"), rgba(255,255,255,0.3);
+      /* background: url("@/assets/img/split-cells.svg"), rgba(255,255,255,0.3); */
+      background: rgba(255,255,255,0.3);
       border: 4px solid white;
       border-radius: 50%;
       background-size: contain;
@@ -1100,6 +1188,115 @@
   audio#html5-player {
     width: calc(100% - 60px);
     max-width: 50vh;
+  }
+
+
+  .buttons {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+  }
+
+  /* The Close Button */
+  .close {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 6px;;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+  }
+
+  .popup-overview sl-popup {
+    --arrow-color: var(--sl-color-primary-600);
+  }
+
+  .popup-overview span[slot='anchor'] {
+    display: inline-block;
+    width: 150px;
+    height: 150px;
+    border: dashed 2px var(--sl-color-neutral-600);
+    margin: 50px;
+  }
+
+  .popup-overview .box {
+    width: 100px;
+    height: 50px;
+    background: var(--sl-color-primary-600);
+    border-radius: var(--sl-border-radius-medium);
+  }
+
+  .popup-overview-options {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 1rem;
+  }
+
+  .popup-overview-options sl-select {
+    width: 160px;
+  }
+
+  .popup-overview-options sl-input {
+    width: 100px;
+  }
+
+  .popup-overview-options + .popup-overview-options {
+    margin-top: 1rem;
+  }
+
+  sl-popup {
+    --arrow-color: var(--sl-color-primary-600);
+  }
+
+  .media-item .box {
+    width: 300px;
+    height: 600px;
+    background: white;
+    border-radius: var(--sl-border-radius-medium);
+  }
+
+  #annotations-icon {
+    position: relative;
+    cursor: pointer;
+  }
+
+  #annotations-icon::part(base) {
+    color: white;
+    font-size: 1.2rem;
+    padding: 3px;
+  }
+
+  .button-icon-with-badge {
+    display: inline-block;
+    position: relative;
+    /* width: 50px; */
+    margin: 0 6px;
+  }
+
+  .button-icon-with-badge sl-badge {
+    position: absolute;
+    left: 70%;
+    top: 0;
+    cursor: pointer;
+
+  }
+  .button-icon-with-badge sl-badge::part(base) {
+    font-size: .7rem;
+    background-color: yellow;
+    color: black;
+    font-weight: bold;
+    padding: 4px 5px 1px 5px;
+    border: unset;
+  }
+
+  #youtube-placeholder, #ve-video-vimeo {
+    width: 100%;
   }
 
 </style>
