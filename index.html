@@ -26,6 +26,13 @@
 
     <main>
 
+      <ve-add-media-resource-dialog path="rsnyder/media"></ve-add-media-resource-dialog>
+
+      <button>Toggle Dialog</button>
+      <!--
+      <ve-starter id="starter" num-prop="5"></ve-starter>
+
+      <ve-map center="42.279935588803255,-83.75390754221135"></ve-map>
       <ve-header
         label="Farmhouse in Provence"
         background="wc:Farmhouse_in_Provence,_1888,_Vincent_van_Gogh,_NGA.jpg"
@@ -56,11 +63,23 @@
       </ve-header>
 
       <div style="height:110vh;"></div>
-
+      -->
       <!-- <ve-content-selector mode="essays" path="rsnyder/essays"></ve-content-selector> -->
 
     </main>
     
     <script src="src/main.ts" type="module"></script>
+    <script>
+      let dialog = document.querySelector('ve-add-media-resource-dialog')
+      let button = document.querySelector('button')
+      button.addEventListener('click', (e) => dialog._instance.exposed.show(!dialog._instance.exposed.isOpen()))
+    </script>
+    <!--
+    <script>
+      let el = document.querySelector('ve-starter')
+      el.addEventListener('custom-event', (e) => console.log(e.detail[0]))
+      setTimeout(() => el._instance.exposed.increment(), 5000)
+    </script>
+    -->
   </body>
 </html>
