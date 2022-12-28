@@ -1,5 +1,6 @@
 export const iiifServer = 'https://iiif.juncture-digital.org'
 import { sha256 as __sha256 } from 'js-sha256'
+import md5 from 'js-md5'
 
 export function isURL(str:string) { return /^https*:\/\//.test(str) }
 
@@ -303,4 +304,159 @@ export function domPath(el: any) {
     el = el.parentNode as HTMLElement
   }
   return stack.join('.')
+}
+
+let entityData:any = {}
+export async function getEntityData(qids: string[] = [], language: string = 'en') {
+  let values = qids.filter(qid => !entityData[qid]).map(qid => `(<http://www.wikidata.org/entity/${qid}>)`)
+  // console.log(`getEntityData: qids=${qids.length} toGet=${values.length}`)
+  if (values.length > 0) {
+    let query = `
+      SELECT ?item ?label ?description ?alias ?image ?coords ?pageBanner ?whosOnFirst ?wikipedia WHERE {
+        VALUES (?item) { ${values.join(' ')} }
+        ?item rdfs:label ?label . 
+        FILTER (LANG(?label) = "${language}" || LANG(?label) = "en")
+        OPTIONAL { ?item schema:description ?description . FILTER (LANG(?description) = "${language}" || LANG(?description) = "en")}
+        OPTIONAL { ?item skos:altLabel ?alias . FILTER (LANG(?alias) = "${language}" || LANG(?alias) = "en")}
+        OPTIONAL { ?item wdt:P625 ?coords . }
+        OPTIONAL { ?item wdt:P18 ?image . }
+        OPTIONAL { ?item wdt:P948 ?pageBanner . }
+        OPTIONAL { ?item wdt:P6766 ?whosOnFirst . }
+        OPTIONAL { ?wikipedia schema:about ?item; schema:isPartOf <https://${language}.wikipedia.org/> . }
+    }`
+    let resp = await fetch('https://query.wikidata.org/sparql', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        Accept: 'application/sparql-results+json'
+      },
+      body: `query=${encodeURIComponent(query)}`
+    })
+    if (resp.ok) {
+      let sparqlResp = await resp.json()
+      sparqlResp.results.bindings.forEach((rec: any) => {
+        let qid = rec.item.value.split('/').pop()
+        if (!entityData[qid]) {
+          entityData[qid] = {id: qid, label: rec.label.value}
+          if (rec.description) entityData[qid].description = rec.description.value
+          if (rec.alias) entityData[qid].aliases = [rec.alias.value]
+          if (rec.coords) entityData[qid].coords = rec.coords.value.slice(6,-1).split(' ').reverse().join(',')
+          if (rec.wikipedia) entityData[qid].wikipedia = rec.wikipedia.value
+          if (rec.pageBanner) entityData[qid].pageBanner = rec.pageBanner.value
+          if (rec.image) {
+            entityData[qid].image = rec.image.value
+            entityData[qid].thumbnail = mwImage(rec.image.value, 120)
+          }
+          if (rec.whosOnFirst) entityData[qid].geojson = whosOnFirstUrl(rec.whosOnFirst.value)
+        } else {
+          if (rec.alias) entityData[qid].aliases.push(rec.alias.value)
+        }
+      })
+      // return entityData
+      return Object.fromEntries(qids.filter(qid => entityData[qid]).map(qid => [qid,entityData[qid]]))
+    }
+  }
+  // return entityData
+  return Object.fromEntries(qids.filter(qid => entityData[qid]).map(qid => [qid,entityData[qid]]))
+}
+
+export function isQID(s: string) {
+  return s[0] === 'Q' && isNum(s.slice(1))
+}
+
+export async function getEntity(qid: string, language: string = 'en') {
+  let entities = await getEntityData([qid], language)
+  return entities[qid]
+}
+
+export function mwImage(mwImg:string, width:number) {
+  // Converts Wikimedia commons image URL to a thumbnail link
+  mwImg = (Array.isArray(mwImg) ? mwImg[0] : mwImg).replace(/Special:FilePath\//, 'File:').split('File:').pop()
+  mwImg = decodeURIComponent(mwImg).replace(/ /g,'_')
+  const _md5 = md5(mwImg)
+  const extension = mwImg.split('.').pop()
+  let url = `https://upload.wikimedia.org/wikipedia/commons${width ? '/thumb' : ''}`
+  url += `/${_md5.slice(0,1)}/${_md5.slice(0,2)}/${mwImg}`
+  if (width) {
+    url += `/${width}px-${mwImg}`
+    if (extension === 'svg') {
+      url += '.png'
+    } else if (extension === 'tif' || extension === 'tiff') {
+      url += '.jpg'
+    }
+  }
+  return url
+}
+
+// Creates a GeoJSON file URL from a Who's on First ID 
+function whosOnFirstUrl(wof:string) {
+  let wofParts = []
+  for (let i = 0; i < wof.length; i += 3) {
+    wofParts.push(wof.slice(i,i+3))
+  }
+  return `https://data.whosonfirst.org/${wofParts.join('/')}/${wof}.geojson`
+}
+
+export function isNum(s:string) {
+  return s && !isNaN(<any>s)
+}
+
+export function parseImageOptions(str: string) {
+  let elems = str?.split('/') || []
+  // let seq = 1
+  let region = 'full'
+  let size = 'full'
+  let rotation = '0'
+  let quality = 'default'
+  let format = 'jpg'
+  let offset = 0
+  /*
+  if (isNum(elems[0])) {
+    seq = +elems[0]
+    offset = 1
+  }
+  */
+  let options = {
+    // seq,
+    region: elems.length > offset && elems[offset] ? elems[offset] : region,
+    size: elems.length > offset+1 && elems[offset+1] ? elems[offset+1] : size,
+    rotation: elems.length > offset+2 && elems[offset+2] ? elems[offset+2] : rotation,
+    quality: elems.length > offset+3 && elems[offset+3] ? elems[offset+3] : quality,
+    format: elems.length > offset+4 && elems[offset+4] ? elems[offset+4] : format
+  }
+  return options
+}
+
+// For cropping regular images
+export async function imageDataUrl(url: string, region: any, dest: any): Promise<string> {
+  return new Promise((resolve) => {
+    let {x, y, w, h} = region
+    let {width, height} = dest
+    let image = new Image()
+    image.crossOrigin = 'anonymous'
+    x = x ? x/100 : 0
+    y = y ? y/100 : 0
+    w = w ? w/100 : 0
+    h = h ? h/100 : 0
+    image.onload = () => {
+      let sw = image.width
+      let sh = image.height
+      let swScaled = w > 0 ? sw * w : sw - (sw * x)
+      let shScaled =  h > 0 ? sh * h : sh - (sh * y)
+      let ratio = swScaled/shScaled
+      if (ratio > 1) height = width/ratio
+      else width = height * ratio
+      const canvas = document.createElement('canvas')
+      const ctx = canvas.getContext('2d')
+      canvas.width = width
+      canvas.height = height
+      x = x*sw
+      y = y*sh
+      // console.log(`x=${x} y=${y} sw=${sw} sh=${sh} swScaled=${swScaled} shScaled=${shScaled} width=${width} height=${height} ratio=${ratio}`)
+      ctx?.drawImage(image, x, y, swScaled, shScaled, 0, 0, width, height)
+      let dataUrl = canvas.toDataURL()
+      resolve(dataUrl)
+    }
+    image.src = url
+  })
 }
