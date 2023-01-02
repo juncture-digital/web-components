@@ -8,7 +8,7 @@ export class GithubClient {
   
     // Encoding UTF8 ⇢ base64
 
-    b64EncodeUnicode(str) {
+    b64EncodeUnicode(str:string) {
       return btoa(encodeURIComponent(str).replace(/%([0-9A-F]{2})/g, function(_, p1) {
           return String.fromCharCode(parseInt(p1, 16))
       }))
@@ -16,7 +16,7 @@ export class GithubClient {
 
     // Decoding base64 ⇢ UTF8
 
-    b64DecodeUnicode(str) {
+    b64DecodeUnicode(str:string) {
       return decodeURIComponent(Array.prototype.map.call(atob(str), function(c) {
           return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)
       }).join(''))
@@ -69,7 +69,7 @@ export class GithubClient {
       }).then(resp => resp.json())
     }
       
-    async createRepository({org=null, name, description='', auto_init=true}): Promise<any> {
+    async createRepository({org=null, name='', description='', auto_init=true}): Promise<any> {
       let url = org ? `https://api.github.com/orgs/${org}/repos` : 'https://api.github.com/user/repos'
       console.log(`createUserRepository: org=${org} name=${name} description=${description} auto_init=${auto_init} url=${url}`)
       let resp = await fetch(url, {

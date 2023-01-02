@@ -3,7 +3,7 @@
   <div ref="root">
     <div class="nav" :style="{backgroundColor: props.background}">
       <input class="menu-btn" type="checkbox" id="menu-btn"/>
-        <div v-if="navItems.length > 0" class="wrapper">
+        <div v-if="navItems" class="wrapper">
           <label class="menu-icon" htmlFor="menu-btn"><span class="navicon"></span></label>
           <ul class="menu" :style="{backgroundColor: props.background || '#444'}">
             <li v-for="item, idx in navItems" :key="`nav-${idx}`" @click="menuItemSelected(item)">
@@ -66,17 +66,36 @@
   const isLoggedIn = ref(false)
   const originalNavItems = ref<any[]>([])
 
-  const navEl = ref<HTMLUListElement>()
-  // watch(navEl, () => { console.log('Menu', navEl.value) })
-
-  const navItems = ref<any[]>([])
-  // watch(navItems, () => { console.log(navItems.value) })
+  const navItems = ref<any[]>()
+  // watch(navItems, () => console.log('menu.navItems', toRaw(navItems.value)) )
 
   let helpWindow:any
   let externalWindow:any
 
-  watch(host, () => {    
-    getNavItems()
+  onMounted(() => {
+    init()
+    nextTick(() => {
+      let listItems = Array.from(host.value.children[0]?.children || [])
+      if (listItems.length > 0)
+      originalNavItems.value = listItems
+        .map((navItem:any) => {
+          if (navItem.firstChild.nodeName === 'A') {
+            let linkEl = navItem.firstChild as HTMLLinkElement
+            return {label: linkEl.textContent, href:linkEl.href, newWindow: linkEl.getAttribute('target') === '_blank' }
+          } else {
+            let text = navItem.firstChild.textContent
+            if (text.toLowerCase() === 'auth') {
+              return {label:  isLoggedIn.value ? 'Logout' : 'Login', href:  isLoggedIn.value ? 'logout' : 'login'}
+            } else {
+              return {label: text}
+            }
+          }
+        })
+        .filter(item => item.label.toLowerCase().indexOf('contact') !== 0 || props.contact)
+    })
+  })
+
+  function init() {    
     isLoggedIn.value = ghAuthToken() !== null
     let code = (new URL(window.location.href)).searchParams.get('code')
     if (code) {
@@ -97,13 +116,7 @@
         .catch(err => console.log('err', err))
     }
     host.value.classList.add(props.position)
-  })
-
-  onUpdated(() => {    
-    nextTick(() => navEl.value = host.value.querySelector('ul') as HTMLUListElement)
-  })
-  
-  watch(navEl, () => { if (navEl.value) getNavItems() })
+  }
 
   watch(originalNavItems, () => {
     navItems.value = originalNavItems.value
@@ -131,26 +144,6 @@
           : item
       )
   })
-
-  function getNavItems() {
-    originalNavItems.value = Array.from(host.value.querySelectorAll('li'))
-    .map((navItem:any) => {
-      if (navItem.firstChild.nodeName === 'A') {
-        let linkEl = navItem.firstChild as HTMLLinkElement
-        return {label: linkEl.textContent, href:linkEl.href, newWindow: linkEl.getAttribute('target') === '_blank' }
-      } else {
-        let text = navItem.firstChild.textContent
-        if (text.toLowerCase() === 'auth') {
-          return {label:  isLoggedIn.value ? 'Logout' : 'Login', href:  isLoggedIn.value ? 'logout' : 'login'}
-        } else {
-          return {label: text}
-        }
-      }
-    })
-    .filter(item => item.label.toLowerCase().indexOf('contact') !== 0 || props.contact)
-  }
-
-  onUpdated(() => { if (!navEl.value) navEl.value = host.value.querySelector('ul') as HTMLUListElement })
 
   function  ghAuthToken() {
     return localStorage.getItem('gh-auth-token')
@@ -210,6 +203,7 @@
   }
 
   function menuItemSelected(item: any) {
+    // console.log('menuItemSelected', item)
     let action = item.href ? item.href.split('/').pop().toLowerCase() : null
     if ((action.indexOf('contact') === 0 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
       showContactForm()
@@ -227,7 +221,7 @@
         if (externalWindow) { externalWindow.close() }
         externalWindow = window.open(item.href, '_blank', 'toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes')
       } else {
-        // location.href = item.href
+        location.href = item.href
       }
     }
     (shadowRoot.value?.querySelector('#menu-btn') as HTMLInputElement).checked = false

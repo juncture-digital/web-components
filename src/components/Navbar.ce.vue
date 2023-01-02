@@ -11,10 +11,8 @@
     </div>
     <div class="controls">
       <ve-site-search v-if="props.searchDomain" :search-domain="props.searchDomain"></ve-site-search>
-      <ve-menu :background="props.background" position="right" :contact="props.contact">
-        <ul v-if="navEl">
-          <li v-for="li, idx in Array.from(navEl.querySelectorAll('li'))" :key="`li-${idx}`" v-html="li.innerHTML"></li>
-        </ul>
+      <ve-menu v-if="navEl" :background="props.background" position="right" :contact="props.contact">
+        <ul v-html="navEl"></ul>
       </ve-menu>
     </div>
   </section>
@@ -23,7 +21,7 @@
   
 <script setup lang="ts">
 
-  import { computed, onMounted, onUpdated, ref, toRaw, watch } from 'vue'
+  import { computed, nextTick, onMounted, onUpdated, ref, toRaw, watch } from 'vue'
 
   const props = defineProps({
     label: { type: String },
@@ -43,15 +41,16 @@
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
   const shadow = computed(() => root?.value?.parentNode?.querySelector('.ve-navbar') as HTMLElement)
 
-  const navEl = ref<HTMLUListElement>()
-  // watch(navEl, () => { console.log('Navbar', navEl.value) })
+  const navEl = ref<string>()
+  
+  const navItems = ref<string[]>([])
 
-  onMounted(() => applyProps())
-  onUpdated(() => applyProps())
+  onMounted(() => {
+    applyProps()
+    nextTick(() => navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML)
+  })
 
-  function applyProps() {
-    if (!navEl.value) navEl.value = host.value.querySelector('ul') as HTMLUListElement
-    
+  function applyProps() {    
     shadow.value.style.height = `${props.height}px`
     if (props.background) host.value.style.backgroundColor = props.background
     if (props.alpha) host.value.style.background = `rgba(0, 0, 0, ${props.alpha})`

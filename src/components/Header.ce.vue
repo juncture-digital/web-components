@@ -24,9 +24,9 @@
       :alpha="backgroundIsImage ? 0.2 : 0"
       :offset="backgroundIsImage ? navbarHeight : 0"
     >
-      <ul v-if="navEl">
-        <li v-for="li, idx in Array.from(navEl.querySelectorAll('li'))" :key="`li-${idx}`" v-html="li.innerHTML"></li>
-      </ul>
+
+      <ul v-if="navEl" v-html="navEl"></ul>
+
     </ve-navbar>
 
 
@@ -36,7 +36,7 @@
 
   import { computed, onMounted, onUpdated, ref, toRaw, watch } from 'vue'
   import { isURL, getEntity } from '../utils'
-
+  
   const props = defineProps({
     label: { type: String },
     subtitle: { type: String },
@@ -60,23 +60,25 @@
   const host = computed(() => (navbar.value?.getRootNode() as any)?.host)
 
   const backgroundIsImage = ref(false)
-  const navEl = ref<HTMLUListElement>()
+  const navEl = ref<string>()
   const entities = ref<string[]>([])
   const entity = ref<any>()
   const background = ref<string>()
 
   const height = computed(() => props.height || (backgroundIsImage.value ? heroHeight : navbarHeight))
 
-  onMounted(() => applyProps())
-  onUpdated(() => applyProps())
+  onMounted(() => applyProps() )
+  onUpdated(() => applyProps() )
 
   function applyProps() {
     entities.value = props.entities ? props.entities.split(/\s+/).filter(qid => qid) : []
     backgroundIsImage.value = props.background !== undefined && (isURL(props.background) || isManifestShorthand(props.background))
     if (navbar.value) navbar.value.style.height = `${props.height || navbarHeight}px`
     if (props.sticky) host.value.classList.add('sticky')
-    navEl.value = host.value.querySelector('ul') as HTMLUListElement
+    navEl.value = (host.value.querySelector('ul') as HTMLUListElement).innerHTML
   }
+
+  // watch(navEl, () => console.log('header.navEl', navEl.value))
 
   watch(entities, async () => {
     if (entities.value.length > 0) {

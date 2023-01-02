@@ -23,9 +23,9 @@ export class Annotator {
     this.annotorious.on('updateAnnotation', async (anno:any) => this.updateAnnotation(anno))
     this.annotorious.on('deleteAnnotation', async (anno:any) => this.deleteAnnotation(anno))
     this.annotorious.on('selectAnnotation', async (anno:any) => this.onSelect(anno))
-    this.setVisible(false)
+    this.setVisible(true)
     this.ghAuthToken = localStorage.getItem('gh-auth-token') || ''
-    // console.log(`Annotator: base=${base} readOnly=${this.annotorious.readOnly} authenticated=${this.ghAuthToken !== ''}`)
+    console.log(`Annotator: base=${base} readOnly=${this.annotorious.readOnly} authenticated=${this.ghAuthToken !== ''}`)
   }
 
   async loadAnnotations(imageId:string) {
@@ -33,7 +33,7 @@ export class Annotator {
     this.setVisible(false)
     let annotations = []
     let url = `${annotationsEndpoint}/annotations/${this.base}/${imageId}/`
-    // console.log(`Annotator.loadAnnotations: ${url}`)
+    console.log(`Annotator.loadAnnotations: ${url}`)
     let resp:any = await fetch(url)
     if (resp.ok) {
       resp = await resp.json()
@@ -44,7 +44,6 @@ export class Annotator {
           return anno
         })
         console.log(`Adding ${resp.annotations.length} annotations`)
-        this.annotorious.setAnnotations(annotations)
         if (this.annotorious.readOnly) {
           annotations.forEach((anno: any) => {
             let annoEl = this.annoEl(anno.id)
@@ -56,6 +55,7 @@ export class Annotator {
         }
       }
     }
+    this.annotorious.setAnnotations(annotations)
     return annotations
   }
 
@@ -73,6 +73,7 @@ export class Annotator {
   }
 
   toggleVisibility(evt:MouseEvent) {
+    console.log('toggleVisibility')
     if (evt) evt.stopPropagation()
     this.setVisible(!this.visible)
   }

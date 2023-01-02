@@ -1,18 +1,47 @@
 * { box-sizing: border-box; }
 
+ve-media-card {
+  height: 100%;
+}
+
+.manifest-popup {
+  border: 1px solid #555;
+  background-color: white;
+  width: 350px;
+  max-height: 500px;
+  overflow-y: scroll;
+  border-radius: 6px;
+  padding: 4px;
+  box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+}
+
+.visible {
+  visibility: visible;
+  opacity: 1;
+  transition: opacity .5s linear;
+}
+.hidden {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s .5s, opacity .5s linear;
+}
+
 section {
   display: flow-root;
 }
 
-.section1 {
+main > section {
   padding-top: 3rem;
 }
 
-.section2, .section3 {
+main > section > section,
+main > section > section > section {
   padding-top: 2rem;
 }
 
-.section4, .section5, .section6 {
+main > section > section > section > section,
+main > section > section > section > section > section,
+main > section > section > section > section > section > section {
   padding-top: 1rem;
 }
 
@@ -50,7 +79,7 @@ ve-footer ul {
 
 section {
   width: 100%;
-  position: relative;
+  /* position: relative; */
   clear: both;
   background-color: inherit;
 }
@@ -299,6 +328,7 @@ input ~ .tab {
   padding: 12px;
 }
 h1 {margin-bottom: 32px;}
+
 .tab { 
   position: absolute;
   visibility: hidden;
@@ -455,6 +485,12 @@ mark.zoom::after {
 
 mark.play::after {
   content: "▶";
+}
+
+mark.flyto::after {
+  content: "✈";
+  font-size: 120%;
+  top: 0;
 }
 
 a { color: #0645ad; text-decoration:none;}

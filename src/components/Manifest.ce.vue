@@ -126,8 +126,14 @@ export default {
       
     const licenseBadge = computed(() => parsed.value && _getLicenseBadge(parsed.value))
 
-    if (typeof props.manifest === 'object') manifest.value = props.manifest
-    else getManifest(<string>props.manifest).then(resp => manifest.value = resp )
+    console.log(props.manifest)
+    if (typeof props.manifest === 'object') {
+      console.log('manifest.isObject')
+      manifest.value = props.manifest
+    } else {
+      console.log('manifest.isUrl')
+      getManifest(<string>props.manifest).then(resp => manifest.value = resp )
+    }
 
     function _value(langObj: any, language='en') {
       return typeof langObj === 'object' && !Array.isArray(langObj)

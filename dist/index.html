@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Juncture Web Components</title>
+    <script type="module" crossorigin src="/assets/js/index.js"></script>
+    <link rel="stylesheet" href="/assets/css/index.css">
+  </head>
+  <body style="opacity:0">
+
+    <main class="show-active">
+
+      <ve-header
+        label="Juncture Web Components"
+        background="wc:Vincent_van_Gogh_-_The_yellow_house_('The_street').jpg"
+        contact="ron@snyderjr.com"
+        sticky>
+        <ul>
+          <li><a href="/help">Help</a></li>
+          <li><a href="/contact">Contact us</a></li>
+          <li>auth</li>
+        </ul>
+      </ve-header>
+
+      <section>
+        <h1>Juncture Web Components</h1>
+        <p>Juncture is ...</p>
+
+        <section>
+          <h2>Media</h2>
+          <p>
+            Juncture provides a flexible media viewer that ...
+          </p>
+          <section>
+            <h3>High-resolution Images</h3>
+            <ve-media src="wc:Vincent_van_Gogh_-_De_slaapkamer_-_Google_Art_Project.jpg" sticky></ve-media>
+            <p>Lorem <mark qid="Q5582">ipsum</mark> dolor <mark qid="Q48292">sit</mark> amet, <mark zoomto="9012,6782,7500,5955">consectetur</mark> adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Sed euismod nisi porta lorem mollis. Tellus id interdum velit laoreet id donec. Molestie at elementum eu facilisis. Ultricies mi eget mauris pharetra. Viverra aliquet eget sit amet. Vel risus commodo viverra maecenas accumsan lacus vel facilisis volutpat. Porta nibh venenatis cras sed felis. Arcu odio ut sem nulla pharetra diam sit amet nisl. Scelerisque purus semper eget duis at tellus at urna. Consectetur adipiscing elit pellentesque habitant morbi tristique senectus et netus. Donec ac odio tempor orci.</p>
+            <p>Morbi quis commodo odio aenean. Mattis vulputate enim nulla aliquet porttitor lacus luctus. Congue nisi vitae suscipit tellus mauris a diam. Magna fringilla urna porttitor rhoncus dolor purus non enim praesent. Convallis convallis tellus id interdum velit laoreet. Natoque penatibus et magnis dis. Donec ultrices tincidunt arcu non sodales neque. Duis tristique sollicitudin nibh sit amet commodo. Enim ut tellus elementum sagittis vitae et. Risus feugiat in ante metus dictum at tempor. Amet est placerat in egestas erat imperdiet sed euismod nisi. Ultrices in iaculis nunc sed augue lacus viverra vitae congue. Placerat orci nulla pellentesque dignissim enim.</p>          
+            <p>Vestibulum lectus mauris ultrices eros in cursus turpis. A scelerisque purus semper eget duis at tellus at. Vel elit scelerisque mauris pellentesque pulvinar pellentesque habitant morbi. Ac turpis egestas integer eget aliquet nibh praesent. Nunc sed velit dignissim sodales ut eu. Porta lorem mollis aliquam ut. Amet commodo nulla facilisi nullam. Cursus euismod quis viverra nibh. Mi tempus imperdiet nulla malesuada pellentesque elit eget gravida cum. Non nisi est sit amet facilisis magna etiam tempor orci. Non tellus orci ac auctor augue mauris augue neque gravida.</p>          
+            <p>Lectus vestibulum mattis ullamcorper velit sed ullamcorper. In iaculis nunc sed augue lacus viverra vitae congue. Ultrices tincidunt arcu non sodales neque. Nibh sit amet commodo nulla facilisi nullam vehicula ipsum. In nibh mauris cursus mattis molestie. Vitae aliquet nec ullamcorper sit amet risus nullam. Sed euismod nisi porta lorem. Bibendum at varius vel pharetra vel turpis nunc eget lorem. Purus non enim praesent elementum facilisis leo vel fringilla est. Lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt. Viverra suspendisse potenti nullam ac tortor. Risus commodo viverra maecenas accumsan lacus. Libero enim sed faucibus turpis. Pellentesque elit eget gravida cum sociis natoque. Lacus viverra vitae congue eu consequat. Faucibus pulvinar elementum integer enim neque volutpat. Congue mauris rhoncus aenean vel elit scelerisque mauris. Sit amet porttitor eget dolor morbi non. Consectetur lorem donec massa sapien. Etiam sit amet nisl purus in mollis nunc.</p>
+            <p>Eu augue ut lectus arcu. Aliquet lectus proin nibh nisl condimentum. Dignissim suspendisse in est ante in nibh mauris cursus. Viverra mauris in aliquam sem. Fringilla ut morbi tincidunt augue. Vel elit scelerisque mauris pellentesque pulvinar pellentesque. Molestie at elementum eu facilisis. Et malesuada fames ac turpis egestas sed tempus urna et. Viverra justo nec ultrices dui sapien. Est lorem ipsum dolor sit amet consectetur adipiscing. Pulvinar pellentesque habitant morbi tristique senectus. Egestas diam in arcu cursus euismod quis viverra nibh.</p>
+          </section>
+
+            <section>
+              <h3>Multiple Images</h3>
+              <ve-media cards>
+                <ul>
+                  <li>wc:Vincent_van_Gogh_-_De_slaapkamer_-_Google_Art_Project.jpg</li>
+                  <li>wc:Vincent_van_Gogh_-_Vincent's_Bedroom_in_Arles_-_Letter_Sketch_October_1888.jpg</li>
+                  <li>wc:Vincent_van_Gogh_-_Vincent's_Bedroom_-_Lettersketch_17_October_1888.jpg</li>
+                  <li>wc:Vincent_van_Gogh_-_The_Bedroom_-_Google_Art_Project.jpg</li>
+                  <li>gh:rsnyder/media/italy/amalfi-coast/Amalfi_Coast.jpg</li>
+                </ul>
+              </ve-media>
+          </section>
+
+          <section>
+            <h3>Multimedia</h3>
+            <ve-media src="https://www.youtube.com/watch?v=q8abIqDaqvE" right sticky caption="YouTube Video"></ve-media>
+            <p>
+              Some text
+            </p>
+            <ul>
+              <li>HTML5 audio and video</li>
+              <li>Streaming video from <mark play="30">YouTube</mark> and Vimeo</li>
+            </ul>
+            <p>Morbi quis commodo odio aenean. Mattis vulputate enim nulla aliquet porttitor lacus luctus. Congue nisi vitae suscipit tellus mauris a diam. Magna fringilla urna porttitor rhoncus dolor purus non enim praesent. Convallis convallis tellus id interdum velit laoreet. Natoque penatibus et magnis dis. Donec ultrices tincidunt arcu non sodales neque. Duis tristique sollicitudin nibh sit amet commodo. Enim ut tellus elementum sagittis vitae et. Risus feugiat in ante metus dictum at tempor. Amet est placerat in egestas erat imperdiet sed euismod nisi. Ultrices in iaculis nunc sed augue lacus viverra vitae congue. Placerat orci nulla pellentesque dignissim enim.</p>          
+            <p>Vestibulum lectus mauris ultrices eros in cursus turpis. A scelerisque purus semper eget duis at tellus at. Vel elit scelerisque mauris pellentesque pulvinar pellentesque habitant morbi. Ac turpis egestas integer eget aliquet nibh praesent. Nunc sed velit dignissim sodales ut eu. Porta lorem mollis aliquam ut. Amet commodo nulla facilisi nullam. Cursus euismod quis viverra nibh. Mi tempus imperdiet nulla malesuada pellentesque elit eget gravida cum. Non nisi est sit amet facilisis magna etiam tempor orci. Non tellus orci ac auctor augue mauris augue neque gravida.</p>          
+            <p>Lectus vestibulum mattis ullamcorper velit sed ullamcorper. In iaculis nunc sed augue lacus viverra vitae congue. Ultrices tincidunt arcu non sodales neque. Nibh sit amet commodo nulla facilisi nullam vehicula ipsum. In nibh mauris cursus mattis molestie. Vitae aliquet nec ullamcorper sit amet risus nullam. Sed euismod nisi porta lorem. Bibendum at varius vel pharetra vel turpis nunc eget lorem. Purus non enim praesent elementum facilisis leo vel fringilla est. Lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt. Viverra suspendisse potenti nullam ac tortor. Risus commodo viverra maecenas accumsan lacus. Libero enim sed faucibus turpis. Pellentesque elit eget gravida cum sociis natoque. Lacus viverra vitae congue eu consequat. Faucibus pulvinar elementum integer enim neque volutpat. Congue mauris rhoncus aenean vel elit scelerisque mauris. Sit amet porttitor eget dolor morbi non. Consectetur lorem donec massa sapien. Etiam sit amet nisl purus in mollis nunc.</p>
+            <p>Eu augue ut lectus arcu. Aliquet lectus proin nibh nisl condimentum. Dignissim suspendisse in est ante in nibh mauris cursus. Viverra mauris in aliquam sem. Fringilla ut morbi tincidunt augue. Vel elit scelerisque mauris pellentesque pulvinar pellentesque. Molestie at elementum eu facilisis. Et malesuada fames ac turpis egestas sed tempus urna et. Viverra justo nec ultrices dui sapien. Est lorem ipsum dolor sit amet consectetur adipiscing. Pulvinar pellentesque habitant morbi tristique senectus. Egestas diam in arcu cursus euismod quis viverra nibh.</p>
+          </section>
+        </section>
+
+        <section>
+          <h2>Maps</h2>
+          <ve-map center="40.623931,14.50215" marker="40.623931,14.50215" right sticky caption="Map"></ve-map>
+          <p>Lorem ipsum dolor sit amet, <mark flyto="43.00527,6.39524,13">consectetur</mark> adipiscing elit, sed do <mark flyto="40.838,14.26008,15">eiusmod</mark> tempor incididunt ut labore et dolore magna aliqua. Sed euismod nisi porta lorem mollis. Tellus id interdum velit laoreet id donec. Molestie at elementum eu facilisis. Ultricies mi eget mauris pharetra. Viverra aliquet eget sit amet. Vel risus commodo viverra maecenas accumsan lacus vel facilisis volutpat. Porta nibh venenatis cras sed felis. Arcu odio ut sem nulla pharetra diam sit amet nisl. Scelerisque purus semper eget duis at tellus at urna. Consectetur adipiscing elit pellentesque habitant morbi tristique senectus et netus. Donec ac odio tempor orci.</p>
+          <p>Morbi quis commodo odio aenean. Mattis vulputate enim nulla aliquet porttitor lacus luctus. Congue nisi vitae suscipit tellus mauris a diam. Magna fringilla urna porttitor rhoncus dolor purus non enim praesent. Convallis convallis tellus id interdum velit laoreet. Natoque penatibus et magnis dis. Donec ultrices tincidunt arcu non sodales neque. Duis tristique sollicitudin nibh sit amet commodo. Enim ut tellus elementum sagittis vitae et. Risus feugiat in ante metus dictum at tempor. Amet est placerat in egestas erat imperdiet sed euismod nisi. Ultrices in iaculis nunc sed augue lacus viverra vitae congue. Placerat orci nulla pellentesque dignissim enim.</p>          
+          <p>Vestibulum lectus mauris ultrices eros in cursus turpis. A scelerisque purus semper eget duis at tellus at. Vel elit scelerisque mauris pellentesque pulvinar pellentesque habitant morbi. Ac turpis egestas integer eget aliquet nibh praesent. Nunc sed velit dignissim sodales ut eu. Porta lorem mollis aliquam ut. Amet commodo nulla facilisi nullam. Cursus euismod quis viverra nibh. Mi tempus imperdiet nulla malesuada pellentesque elit eget gravida cum. Non nisi est sit amet facilisis magna etiam tempor orci. Non tellus orci ac auctor augue mauris augue neque gravida.</p>          
+          <p>Lectus vestibulum mattis ullamcorper velit sed ullamcorper. In iaculis nunc sed augue lacus viverra vitae congue. Ultrices tincidunt arcu non sodales neque. Nibh sit amet commodo nulla facilisi nullam vehicula ipsum. In nibh mauris cursus mattis molestie. Vitae aliquet nec ullamcorper sit amet risus nullam. Sed euismod nisi porta lorem. Bibendum at varius vel pharetra vel turpis nunc eget lorem. Purus non enim praesent elementum facilisis leo vel fringilla est. Lectus vestibulum mattis ullamcorper velit sed ullamcorper morbi tincidunt. Viverra suspendisse potenti nullam ac tortor. Risus commodo viverra maecenas accumsan lacus. Libero enim sed faucibus turpis. Pellentesque elit eget gravida cum sociis natoque. Lacus viverra vitae congue eu consequat. Faucibus pulvinar elementum integer enim neque volutpat. Congue mauris rhoncus aenean vel elit scelerisque mauris. Sit amet porttitor eget dolor morbi non. Consectetur lorem donec massa sapien. Etiam sit amet nisl purus in mollis nunc.</p>
+          <p>Eu augue ut lectus arcu. Aliquet lectus proin nibh nisl condimentum. Dignissim suspendisse in est ante in nibh mauris cursus. Viverra mauris in aliquam sem. Fringilla ut morbi tincidunt augue. Vel elit scelerisque mauris pellentesque pulvinar pellentesque. Molestie at elementum eu facilisis. Et malesuada fames ac turpis egestas sed tempus urna et. Viverra justo nec ultrices dui sapien. Est lorem ipsum dolor sit amet consectetur adipiscing. Pulvinar pellentesque habitant morbi tristique senectus. Egestas diam in arcu cursus euismod quis viverra nibh.</p>
+        </section>
+
+        <section>
+          <h1>Diagrams</h1>
+
+          <ve-mermaid right caption="Test Diagram">
+            <pre>
+              sequenceDiagram
+              participant Alice
+              participant Bob
+              Alice->>John: Hello John, how are you?
+              loop Healthcheck
+                  John->>John: Fight against hypochondria
+              end
+              Note right of John: Rational thoughts <br/>prevail!
+              John-->>Alice: Great!
+              John->>Bob: How about you?
+              Bob-->>John: Jolly good!
+            </pre>
+          </ve-mermaid>
+        </section>
+    
+      </section>
+
+      <ve-footer>
+        <ul>
+          <li>Brought to you by: <a href="https://labs.jstor.org"><img src="https://raw.githubusercontent.com/jstor-labs/juncture-digital/c7d73fb/images/Labs_logo_knockout.svg"/></a></li>
+          <li><a href="/about"></a>About</a></li>
+          <li><a href="#"></a>Terms and conditions</a></li>
+        </ul>
+      </ve-footer>
+  
+    </main>
+
+    
+  </body>
+</html>

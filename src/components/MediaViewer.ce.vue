@@ -1,34 +1,26 @@
 <template>
-  <div ref="root" id="outer" :class="isEditable ? 'edit' : 'view'">
+  <div ref="root" v-bind="$attrs"></div>
+
+  <div id="outer" :class="annotationsEditable ? 'edit' : 'view'">
     <div id="inner">
       <div id="content">
         
         <!-- Single image -->
         <div v-if="type === 'image'" class="image-wrapper media-item">
           <div id="osd"></div>
-          <sl-popup placement="left-start" distance="8">
-            <sl-icon-button slot="anchor" class="info-icon" @click="onInfoClick" name="info-circle-fill" label="Media Info"></sl-icon-button>
-            <div class="manifest-popover">
-              <ve-manifest :manifest="manifests[0]"></ve-manifest>
-            </div>
-          </sl-popup>
+          <ve-manifest-popup :manifest="manifests[0].id"></ve-manifest-popup>
         </div>
         
         <!-- image Grid -->
         <div v-else-if="type === 'image-grid'" class="grid-wrapper">
           <template v-for="item, idx in iiifItemsList">
             
-            <ve-media-card v-if="props.cards" style="width:100%;" :manifest="item.manifest"></ve-media-card>
+            <ve-media-card v-if="props.cards" style="width:100%;height:100%;" :manifest="item.manifest"></ve-media-card>
 
             <div v-else>
               <div class="media-item">
                 <img :src="thumbnail(manifests[idx])" @click="toggleDialogId(item.manifest)"/>
-                <sl-popup placement="left" distance="8" arrow>
-                  <sl-icon-button slot="anchor" class="info-icon" @click="onInfoClick" name="info-circle-fill" label="Media Info"></sl-icon-button>
-                  <div class="manifest-popover">
-                    <ve-manifest :manifest="manifests[idx]"></ve-manifest>
-                  </div>
-                </sl-popup>
+                <ve-manifest-popup :manifest="manifests[idx].id"></ve-manifest-popup>
               </div>
             </div>
 
@@ -38,10 +30,7 @@
         <!-- image Compare -->
         <div v-else-if="type === 'image-compare'">
           <sl-image-comparer>
-            <img v-for="src, idx in scaledImages" :key="`img-${idx}`"
-              :slot="idx === 0 ? 'before' : 'after'"
-              :src="src"
-              :alt="label(manifests[idx])" />
+            <img v-for="src, idx in scaledImages" :key="`img-${idx}`" :slot="idx === 0 ? 'before' : 'after'" :src="src" :alt="label(manifests[idx])" />
           </sl-image-comparer>
         </div>
 
@@ -50,14 +39,7 @@
           <audio id="html5-player" controls>
             <source :src="src" :type="mime"/>
           </audio>
-            
-          <sl-popup placement="left-start" distance="8">
-            <sl-icon-button slot="anchor" class="info-icon" @click="onInfoClick" name="info-circle-fill" label="Media Info"></sl-icon-button>
-            <div class="manifest-popover">
-              <ve-manifest :manifest="manifests[0]"></ve-manifest>
-            </div>
-          </sl-popup>
-
+          <ve-manifest-popup :manifest="manifests[0].id"></ve-manifest-popup>
         </div>
 
         <!-- Video -->
@@ -69,22 +51,10 @@
 
           <template v-else>
 
-            <video
-              id="html5-player"
-              controls
-              playsinline
-              :muted="props.muted"
-              :autoplay="props.autoplay"
-            >
+            <video id="html5-player" controls playsinline :muted="props.muted" :autoplay="props.autoplay">
               <source :src="src" :type="mime"/>
             </video>
-            
-            <sl-popup placement="left-start" distance="8">
-              <sl-icon-button slot="anchor" class="info-icon" @click="onInfoClick" name="info-circle-fill" label="Media Info"></sl-icon-button>
-              <div class="manifest-popover">
-                <ve-manifest :manifest="manifests[0]"></ve-manifest>
-              </div>
-            </sl-popup>
+            <ve-manifest-popup :manifest="manifests[0].id"></ve-manifest-popup>
 
           </template>
 
@@ -95,10 +65,19 @@
       <ve-pager v-if="type === 'image' && totalImages > 1" :total="totalImages" :current="currentImage" @image-selected="onPageChange"></ve-pager>
 
       <div v-if="caption" id="caption-bar" @click="onInfoClick">
-        <div v-if="annotations.length > 0" class="button-icon-with-badge" @click="annotator.toggleVisibility">
-          <sl-icon-button id="annotations-icon" name="chat-square-text" label="Show annotations"></sl-icon-button>
-          <sl-badge variant="danger" pill>{{annotations.length}}</sl-badge>
-        </div>
+        <div id="annotations-icon" class="button-icon-with-badge" @click="toggleAnnotations">
+          
+          <template v-if="annotationsEditable" >
+            <sl-icon-button v-if="annotationsVisible" name="chat-square" label="Hide annotations"></sl-icon-button>
+            <sl-icon-button v-else name="pencil" label="Edit annotations"></sl-icon-button>
+            <sl-badge v-if="!annotationsVisible && annotations.length > 0" variant="danger" pill>{{annotations.length}}</sl-badge>
+          </template>
+          <template v-else-if="annotations.length > 0" >
+            <sl-icon-button v-if="annotationsVisible" name="chat-square" label="Hide annotations"></sl-icon-button>
+            <sl-icon-button v-else name="chat-square-text" label="Show annotations"></sl-icon-button>
+            <sl-badge v-if="!annotationsVisible" variant="danger" pill>{{annotations.length}}</sl-badge>
+          </template>
+       </div>
         <div class="label" v-html="caption"></div>
       </div>
 
@@ -132,18 +111,19 @@
   import '@shoelace-style/shoelace/dist/components/popup/popup'
 
   import type SLDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
+import { propsToAttrMap } from '@vue/shared'
 
   const props = defineProps({
     manifest: { type: String },
     src: { type: String },
     seq: { type: Number, default: 1 },
+    annoBase: { type: String },
     base: { type: String },
     region: { type: String },
     size: { type: String },
     rotation: { type: String },
     quality: { type: String },
     format: { type: String },
-    editable: { type: Boolean, default: false },
     options: { type: String },
     alt: { type: String },
     caption: { type: String },
@@ -177,8 +157,63 @@
   const root = ref<HTMLElement | null>(null)
   const shadowRoot = computed(() => root?.value?.parentNode)
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
+  const content = computed(() => shadowRoot.value?.querySelector('#content') as HTMLElement)
+  const inner = computed(() => shadowRoot.value?.querySelector('#inner') as HTMLElement)
 
-  watch(host, () => {
+  // watch(host, () => init())
+  onMounted(() => init())
+
+  const position:string = props.position || (props.right ? 'right' : props.left ? 'left' : 'full')
+  
+  function doLayout(defaultAspect:number=16/9) {
+
+    if (props.sticky) makeSticky(host.value)
+
+    aspect.value = itemInfo.value
+      ? Number((itemInfo.value.width/itemInfo.value.height).toFixed(4))
+      : defaultAspect
+
+    host.value.classList.add('ve-component')
+    host.value.classList.add(position)
+    if (position === 'full') {
+      host.value.style.width = '100%'
+    } else {
+      host.value.style.float = position
+      host.value.style.width = '50%'
+    }
+    host.value.style.width = window.getComputedStyle(host.value).width
+
+    if ( content.value) inner.value.style.width = props.width || '100%'
+    nextTick(() => {
+      width.value = parseInt(window.getComputedStyle(content.value).width.slice(0,-2))
+      content.value.style.width = `${width}px`
+      content.value.style.height = props.height || (
+      type.value === 'image-grid'
+        ? ''
+        : type.value === 'audio'
+          ? '80px'
+          : `${Math.round(width?.value / aspect.value)}px`)
+      height.value = parseInt(window.getComputedStyle(content.value).height.slice(0,-2))
+
+      // Scale height to 40% of window height if sticky
+      if (props.sticky && position === 'full' && !(props.width || props.height)) {
+        let maxStickyHeight = Math.round(window.innerHeight * .4)
+        let computedWidth = maxStickyHeight/aspect.value
+        console.log(`height=${height.value} maxStickyHeight=${maxStickyHeight} computedWidth=${computedWidth}`)
+        content.value.style.height = `${maxStickyHeight}px`
+        inner.value.style.width = `${computedWidth}px`
+      }
+
+      nextTick(() => {
+        width.value = parseInt(window.getComputedStyle(inner.value).width.slice(0,-2))
+        height.value = parseInt(window.getComputedStyle(content.value).height.slice(0,-2))
+        console.log(`position=${position} width=${width.value} height=${height.value} aspect=${aspect.value}`)
+      })
+    })
+
+  }
+
+  function init() {
     if (props.src) {
       if (props.src?.indexOf('http') === 0) {
         let srcUrl = new URL(props.src)
@@ -202,7 +237,8 @@
     } else {
       iiifItemsList.value = buildIiiFItemsList()
     }
-  })
+    listenForSlotChanges()
+  }
 
   function onInfoClick(evt:MouseEvent) {
     const popup:any = (evt.target as HTMLElement).parentElement
@@ -216,7 +252,7 @@
       let osdViewer = viewer.value
       setTimeout(() => setViewportCoords(), 100)
       osdViewer.addHandler('viewport-change', () => watchCoords())
-      if (props.base) annotator.value = new Annotator(osdViewer, props.base, isEditable.value)
+      if (props.base || props.annoBase) annotator.value = new Annotator(osdViewer, props.base || props.annoBase, annotationsEditable.value)
 
       let tiledImage = osdViewer.world.getItemAt(0)
       if (tiledImage) {
@@ -247,6 +283,18 @@
   /************ Image annotations ************/
   const annotator = ref<any>()
   const annotations = ref<any[]>([])
+  const annotationsVisible = ref(false)
+  const annotationsEditable = ref(window.location.pathname.split('/')[1] === 'editor')
+
+  function toggleAnnotations() {
+    annotationsVisible.value = !annotationsVisible.value
+  }
+  watch(annotationsVisible, () => {
+    annotator.value.setVisible(annotationsVisible.value)
+    let annoIcon = shadowRoot.value?.querySelector('#annotations-icon')
+    if (annotationsEditable.value && annotationsVisible.value) annoIcon?.classList.add('editable')
+    else annoIcon?.classList.remove('editable')
+  })
 
   /************ Image region coords ************/
   const coords = ref<string>()
@@ -321,11 +369,12 @@
   const tileSource:any = ref(null)
 
   watch(iiifItemsList, () => {
+    // console.log(toRaw(iiifItemsList.value))
     let manifestUrls = iiifItemsList.value.map(item => item.manifest)
     loadManifests(manifestUrls).then(resp => {
       manifests.value = resp
-      if (manifests.value.length > 1)
-      type.value = manifests.value.length === 2 ? 'image-compare' : 'image-grid'
+      if (props.grid) type.value = 'image-grid'
+      else if (manifests.value.length > 1) type.value = manifests.value.length === 2 ? 'image-compare' : 'image-grid'
     })
   })
 
@@ -333,13 +382,8 @@
   watch(manifest, () => {
     totalImages.value = imageCount(manifest.value)
     itemInfo.value = manifest.value ? getItemInfo(manifest.value, currentImage.value) : null
-    if (!caption.value && manifests.value.length === 1) caption.value = label(manifest.value)
   })
   watch(currentImage, () => itemInfo.value = manifest.value ? getItemInfo(manifest.value, currentImage.value) : null)
-
-  const isEditable = computed(() => {
-    return props.editable === true || window.location.pathname.indexOf('/editor') === 0
-  })
 
   const scaledImages = ref<string[]>([])
   
@@ -369,11 +413,31 @@
     addInteractionHandlers()
     nextTick(() => {
       if (type.value === 'image') loadImage()
-      else if (type.value === 'image-compare') scaledImages.value = scaleImages()
+      // else if (type.value === 'image-compare') scaledImages.value = scaleImages()
       else if (type.value === 'video' && iiifItemsList.value.length > 0) initializeHTML5Player()
-      else if (type.value === 'audio') initializeHTML5Player()      
+      else if (type.value === 'audio') initializeHTML5Player()   
+      if (!caption.value && type.value === 'image') caption.value = label(manifest.value)   
     })
   })
+
+  watch(height, () => {
+    if (type.value === 'image-compare') scaledImages.value = scaleImages()
+  })
+
+  function listenForSlotChanges() {
+    let slot = document.querySelector('ve-media > ul, ve-media > span')
+    if (slot) {
+      const callback = (mutationsList:any) => {
+        for (let mutation of mutationsList) {
+          if (mutation.type === 'childList' || mutation.type === 'characterData') {
+          }
+        }
+        iiifItemsList.value = buildIiiFItemsList()
+      }
+      const observer = new MutationObserver(callback)
+      observer.observe(slot, { childList: true, subtree: true, characterData: true })
+    }
+  }
 
   const iiifRegex = RegExp(/^(?<region>(pct:)?([0-9.]+,[0-9.]+,[0-9.]+,[0-9.]+)|full|square)(\/(?<size>full|max|((pct:)?[\d,.!]+)))?(\/(?<rotation>!?\d+))?(\/(?<quality>color|gray|bitonal|default))?(\/(?<format>jpg|tif|png|gif|jp2|pdf|webp))?/)
   const rotationRegex = RegExp(/^(?<mirror>!?)(?<rotation>0|90|180|270){1}/)
@@ -393,6 +457,13 @@
   function buildIiiFItemsList() {
     let itemsList = []
     let manifestUrl = props.manifest || props.src
+
+    if (manifestUrl) {
+      let parsedUrl = new URL(manifestUrl)
+      let domain = parsedUrl.hostname.replace(/^www\./, '')
+      if (youtubeDomains.has(domain) || vimeoDomains.has(domain)) manifestUrl = undefined
+    }
+
     if (manifestUrl) {
       let obj:any = {
         id: sha256(manifestUrl).slice(0,8),
@@ -441,6 +512,7 @@
         }
         return obj
       })
+      //Array.from(host.value.querySelectorAll('li') as HTMLUListElement[]).forEach(li => li.parentElement?.removeChild(li))
     }
     return itemsList
   }
@@ -449,6 +521,8 @@
     let targetWidth = width.value
     let targetHeight = height.value
     let targetAspectRatio = aspect.value
+
+    // console.log(`scaleImages: targetWidth=${targetWidth} targetHeight=${targetHeight} targetAspectRatio=${targetAspectRatio}`)
 
     return iiifItemsList.value.map((img, idx) => {
       
@@ -492,54 +566,6 @@
 
       return imgUrl
     })
-  }
-
-  const position:string = props.position || (props.right ? 'right' : props.left ? 'left' : 'full')
-  
-  function doLayout(defaultAspect:number=16/9) {
-    let outer = shadowRoot?.value?.querySelector('#outer') as HTMLElement
-    let inner = shadowRoot?.value?.querySelector('#inner') as HTMLElement
-    let contentContainer = shadowRoot?.value?.querySelector('#content') as HTMLElement
-
-    aspect.value = itemInfo.value
-      ? Number((itemInfo.value.width/itemInfo.value.height).toFixed(4))
-      : defaultAspect
-
-    outer.classList.add(position)
-    host.value.classList.add('ve-component')
-    host.value.classList.add(position)
-    if (props.sticky) makeSticky(host.value)
-
-    if (position === 'left' || position === 'right') {
-      outer.style.float = position
-      outer.style.width = '50%'
-      outer.style.margin = position === 'left' ? '0 12px 6px 0' : '0 0 6px 12px'
-    }
-    inner.style.width = props.width || '100%'
-
-    width.value = parseInt(window.getComputedStyle(contentContainer).width.slice(0,-2))   
-    
-    contentContainer.style.height = props.height || (
-      type.value === 'image-grid'
-        ? ''
-        : type.value === 'audio'
-          ? '80px'
-          : `${Math.round(width.value / aspect.value)}px`)
-  
-    height.value = parseInt(window.getComputedStyle(contentContainer).height.slice(0,-2)) || (aspect.value >= 1 ? Math.round(width.value / aspect.value) : Math.round(width.value * aspect.value))  
-    
-    if (position === 'full' && (props.compare || props.sticky)) {
-      let maxHeight = Math.round(window.innerHeight * .5)
-      if (height.value > maxHeight) {
-        height.value = maxHeight
-        contentContainer.style.height = `${height.value}px`
-        inner.style.width = `${Math.round(height.value / aspect.value)}px`
-        // contentContainer.style.margin = 'auto'
-        // contentContainer.classList.add('shadow')
-      }
-    }
-
-    // console.log(`doLayout: type=${type.value} position=${position} width=${width.value} height=${height.value} aspect=${aspect.value}`)
   }
 
   function loadImage() {
@@ -746,28 +772,22 @@
   // watch(mediaPlayer, () => monitor())
 
   function initializeYouTubePlayer() {
-    doLayout(1.39)
+    doLayout()
     let playerEl = shadowRoot.value?.querySelector('#youtube-placeholder') as HTMLElement
+    let width = parseInt(window.getComputedStyle(playerEl).width.slice(0,-2))
+    playerEl.style.height = `${width/16*9}px`
     let playerVars = {
       color: 'white',
       rel: 0,
       modestbranding: 1,
-      playsinline: 1,
-      autoplay: props.autoplay ? 1 : 0,
-      start: props.start
+      playsinline: 1
     }
     mediaPlayer = YouTubePlayer(
       playerEl, {
         videoId: videoId.value,
         playerVars
       })
-    mediaPlayer.on('ready', (evt:any) => {
-      let dimensions = evt.target.getSize()
-      // console.log(`youTube: width=${dimensions.width} height=${dimensions.height} aspect=${dimensions.width/dimensions.height}`)
-      doLayout(dimensions.width/dimensions.height)
-      // this.seekTo(this.start, this.autoplay ? this.end : this.start)
-      monitor()
-    })
+    mediaPlayer.on('ready', (evt:any) => monitor())
   }
 
   async function initializeVimeoPlayer() {
@@ -882,7 +902,7 @@
   }
 
   function seekTo(start:string, end:string) {
-    console.log(`seekTo: start=${start} end=${end}`)
+    // console.log(`seekTo: start=${start} end=${end}`)
     let startSecs = hmsToSeconds(start)
     let endSecs = end ? hmsToSeconds(end) + 1 : -1
     // console.log(`seekTo: start=${startSecs} end=${endSecs} isMuted=${isMuted.value} forceMuteOnPlay=${forceMuteOnPlay}`)
@@ -986,6 +1006,14 @@
     justify-items: center;
   }
 
+  #inner {
+    margin: auto
+  }
+
+  .image-wrapper {
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+  }
+
   #content {
     width: 100%;
   }
@@ -1023,12 +1051,15 @@
 
   .grid-wrapper {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(245px, 1fr));
-    grid-gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-auto-rows: 1fr;
+
+    grid-gap: 18px;
     align-items: flex-start;
     justify-items: center;
-    padding: 12px 0;
-    width: 100%
+    /* padding: 12px 0;
+    width: 100%;
+    margin: 24px 0; */
   }
 
   .grid-wrapper > .caption {
@@ -1047,7 +1078,7 @@
   .grid-wrapper img {
     border: 1px solid #ccc;
     box-shadow: 2px 2px 6px 0px  rgba(0,0,0,0.3);
-    width: 240px;
+    /* width: 240px; */
     max-width: 100%;
   }
 
@@ -1266,11 +1297,18 @@
     cursor: pointer;
   }
 
-  #annotations-icon::part(base) {
+  #annotations-icon {
+    position: relative;
+    cursor: pointer;
+  }
+
+  #annotations-icon sl-icon-button::part(base) {
     color: white;
     font-size: 1.2rem;
     padding: 3px;
   }
+
+
 
   .button-icon-with-badge {
     display: inline-block;
@@ -1297,6 +1335,21 @@
 
   #youtube-placeholder, #ve-video-vimeo {
     width: 100%;
+  }
+
+  ve-manifest-popup {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    visibility: hidden;
+    opacity: 0;
+    cursor: pointer;
+  }
+
+  .media-item:hover ve-manifest-popup {
+    visibility: visible;
+    opacity: 0.8;
+    transition: all .5s ease-in;
   }
 
 </style>

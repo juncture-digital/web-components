@@ -55,7 +55,7 @@
   
 <script setup lang="ts">
 
-  import { computed, ref, watch } from 'vue'
+  import { computed, onMounted, ref, watch } from 'vue'
   import exifr from 'exifr'
   import { GithubClient } from '../gh-utils'
   import yaml from 'js-yaml'
@@ -71,7 +71,7 @@
   defineExpose({ isOpen, show }) // Expose resource for external use
 
   const props = defineProps({
-    path: { type: String, required: true },
+    path: { type: String },
     show: { type: Boolean }
   })
 
@@ -100,7 +100,8 @@
   const shadowRoot = computed(() => root?.value?.parentNode)
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
 
-  watch(host, () => init())
+  // watch(host, () => init())
+  onMounted(() => init())
 
   watch(open, () => {
     if (dialog.value) dialog.value.open = open.value
@@ -117,7 +118,7 @@
   function init() {
     let token = window.localStorage.getItem('gh-auth-token') || window.localStorage.getItem('gh-unscoped-token')
     if (token) authToken.value = token
-    parseContentPath()
+    if (props.path) parseContentPath()
     dialog.value = shadowRoot.value?.querySelector('#add-media-resource-dialog') as SlDialog
     dialog.value.addEventListener('sl-hide', () => hideDialog())
     form.value = shadowRoot.value?.querySelector('#add-media-resource-form') as HTMLFormElement
@@ -131,13 +132,15 @@
   }
 
   function parseContentPath() {
-    let [_path, _args] = props.path.split(':').pop()?.split('?') || []
-    let qargs = _args ? Object.fromEntries(_args.split('&').map(arg => arg.split('='))) : {}
-    let _pathElems = _path.split('/').filter(pe => pe)
-    if (_pathElems.length > 0) acct.value = _pathElems[0]
-    if (_pathElems.length > 1) repo.value = _pathElems[1]
-    if (_pathElems.length > 2) pathElems.value = _pathElems.slice(2)
-    if (qargs.ref) branch.value = qargs.ref || 'main'
+    if (props.path) {
+      let [_path, _args] = props.path.split(':').pop()?.split('?') || []
+      let qargs = _args ? Object.fromEntries(_args.split('&').map(arg => arg.split('='))) : {}
+      let _pathElems = _path.split('/').filter(pe => pe)
+      if (_pathElems.length > 0) acct.value = _pathElems[0]
+      if (_pathElems.length > 1) repo.value = _pathElems[1]
+      if (_pathElems.length > 2) pathElems.value = _pathElems.slice(2)
+      if (qargs.ref) branch.value = qargs.ref || 'main'
+    }
   }
 
   function hideDialog() {

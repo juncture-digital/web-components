@@ -1,11 +1,39 @@
 export const iiifServer = 'https://iiif.juncture-digital.org'
 import { sha256 as __sha256 } from 'js-sha256'
 import md5 from 'js-md5'
+import tippy from 'tippy.js';
 
 export function isURL(str:string) { return /^https*:\/\//.test(str) }
 
 export function sha256(str: string) {
   return __sha256(str)
+}
+
+let tippyEntities:any
+export function initTippy(force=false) {
+  if (force) tippyEntities = null
+  // console.log(document.querySelectorAll('mark'))
+  let _entities = Array.from(document.querySelectorAll('mark')).filter(el =>
+    Array.from(el.attributes).find(attr => attr.name.toLowerCase() === 'qid' || isQID(attr.value))
+  )
+  if (!tippyEntities && _entities.length > 0) {
+    tippyEntities = _entities
+    // console.log(`initTippy: entities=${tippyEntities.length}`)
+    tippy(tippyEntities, {
+      // theme: 'light-border',
+      interactive: true,
+      allowHTML: true,
+      delay: [null, null],
+      onShow: (instance:any) => {
+        let qid = Array.from(instance.reference.attributes)
+          .filter((attr:any) => attr.name.toLowerCase() === 'qid' || isQID(attr.value))
+          .map((attr:any) => attr.value)
+          .flat().join()
+        if (qid)
+          instance.setContent(`<ve-entity-card qid="${qid}" style="width:600px;"></ve-entity-card>`)
+      }
+    })
+  }
 }
 
 export async function getManifest(manifestId: string, refresh: boolean=false) {
@@ -41,6 +69,7 @@ function observeNavbar(navbar:HTMLElement, target:HTMLElement) {
 export function makeSticky(el:HTMLElement) {
   el.classList.add('sticky')
   el.style.position = 'sticky'
+  el.style.marginTop = '6px'
   let stickyNavbar:any = document.querySelector('ve-navbar[sticky="true"]') as HTMLElement
   if (stickyNavbar) {
     observeNavbar(stickyNavbar, el)
@@ -202,7 +231,7 @@ export function top() {
 }
 
 function findStickyElems() {
-  // initTippy()
+  initTippy()
   let stickyElems = Array.from(document.querySelectorAll('.sticky'))
     // .filter(el => el.localName.toLowerCase() !== 've-content-selector')
   
@@ -249,7 +278,14 @@ function setTop(el:HTMLElement) {
 }
 
 let stickyElems:any[] = []
-const mutationObserver = new MutationObserver(() => stickyElems = findStickyElems())
+const mutationObserver = new MutationObserver((mutations) => {
+  let nonTippyMutations = mutations.filter(mut => {
+    let addedCt = Array.from(mut.addedNodes).filter((node:any) => node.id?.indexOf('tippy') < 0).length
+    let removedCt = Array.from(mut.removedNodes).filter((node:any) => node.id?.indexOf('tippy') < 0).length
+    return (addedCt + removedCt) > 0
+  })
+  if (!tippyEntities || nonTippyMutations.length > 0) stickyElems = findStickyElems()
+})
 mutationObserver.observe(document, { childList: true, subtree: true })
 
 let targets:any = {}
@@ -459,4 +495,24 @@ export async function imageDataUrl(url: string, region: any, dest: any): Promise
     }
     image.src = url
   })
+}
+
+let summaryText:any = {}
+export async function getSummaryText(qid: string, language='en') {
+  // console.log(`getSummaryText: qid=${qid} language=${language}`)
+  if (!summaryText[language]) summaryText[language] = {}
+  
+  if (!summaryText[language][qid] && entityData[qid] && entityData[qid].wikipedia) {
+    let wikiUrl = entityData[qid].wikipedia
+    let page: number = wikiUrl.replace(/\/w\//, '/wiki').split('/wiki/').pop()
+    let url = `https://${language}.wikipedia.org/api/rest_v1/page/summary/${page}`
+    let resp: any = await fetch(url)
+    if (resp.ok) {
+      resp = await resp.json()
+      summaryText[language][qid] = resp['extract_html'] || resp['extract']
+    }
+    return summaryText[language][qid]
+  } else {
+    return summaryText[language][qid]
+  }
 }

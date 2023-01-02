@@ -1,17 +1,19 @@
 <template>
 
-<div ref="root" class="content">
-  <div id="lat-lng-zoom" v-html="latLngZoom" @click="copyTextToClipboard(`${latLngZoom}`)"></div>
-  <input v-if="tileLayers && tileLayers.length > 0" id="opacity-slider" type="range" min="0" max="1" step="0.02" value="1" @nput="updateOpacity"/>
-  <div id="map" :style="{width: '100%', height: '100%'}"></div>
-  <div v-if="caption" id="caption" v-html="caption"></div>
+<div ref="root" :style="{width: '100%', height: '100%'}">
+  <div class="content">
+    <div id="lat-lng-zoom" v-html="latLngZoom" @click="copyTextToClipboard(`${latLngZoom}`)"></div>
+    <input v-if="tileLayers && tileLayers.length > 0" id="opacity-slider" type="range" min="0" max="1" step="0.02" value="1" @nput="updateOpacity"/>
+    <div id="map"></div>
+    <div v-if="caption" id="caption" v-html="caption"></div>
+  </div>
 </div>
 
 </template>
   
 <script setup lang="ts">
 
-  import { computed, ref, watch } from 'vue'
+  import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
   import L, { LatLng } from 'leaflet'
   import { isQID, getEntity, makeSticky } from '../utils'
 
@@ -43,8 +45,10 @@
   })
 
   const root = ref<HTMLElement | null>(null)
+  const host = computed(() => (root.value?.getRootNode() as any)?.host as HTMLElement)
+
   const shadowRoot = computed(() => root?.value?.parentNode)
-  const host = computed(() => (root.value?.getRootNode() as any)?.host)
+  const content = computed(() => shadowRoot.value?.querySelector('.content') as HTMLElement)
 
   const map = ref<L.Map>() 
   const opacitySlider = ref<HTMLInputElement | null>() 
@@ -56,7 +60,35 @@
 
   let zoom:number = 10
 
-  watch(host, () => init())
+  watch(host, () => nextTick(() => doLayout()))
+
+  onMounted(() => {
+    doLayout()
+  })
+
+  const position:string = props.right ? 'right' : props.left ? 'left' : 'full'
+
+  function doLayout() {
+    host.value.classList.add('ve-component')
+    host.value.classList.add(position)
+    if (position === 'full') {
+      host.value.style.width = '100%'
+    } else {
+      host.value.style.float = position
+      host.value.style.width = '50%'
+    }
+    host.value.style.width = window.getComputedStyle(host.value).width
+
+    if (props.sticky) makeSticky(host.value)
+    
+    content.value.style.width = props.width || '100%'
+    nextTick(() => {
+      let width = parseInt(window.getComputedStyle(content.value).width.slice(0,-2))
+      content.value.style.width = `${width}px`
+      content.value.style.height = `${width}px`
+      init()
+    })
+  }
 
   watch(layerObjs, async () => {
 
@@ -76,7 +108,7 @@
     let _geoJsonLayers = geoJSONs.map(geoJSON => L.geoJSON(geoJSON))
 
     if (locations.length > 0) _geoJsonLayers.push(toGeoJSON(locations))
-    layers.geoJsonLayers = _geoJsonLayers
+    geoJsonLayers.value = _geoJsonLayers
     
     layers.tileLayers = _layerObjs.map(ls => {
       if (ls.allmaps) {
@@ -93,7 +125,6 @@
   watch(map, () => updateMap())
 
   function init() {
-    host.value.classList.add('ve-component')
     entities.value = props.entities ? props.entities.split(/\s+/).filter(qid => qid) : []
     if (props.cards) {
       let locations: any[] = []
@@ -116,12 +147,11 @@
     getLayerStrings()
     listenForSlotChanges()
 
-    doLayout()
-    if (props.sticky) makeSticky(host.value)
     const resizeObserver = new ResizeObserver(() => initMap())
     let mapEl = shadowRoot.value?.querySelector('#map')
     if (mapEl) resizeObserver.observe(mapEl)
     initMap()
+    addInteractionHandlers()
   }
 
   async function initMap() {
@@ -145,6 +175,10 @@
     if (map.value) {
       map.value.off()
       map.value.remove()
+      let mapEl = shadowRoot.value?.querySelector('#map') as HTMLElement
+      let newMapEl = document.createElement('div')
+      newMapEl.id = 'map'
+      mapEl.replaceWith(newMapEl)
     }
     let mapEl = shadowRoot.value?.querySelector('#map') as HTMLElement
     if (mapEl) {
@@ -278,48 +312,6 @@
     return new LatLng(lat, lng)
   }
 
-  function doLayout() {
-    let position = props.right ? 'right' : props.left ? 'left' : 'full'
-
-    console.log(`ve-map: width=${props.width} height=${props.height} position=${position} sticky=${props.sticky}`)
-    
-    const floatMargin = 12
-
-    let width, height
-    if (position === 'full') { // Full-width layout
-      host.value.classList.add('full')
-      host.value.style.width = props.width || '100%'
-      let elWidth = parseInt(window.getComputedStyle(host.value).width.slice(0,-2))
-      // console.log(`elWidth=${elWidth}`)
-      if (props.sticky) {
-        let maxHeight = Math.round(window.innerHeight * .4)
-        // console.log(`maxHeight=${maxHeight}`)
-        width = elWidth
-        height = width > maxHeight ? maxHeight : width
-      } else {
-        width = parseInt(window.getComputedStyle(host.value).width.slice(0,-2))
-        height = width
-      }     
-      host.value.style.width = '100%'
-
-    } else { // Half-width layout
-      host.value.style.float = position
-      host.value.classList.add(position)
-      host.value.style.width = props.width || '50%'
-      width = parseInt(window.getComputedStyle(host.value).width.slice(0,-2))
-      height = width
-    }
-    host.value.style.height = `${height + 12}px`
-
-    if (props.sticky) host.value.style.paddingTop = '6px'
-    
-    let content: HTMLElement = host.value.shadowRoot.querySelector('.content')
-    if (position === 'left') content.style.marginRight = `${floatMargin}px`
-    else if (position === 'right') content.style.marginLeft = `${floatMargin}px`
-    content.style.width = `${width}px`
-    content.style.height = `${height}px`
-  }
-
   function copyTextToClipboard(text: string) {
     console.log(`copyTextToClipboard=${text}`)
     if (navigator.clipboard) navigator.clipboard.writeText(text)
@@ -327,6 +319,55 @@
 
   function updateOpacity() {
     if (tileLayers.value && opacitySlider.value) tileLayers.value[0].setOpacity(parseFloat(opacitySlider.value.value))
+  }
+
+  const flytoRegex = RegExp(/^(?<lat>[\d.]+),(?<lng>[\d.]+),?(?<zoom>[\d.]+)?$/)
+  function isFlyto(attr:Attr) {
+    let name = attr.name.toLowerCase()
+    let value = attr.value
+    if ((name === 'enter' || name === 'exit') && value.indexOf('|') > 0) [name, value] = value.split('|')
+    return ['zoom', 'zoomto'].indexOf(name.toLowerCase()) === 0 || flytoRegex.test(value)
+  }
+
+  function addInteractionHandlers() {
+    let markEls = Array.from(document.querySelectorAll('mark')) as HTMLElement[]
+    markEls.forEach(mark => {
+      Array.from(mark.attributes).forEach(attr => {
+        if (isFlyto(attr)) {
+          let veMap = findVeMap(mark.parentElement)
+          if (veMap) {
+            mark.classList.add('flyto')
+            mark.addEventListener('click', () => flyto(attr.value) )
+          }
+        }
+      })
+    })
+  }
+
+  function findVeMap(el: any) {
+    let sib = el.previousSibling
+    while (sib) {
+      if (sib.nodeName === 'VE-MAP') return sib === host.value ? sib : null
+      sib = sib.previousSibling
+    }
+    while (el.parentElement && el.tagName !== 'MAIN') {
+      el = el.parentElement
+      let veMap = el.querySelector(':scope > ve-map')
+      if (veMap) return veMap === host.value ? veMap : null
+    }
+  }
+
+  function flyto(arg: string) {
+    arg = arg.replace(/^flyto\|/i,'')
+    const match = arg?.match(flytoRegex)
+    if (match) {
+      let lat = match.groups?.lat ? parseFloat(match.groups.lat) : 0
+      let lng = match.groups?.lng ? parseFloat(match.groups.lng) : 0
+      let zoom = match.groups?.zoom ? parseFloat(match?.groups?.zoom) : 10
+      console.log(`flyto: ${lat},${lng},${zoom}`)
+      let center = new L.LatLng(lat, lng)
+      map.value?.flyTo(center, zoom)
+    }
   }
 
 </script>
@@ -347,20 +388,23 @@
   }
 
   .content {
-    display: flex;
-    flex-direction: column;
+    margin: auto;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   }
 
   #map {
     border: 1px solid #ccc;
+    width: 100%;
+    height: 100%;
   }
+  
   #caption {
     display: flex;
     align-items: center;
     font-family: sans-serif;
     width: 100%;
-    background: rgba(0, 0, 0, 0.7);
+    /* background: rgba(0, 0, 0, 0.7); */
+    background-color: #555;
     color: white;
     padding: 4px 6px;
     bottom: 0;
@@ -389,14 +433,15 @@
     z-index: 2;
     opacity: 0;
     text-align: right;
-    }
-    #lat-lng-zoom:hover {
-    visibility: visible;
-    opacity: 1;
-    transition: all 0.3s ease-in;
-    cursor: copy;
-    z-index: 1000;
-    }
+  }
+
+  #lat-lng-zoom:hover {
+  visibility: visible;
+  opacity: 1;
+  transition: all 0.3s ease-in;
+  cursor: copy;
+  z-index: 1000;
+  }
 
   .card {
     display: grid;
@@ -406,17 +451,17 @@
     padding: 0;
     }
     
-    .card p {
+  .card p {
     border: none;
     }
     
-    .card-image {  /* image */
+  .card-image {  /* image */
     grid-area: 1 / 1 / 2 / 2;
     width: 100%;
     height: 190px;
     }
     
-    .card-title {  /* title */
+  .card-title {  /* title */
     grid-area: 2 / 1 / 3 / 2;
     font-weight: bold;
     font-size: 1.5rem;
@@ -425,7 +470,7 @@
     text-decoration: none;
     }
     
-    .card-metadata {  /* metadata list */
+  .card-metadata {  /* metadata list */
     grid-area: 3 / 1 / 4 / 2;
     list-style: none;
     padding: .2rem .5rem;
@@ -434,7 +479,7 @@
     font-weight: 400;
     }
     
-    .card-abstract{  /* abstract */
+  .card-abstract{  /* abstract */
     grid-area: 4 / 1 / 5 / 2;
     align-self: flex-end;
     height: 110px;

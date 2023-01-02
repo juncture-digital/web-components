@@ -4,28 +4,47 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Vite App</title>
-    <link rel="stylesheet" href="https://unpkg.com/@rdsnyderjr/juncture@0.0.1/dist/assets/css/index.css">
+    <title>Juncture Demo</title>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900" />
+    <!-- <link href="https://unpkg.com/juncture-digital-vue3/dist/assets/css/index.css" type="text/css" rel="stylesheet" > -->
+    <style>
+      main {
+        width: 880px !important;
+      }
+      .sticky-div {
+        width: 100%;
+        background-color: white;
+
+      }
+      .content {
+        width: 50%;
+        height: 300px;
+        margin: auto;
+        border: 1px solid red;
+      }
+    </style>
   </head>
 
-  <body>
+  <body style="opacity:0;">
+
     <main>
+      <section>
 
-      <ve-media-beta
-        manifest="https://iiif.harvardartmuseums.org/manifests/object/299843" 
-        idx="3"
-        base="rsnyder/essays/anno-test"
-      ></ve-media-beta>
+        <ve-media src="wc:Murga_La_Corre_y_Vuela_en_Encuentro_de_Murgas_de_Mujeres_y_Mujeres_Murguistas_edited.jpg" width="80%" sticky></ve-media>
+      <!--
+      -->
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore xxx smagna aliqua. Sed vulputate odio ut enim blandit volutpat maecenas volutpat. Egestas tellus rutrum tellus pellentesque. Et netus et malesuada fames ac turpis egestas sed. Aenean vel elit scelerisque mauris. In fermentum posuere urna nec tincidunt. Tincidunt lobortis feugiat vivamus at augue eget arcu. Nisi est sit amet facilisis magna etiam. Vitae tortor condimentum lacinia quis vel. Arcu dictum varius duis at. Mattis vulputate enim nulla aliquet.</p>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore xxx smagna aliqua. Sed vulputate odio ut enim blandit volutpat maecenas volutpat. Egestas tellus rutrum tellus pellentesque. Et netus et malesuada fames ac turpis egestas sed. Aenean vel elit scelerisque mauris. In fermentum posuere urna nec tincidunt. Tincidunt lobortis feugiat vivamus at augue eget arcu. Nisi est sit amet facilisis magna etiam. Vitae tortor condimentum lacinia quis vel. Arcu dictum varius duis at. Mattis vulputate enim nulla aliquet.</p>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore xxx smagna aliqua. Sed vulputate odio ut enim blandit volutpat maecenas volutpat. Egestas tellus rutrum tellus pellentesque. Et netus et malesuada fames ac turpis egestas sed. Aenean vel elit scelerisque mauris. In fermentum posuere urna nec tincidunt. Tincidunt lobortis feugiat vivamus at augue eget arcu. Nisi est sit amet facilisis magna etiam. Vitae tortor condimentum lacinia quis vel. Arcu dictum varius duis at. Mattis vulputate enim nulla aliquet.</p>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore xxx smagna aliqua. Sed vulputate odio ut enim blandit volutpat maecenas volutpat. Egestas tellus rutrum tellus pellentesque. Et netus et malesuada fames ac turpis egestas sed. Aenean vel elit scelerisque mauris. In fermentum posuere urna nec tincidunt. Tincidunt lobortis feugiat vivamus at augue eget arcu. Nisi est sit amet facilisis magna etiam. Vitae tortor condimentum lacinia quis vel. Arcu dictum varius duis at. Mattis vulputate enim nulla aliquet.</p>
+      <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore xxx smagna aliqua. Sed vulputate odio ut enim blandit volutpat maecenas volutpat. Egestas tellus rutrum tellus pellentesque. Et netus et malesuada fames ac turpis egestas sed. Aenean vel elit scelerisque mauris. In fermentum posuere urna nec tincidunt. Tincidunt lobortis feugiat vivamus at augue eget arcu. Nisi est sit amet facilisis magna etiam. Vitae tortor condimentum lacinia quis vel. Arcu dictum varius duis at. Mattis vulputate enim nulla aliquet.</p>
 
-      <ve-media-beta
-        manifest="https://iiif.juncture-digital.org/gh:rsnyder/media/italy/amalfi-coast/Amalfi_Coast.jpg/manifest.json" 
-        base="rsnyder/essays/anno-test"
-        editable
-      ></ve-media-beta>
+    </section>
+  </main>
 
-    </main>
-
-    <script src="https://unpkg.com/juncture-digital/dist/juncture-digital/juncture-digital.esm.js" type="module"></script>
+    <script src="http://localhost:5173/src/main.ts" type="module"></script>
+    <!--
     <script src="https://unpkg.com/juncture-digital-vue3/dist/assets/js" type="module"></script>
-    </body>
+    -->
+  </body>
 </html>

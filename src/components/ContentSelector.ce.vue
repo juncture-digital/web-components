@@ -168,7 +168,7 @@
 
 <script setup lang="ts">
 
-  import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
+  import { computed, onMounted, onUpdated, ref, toRaw, watch } from 'vue'
 
   import { makeSticky } from '../utils'
   import { GithubClient } from '../gh-utils'
@@ -198,7 +198,7 @@
 
   const emit = defineEmits(['accessChanged', 'addMediaResource', 'contentPathChanged'])
 
-  defineExpose({ getFile, putFile, repositoryIsWriteable })
+  defineExpose({ getDirList, getFile, putFile, repositoryIsWriteable })
 
   const igmore = new Set(['config.yaml', 'CNAME', 'index.html', '404.html', '.nojekyll'])
 
@@ -209,9 +209,8 @@
 
   const contentPath = ref<string>('')
   watch(contentPath, () => {
-      console.log(`ve-content-selector.contentPath=${contentPath.value}`)
-      console.log(toRaw(contentPath.value))
-      emit('contentPathChanged', contentPath.value)
+    console.log(`contentPath=${toRaw(contentPath.value)}`)
+    emit('contentPathChanged', contentPath.value)
   })
 
   const root = ref<HTMLElement | null>(null)
@@ -249,6 +248,8 @@
   })
 
   watch(githubClient, async () => {
+    // console.log('githubClient', props.contentPath)
+    // if (props.contentPath) parseContentPath(props.contentPath)
     parseContentPath()
     if (isLoggedIn.value) {
       accts.value = await getAccounts()
@@ -288,7 +289,7 @@
   const branches = ref<any[]>([])
   const branch = ref('')
   watch(repo, () => {
-    path.value = []
+    // path.value = []
     branch.value = ''
     if (repo.value) {
       if (isLoggedIn.value) {
@@ -303,11 +304,12 @@
 
   let defaultBranch: string
   watch(branches, async () => {
-    defaultBranch = await githubClient.value.defaultBranch(acct.value, repo.value)
-    branch.value = defaultBranch
+    if (!defaultBranch && acct.value && repo.value) defaultBranch = await githubClient.value.defaultBranch(acct.value, repo.value)
+    if (defaultBranch) branch.value = defaultBranch
   })
 
   watch(branch, () => {
+    // console.log(`branch branch=${toRaw(branch.value)} path=${toRaw(path.value)}`)
     if (branch.value && path.value) {
       if (pathIsDirectory) updateDirList().then(_ => setContentPath())
     }
@@ -315,6 +317,7 @@
 
   const path = ref<string[]>([])
   watch(path, () => {
+    // console.log(`path branch=${toRaw(branch.value)} path=${toRaw(path.value)}`)
     if (branch.value) updateDirList().then(_ => setContentPath())
   })
 
@@ -324,16 +327,21 @@
     pathIsDirectory = path.value.length === 0 || dirList.value.length > 0 
   })
 
+  watch(props, () => {
+    // console.log('props', props)
+    // if (props.contentPath) parseContentPath(props.contentPath)
+  })
 
   function pathIsMarkdownFile() {
     return path.value.length > 0 && /\.md$/.test(path.value[path.value.length -1])
   }
 
   onMounted(() => {
+    // console.log('onMounted', props)
     getAuthToken()
     window.addEventListener('storage', () =>  getAuthToken() )
     drawer = shadowRoot?.value?.querySelector('.workspace-selector')
-  })    
+  }) 
 
   // Ensure 'essays' repository exists
   let createSubmitted: boolean = false
@@ -360,20 +368,23 @@
     waitForRepoInit()
   }
 
-  function parseContentPath() {
-    if (contentPath.value) {
-      let [_path, _args] = contentPath.value.split(':').pop()?.split('?') || []
+  function parseContentPath(_contentPath:string='') {
+    _contentPath = _contentPath || props.contentPath || ''
+    // console.log('parseContentPath', _contentPath)
+    if (_contentPath) {
+      let [_path, _args] = _contentPath.split(':').pop()?.split('?') || []
       let qargs = _args ? Object.fromEntries(_args.split('&').map(arg => arg.split('='))) : {}
       let pathElems = _path.split('/').filter(pe => pe)
       if (pathElems.length > 0) acct.value = pathElems[0]
       if (pathElems.length > 1) repo.value = pathElems[1]
       if (pathElems.length > 2) path.value = pathElems.slice(2)
-      if (qargs.ref) branch.value = qargs.ref
-      // console.log(`contentPath: acct=${acct.value} repo=${repo.value} ref=${branch.value} path=${path.value}`)
+      if (qargs.ref) branch.value = qargs.ref || 'main'
+      // console.log(`parseContentPath: acct=${acct.value} repo=${repo.value} ref=${branch.value} path=${path.value}`)
     }
   }
 
   function setContentPath() {
+    // console.log('setContentPath', acct.value, repo.value, path.value)
     if (acct.value && repo.value) {
       let _contentPath = `gh:${acct.value}/${repo.value}`
       if (path.value.length > 0) _contentPath += `/${path.value.join('/')}`
@@ -416,7 +427,6 @@
     //if (dirList.length === 0 && path.length > 0) dirList = await githubClient.dirlist(acct, repo, path.slice(0,-1).join('/'), ref)
     let dirs = _dirList.filter(item => item.type === 'dir')
     let files = _dirList.filter(item => item.type === 'file' && !igmore.has(item.name))
-
     if (useReadme && files.find(file => file.name === 'README.md') && dirs.length === 0) {
       path.value = [...path.value, `README.md`]
     } else {
@@ -425,12 +435,11 @@
 
   }
 
-  async function getDirList() {
-    return dirList
+  function getDirList() {
+    return dirList.value
   }
 
   function repositoryIsWriteable() {
-    console.log(`repositoryIsWriteable=${userCanUpdateRepo.value}`)
     return userCanUpdateRepo.value
   }
 
@@ -483,7 +492,6 @@
   }
 
   function onAddFileClicked(evt:Event) {
-    console.log('onAddFileClicked')
     if (props.mode === 'essays') showAddFileDialog()
     else emitAddEvent(evt)
   }
@@ -571,7 +579,6 @@
   }
 
   function emitAddEvent(evt:Event) {
-    console.log('emitAddEvent')
     emit('addMediaResource', evt)
   }
 
