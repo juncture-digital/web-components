@@ -1,2 +1,2 @@
-# juncture-vue-wc
+# Juncture Web Components
 

@@ -3,7 +3,7 @@ import { defineCustomElement } from 'vue'
 
 import '@shoelace-style/shoelace/dist/themes/light.css'
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js'
-setBasePath('https://juncture-digital.github.io/vue-wc/src')
+setBasePath('https://juncture-digital.github.io/web-components/src')
 
 import AddMediaResourceDialog from './components/AddMediaResourceDialog.ce.vue'
 import Contact from './components/Contact.ce.vue'
@@ -53,7 +53,7 @@ function init() {
 (window as any).previewInit = function(){ console.log('TODO: previewInit')}
 
 // Dynamically load css if needed
-let cssSrc = 'https://unpkg.com/juncture-digital-vue3/dist/assets/css/index.css'
+let cssSrc = 'https://unpkg.com/juncture-digital/dist/assets/css/index.css'
 if (Array.from(document.querySelectorAll(`link[src="${cssSrc}"], style[data-vite-dev-id$="/src/style.css"]`)).length === 0) {
 	let linkEl = document.createElement('link')
 	linkEl.href = cssSrc
