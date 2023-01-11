@@ -28,6 +28,7 @@ ve-media-card {
 
 section {
   display: flow-root;
+  position: relative;
 }
 
 main > section {

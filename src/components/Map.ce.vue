@@ -63,6 +63,7 @@
   watch(host, () => nextTick(() => doLayout()))
 
   onMounted(() => {
+    evalProps()
     doLayout()
   })
 
@@ -90,8 +91,34 @@
     })
   }
 
-  watch(layerObjs, async () => {
+  watch(props, () => evalProps())
 
+  function evalProps() {
+    if (props.cards) parseCards()
+  }
+
+  function parseCards() {
+    let cardLocations: any[] = []
+    if (props.cards) {
+      let cardsEl = document.getElementById(props.cards)
+      if (cardsEl) {
+        cardsEl.querySelectorAll('.card').forEach(async card => {
+          let coords:string = Array.from(card.querySelectorAll('li'))
+            .filter(li => li.innerHTML.trim().indexOf('coords:') === 0)
+            .map(coordsEl => coordsEl.innerHTML.split(':')[1].trim())
+            .pop() || ''
+          if (coords) {
+            let metadataUl = card.querySelector('ul.card-metadata')
+            if (metadataUl) metadataUl.parentElement?.removeChild(metadataUl)
+            cardLocations.push({coords: latLng(coords), caption: card.innerHTML})
+          }
+        })
+      }
+    }
+    if (cardLocations.length > 0) layerObjs.value = [...layerObjs.value, ...cardLocations]
+  }
+
+  watch(layerObjs, async () => {
     let _layerObjs = await Promise.all(layerObjs.value)
     let layers: any = {}
     let locations = _layerObjs.filter(item => item.coords || item.qid)
@@ -142,7 +169,8 @@
           }
         })
       }
-      layerObjs.value = locations
+      // layerObjs.value = locations
+      layerObjs.value = [...layerObjs.value, ...locations]
     }
     getLayerStrings()
     listenForSlotChanges()
@@ -246,7 +274,8 @@
   function getLayerStrings() {
     let _layerObjs = Array.from(host.value.querySelectorAll('li')).map((item:any) => toObj(item.firstChild.textContent))
     if (props.marker) _layerObjs.push(toObj(props.marker))
-    layerObjs.value = _layerObjs
+    // layerObjs.value = _layerObjs
+    layerObjs.value = [...layerObjs.value, ..._layerObjs]
   }
 
   function listenForSlotChanges() {

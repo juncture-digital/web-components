@@ -50,14 +50,17 @@
     nextTick(() => navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML)
   })
 
-  function applyProps() {    
+  watch(props, () => applyProps())
+
+  function applyProps() {
     shadow.value.style.height = `${props.height}px`
     if (props.background) host.value.style.backgroundColor = props.background
-    if (props.alpha) host.value.style.background = `rgba(0, 0, 0, ${props.alpha})`
     if (props.offset) shadow.value.style.marginTop = `-${props.offset}px`
     if (props.sticky) {
       host.value.style.position = 'sticky'
       host.value.style.top = '0'
+      if (props.alpha) host.value.style.background = `rgba(0, 0, 0, ${props.alpha})`
+      host.value.style.marginTop = `-${props.offset}px`
     } 
     if (props.label) {
       let titleEl = document.querySelector('title')
