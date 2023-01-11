@@ -65,7 +65,7 @@
       <ve-pager v-if="type === 'image' && totalImages > 1" :total="totalImages" :current="currentImage" @image-selected="onPageChange"></ve-pager>
 
       <div v-if="caption" id="caption-bar" @click="onInfoClick">
-        <div id="annotations-icon" class="button-icon-with-badge" @click="toggleAnnotations">
+        <div v-if="type === 'image'" id="annotations-icon" class="button-icon-with-badge" @click="toggleAnnotations">
           
           <template v-if="annotationsEditable" >
             <sl-icon-button v-if="annotationsVisible" name="chat-square" label="Hide annotations"></sl-icon-button>
@@ -198,9 +198,11 @@ import { propsToAttrMap } from '@vue/shared'
       // Scale height to 40% of window height if sticky
       if (props.sticky && position === 'full' && !(props.width || props.height)) {
         let maxStickyHeight = Math.round(window.innerHeight * .4)
-        let computedWidth = maxStickyHeight/aspect.value
-        console.log(`height=${height.value} maxStickyHeight=${maxStickyHeight} computedWidth=${computedWidth}`)
-        content.value.style.height = `${maxStickyHeight}px`
+        let computedWidth = Math.ceil(maxStickyHeight * aspect.value)
+        console.log(`type=${type.value} height=${height.value} maxStickyHeight=${maxStickyHeight} computedWidth=${computedWidth}`)
+        
+        if (type.value === 'image') content.value.style.height = `${maxStickyHeight}px`
+        if (type.value !== 'image-grid') inner.value.classList.add('drop-shadow')
         inner.value.style.width = `${computedWidth}px`
       }
 
@@ -455,6 +457,7 @@ import { propsToAttrMap } from '@vue/shared'
   }
 
   function buildIiiFItemsList() {
+    console.log('buildIiiFItemsList')
     let itemsList = []
     let manifestUrl = props.manifest || props.src
 
@@ -478,7 +481,9 @@ import { propsToAttrMap } from '@vue/shared'
       obj.fit = props.fit
       itemsList.push(obj)
     } else {
-      itemsList = Array.from(host.value.querySelectorAll('li') as HTMLUListElement[]).map(li => {
+      itemsList = Array.from(host.value.querySelectorAll('li') as HTMLUListElement[])
+        .filter(li => li.innerHTML)
+        .map(li => {
         let tokens:string[] = []
         let s = li.textContent?.replace(/“/,'"').replace(/”/,'"').replace(/’/,"'").trim()
         s?.match(/[^\s"]+|"([^"]*)"/gmi)?.forEach(token => {
@@ -1006,11 +1011,15 @@ import { propsToAttrMap } from '@vue/shared'
     justify-items: center;
   }
 
-  #inner {
-    margin: auto
+  #outer {
+    padding-bottom: 12px;
   }
 
-  .image-wrapper {
+  #inner {
+    margin: auto;
+  }
+
+  .drop-shadow, .image-wrapper {
     box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   }
 

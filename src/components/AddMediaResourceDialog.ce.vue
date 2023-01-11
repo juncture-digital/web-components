@@ -115,6 +115,14 @@
     githubClient.value = new GithubClient(authToken.value)
   })
 
+  watch(pathElems, () => {
+    if (folder.value) folder.value.value = pathElems.value.join('/')
+  })
+
+  watch(props, () => {
+    parseContentPath()
+  })
+
   function init() {
     let token = window.localStorage.getItem('gh-auth-token') || window.localStorage.getItem('gh-unscoped-token')
     if (token) authToken.value = token

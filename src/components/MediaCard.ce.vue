@@ -32,7 +32,7 @@
 
     <div class="card-links" style="margin-top:auto;">
       <img src="https://juncture-digital.github.io/web-app/static/iiif.png" class="draggable-iiif" alt="IIIF manifest icon"
-        @click="copyTextToClipboard(manifest.id)" 
+        @click="copyTextToClipboard(manifest)" 
         @dragstart="onIiifDrag"
       />
     </div>
@@ -43,7 +43,7 @@
     </sl-dialog>
 
     <sl-dialog ref="mapDialog" id="map-dialog" no-header style="--body-spacing:0;--footer-spacing:0;">
-      <ve-map v-if="showMapDialog" center="40.623931,14.50215" marker="40.623931,14.50215"></ve-map>
+      <ve-map v-if="showMapDialog" :center="location" :marker="location"></ve-map>
       <sl-button slot="footer" class="close" @click="toggleShowMapDialog" variant="primary">Close</sl-button>
     </sl-dialog>
 
@@ -79,6 +79,12 @@
   // watch(dimensions, () => console.log(toRaw(dimensions.value)))
 
   const metadata = computed(() => manifest.value && _getMetadata())
+
+  const location = computed(() => {
+    let locMd = metadata.value.find((md:any) => md.label.toLowerCase() === 'location')
+    return locMd ? `${locMd.value}` : null
+  })
+
   
   onUpdated(() => {
     getManifest(props.manifest).then(resp => manifest.value = resp)
@@ -134,6 +140,7 @@
   watch(showMapDialog, () => { showMapDialog.value ? mapDialog.value?.show() : mapDialog.value?.hide() })
 
   function toggleShowMapDialog() {
+    console.log()
     showMapDialog.value = !showMapDialog.value
   }
 

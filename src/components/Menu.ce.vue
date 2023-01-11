@@ -37,6 +37,7 @@
 
   const clientIds:any = {
   'beta.juncture-digital.org': 'f30ce4168a0bb95ecaa3',
+  'dev.juncture-digital.org': 'bb290b5a738cb6fe31c7',
   'tools.juncture-digital.org': '0b40086fe912d97c03e6'
   }
 
@@ -104,6 +105,7 @@
       let url = isDev
         ? `http://${window.location.hostname}:8000/gh-token?code=${code}&hostname=${window.location.hostname}`
         : `https://api.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
+      console.log('token url:', url)
       fetch(url)
         .then(resp => resp.text())
         .then(authToken => {
@@ -183,6 +185,7 @@
       : clientIds[location.hostname] !== undefined
         ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${location.href}`
         : null
+    console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
     if (href) window.location.href = href
   }
 
@@ -203,7 +206,7 @@
   }
 
   function menuItemSelected(item: any) {
-    // console.log('menuItemSelected', item)
+    console.log('menuItemSelected', item)
     let action = item.href ? item.href.split('/').pop().toLowerCase() : null
     if ((action.indexOf('contact') === 0 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
       showContactForm()
@@ -219,7 +222,7 @@
     } else if (item.href) {
       if (item.newWindow) {
         if (externalWindow) { externalWindow.close() }
-        externalWindow = window.open(item.href, '_blank', 'toolbar=yes,location=yes,left=0,top=0,width=1000,height=1200,scrollbars=yes,status=yes')
+        externalWindow = window.open(item.href, '_blank', 'toolbar=yes,location=yes,left=0,top=0,width=1024,height=1200,scrollbars=yes,status=yes')
       } else {
         location.href = item.href
       }

@@ -7,6 +7,12 @@
       <div class="label" v-html="parsed?.label"></div>
       <div v-if="parsed?.summary" class="summary" v-html="parsed?.summary"></div>
       <a v-if="parsed?.rights" :href="parsed?.rights" v-html="licenseBadge"/>
+      <div class="links">
+        <img src="https://juncture-digital.github.io/web-app/static/iiif.png" class="iiif" alt="IIIF manifest icon"
+          @click="copyTextToClipboard(manifest)" 
+        />
+      </div>
+
     </div>
     
     <div class="detail">
@@ -25,11 +31,16 @@
         </ul>
       </div>
 
+      <div v-if="parsed?.requiredStatement" class="requiredStatement">
+        <span class="value" v-html="parsed.requiredStatement.value"></span>
+      </div>
+  
       <div v-if="parsed?.rights" class="rights">
-        <span class="label">rights</span>
+        <span class="label">Reuse rights</span>
         <a class="value" :href="parsed.rights" v-html="parsed.rights"></a>
       </div>
 
+      <!--
       <div v-if="parsed?.metadata" class="metadata">
         <span class="label">metadata</span>
         <ul>
@@ -42,6 +53,7 @@
           </li>
         </ul>
       </div>
+      -->
       
       <div v-if="parsed?.navDate" class="navDate">
         <span class="label">navDate</span>
@@ -63,6 +75,7 @@
         <a class="value" :href="parsed.logo[0].src" v-html="parsed.logo[0].src"></a>
       </div>
 
+      <!--
       <div v-if="parsed?.requiredStatement" class="requiredStatement">
         <span class="label">requiredStatement</span>
         <ul><li>
@@ -70,11 +83,12 @@
           <span class="value" v-html="parsed.requiredStatement.value"></span>
         </li></ul>
       </div>
+      -->
 
       <div v-if="parsed?.imageData" class="imageData">
         <div>
           <span class="label">source</span>
-          <a class="value" :href="parsed.imageData.id" :innerHTML="parsed.imageData.id"></a>
+          <a class="value" :href="parsed.imageData.id" :innerHTML="parsed.imageData.id.split('/').pop()"></a>
         </div>
         <div>
           <span class="label">format</span>
@@ -90,6 +104,7 @@
         </div>
       </div>
 
+      <!--
       <div v-if="parsed?.thumbnail">
         <span class="label">thumbnail</span>
         <a class="value" :href="parsed.thumbnail" v-html="parsed.thumbnail"></a>
@@ -99,6 +114,7 @@
         <span class="label">service</span>
         <a class="value" :href="parsed.service" v-html="parsed.service"></a>
       </div>
+      -->
 
     </div>
 
@@ -114,7 +130,7 @@ import { getItemInfo, getManifest } from '../utils'
 export default {
   components: {},
   props: {
-    manifest: { required: true }
+    manifest: { type: String, required: true }
   },
   setup(props) {
 
@@ -198,6 +214,17 @@ export default {
       return parsed
     }
 
+
+    function onIiifDrag(dragEvent: DragEvent) {
+      console.log('onIiifDrag')
+      dragEvent.dataTransfer?.setData('text/uri-list', `${manifest.value.id}?manifest=${manifest.value.id}`)
+    }
+
+    function copyTextToClipboard(text: string) {
+        console.log('copyTextToClipboard', text)
+        if (navigator.clipboard) navigator.clipboard.writeText(text)
+    }
+
     function _getLicenseBadge(_parsed:any):string {
       let config = {
         cc: {
@@ -226,8 +253,10 @@ export default {
     }
   
     return {
+      copyTextToClipboard,
       licenseBadge,
       parsed,
+      onIiifDrag,
       props,
       root,
     }
@@ -271,6 +300,15 @@ export default {
     max-height: 200px;
     margin: 0 6px 6px 0;
     /* box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
+  }
+
+  .links {
+    margin-top: 6px;
+  }
+
+  img.iiif {
+    height: 24px;
+    cursor: copy;
   }
 
   ul {

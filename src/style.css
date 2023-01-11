@@ -178,6 +178,10 @@ section.no-offset:target:before {
     z-index: 3;
   }
 
+  ve-map.full {
+    padding-bottom: 12px;
+  }
+
   /*
   .full {
     width: 100%;
@@ -199,6 +203,14 @@ section.no-offset:target:before {
     margin-right: 6px;
   }
   */
+
+  .right {
+    margin-left: 12px;
+  }
+
+  .left {
+    margin-right: 12px;
+  }
   
   .sticky.right + section, 
   .sticky.right ~ section,
@@ -586,6 +598,12 @@ table {
 }
 th { border-bottom: 1px solid black; }
 td { vertical-align: top; }
+
+table td, table th {
+  border: 1px solid #ddd;
+  padding: 5px;
+}
+
 
 /***************** markdown end *****************/
 
