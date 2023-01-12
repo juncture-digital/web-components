@@ -199,7 +199,7 @@ import { propsToAttrMap } from '@vue/shared'
       if (props.sticky && position === 'full' && !(props.width || props.height)) {
         let maxStickyHeight = Math.round(window.innerHeight * .4)
         let computedWidth = Math.ceil(maxStickyHeight * aspect.value)
-        console.log(`type=${type.value} height=${height.value} maxStickyHeight=${maxStickyHeight} computedWidth=${computedWidth}`)
+        // console.log(`type=${type.value} height=${height.value} maxStickyHeight=${maxStickyHeight} computedWidth=${computedWidth}`)
         
         if (type.value === 'image') content.value.style.height = `${maxStickyHeight}px`
         if (type.value !== 'image-grid') inner.value.classList.add('drop-shadow')
@@ -209,7 +209,7 @@ import { propsToAttrMap } from '@vue/shared'
       nextTick(() => {
         width.value = parseInt(window.getComputedStyle(inner.value).width.slice(0,-2))
         height.value = parseInt(window.getComputedStyle(content.value).height.slice(0,-2))
-        console.log(`position=${position} width=${width.value} height=${height.value} aspect=${aspect.value}`)
+        // console.log(`position=${position} width=${width.value} height=${height.value} aspect=${aspect.value}`)
       })
     })
 
@@ -244,7 +244,7 @@ import { propsToAttrMap } from '@vue/shared'
 
   function onInfoClick(evt:MouseEvent) {
     const popup:any = (evt.target as HTMLElement).parentElement
-    popup.active = !popup.active;
+    if (popup) popup.active = !popup.active;
   }
 
   /************ OpenSeadragon Image viewer ************/
@@ -457,7 +457,6 @@ import { propsToAttrMap } from '@vue/shared'
   }
 
   function buildIiiFItemsList() {
-    console.log('buildIiiFItemsList')
     let itemsList = []
     let manifestUrl = props.manifest || props.src
 

@@ -25,7 +25,7 @@ export class Annotator {
     this.annotorious.on('selectAnnotation', async (anno:any) => this.onSelect(anno))
     this.setVisible(true)
     this.ghAuthToken = localStorage.getItem('gh-auth-token') || ''
-    console.log(`Annotator: base=${base} readOnly=${this.annotorious.readOnly} authenticated=${this.ghAuthToken !== ''}`)
+    // console.log(`Annotator: base=${base} readOnly=${this.annotorious.readOnly} authenticated=${this.ghAuthToken !== ''}`)
   }
 
   async loadAnnotations(imageId:string) {
@@ -44,18 +44,18 @@ export class Annotator {
           return anno
         })
         console.log(`Adding ${resp.annotations.length} annotations`)
-        if (this.annotorious.readOnly) {
-          annotations.forEach((anno: any) => {
-            let annoEl = this.annoEl(anno.id)
-            if (annoEl) {
-              annoEl.addEventListener('mouseenter', () => this.select(anno.id))
-              annoEl.addEventListener('mouseleave', () => this.deselect())
-            }
-          })
-        }
       }
     }
     this.annotorious.setAnnotations(annotations)
+    if (this.annotorious.readOnly) {
+      annotations.forEach((anno: any) => {
+        let annoEl = this.annoEl(anno.id)
+        if (annoEl) {
+          annoEl.addEventListener('mouseenter', () => this.select(anno.id))
+          annoEl.addEventListener('mouseleave', () => this.deselect())
+        }
+      })
+    }
     return annotations
   }
 
@@ -83,22 +83,21 @@ export class Annotator {
     if (navigator.clipboard) navigator.clipboard.writeText(this.selected)
   }
 
-  annoEl(annoUri:string) {
-    return this.osd.element.querySelector(`[data-id="${annoUri}"]`) as HTMLElement
+  annoEl(annoId:string) {
+    return this.osd.element.querySelector(`[data-id="${annoId}"]`) as HTMLElement
   }
 
   select(annoId:string) {
-    let annoUri = annoId.indexOf('/') > 0
-      ? annoId
-      : `${annotationsEndpoint}/annotation/${this.base}/${this.imageId}/${annoId}`
-    if (this.selected && this.selected.id == annoId) {
-      this.deselect()
-    } else {
-      this.selected = this.annotorious.selectAnnotation(annoId);
+    // console.log(`annotator.select=${annoId}`, this.selected?.id)
+    if (annoId !== this.selected?.id) {
+      this.deselect() 
+      this.selected = this.annotorious.selectAnnotation(annoId)
       if (this.selected) {
         let annoEl = this.annoEl(annoId)
         if (annoEl) annoEl.style.visibility = 'visible'
       }
+    } else {
+      this.deselect() 
     }
   }
 
@@ -106,7 +105,7 @@ export class Annotator {
     (Array.from(this.osd.element.querySelectorAll(`.a9s-annotation`)) as HTMLElement[])
     .forEach(el => el.style.visibility = this.visible ? 'visible' : 'hidden')
     this.annotorious.selectAnnotation()
-    this.selected = null
+    this.selected = undefined
   }
 
   async createAnnotation(anno:any) {

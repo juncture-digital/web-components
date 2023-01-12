@@ -75,7 +75,7 @@
     backgroundIsImage.value = props.background !== undefined && (isURL(props.background) || isManifestShorthand(props.background))
     if (navbar.value) navbar.value.style.height = `${props.height || navbarHeight}px`
     if (props.sticky) host.value.classList.add('sticky')
-    navEl.value = (host.value.querySelector('ul') as HTMLUListElement).innerHTML
+    navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML
   }
 
   // watch(navEl, () => console.log('header.navEl', navEl.value))

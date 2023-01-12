@@ -65,7 +65,7 @@
                   <sl-icon slot="prefix" name="github" style="fontSize:24px;"></sl-icon>
                 </sl-button>
                 <sl-menu>
-                  <sl-menu-item v-for="_acct, idx in accts" :key="`acct-${idx}`" :checked="_acct.login === acct" @click="accountSelected(_acct)" v-html="_acct.login"></sl-menu-item>
+                  <sl-menu-item v-for="_acct, idx in accts" :key="`acct-${idx}`" :checked="_acct.login === acct" @click="accountSelected(_acct)" type="checkbox" v-html="_acct.login"></sl-menu-item>
                 </sl-menu>
               </sl-dropdown>
               <sl-button v-else slot="trigger" pill size="medium" class="folder">
@@ -80,7 +80,7 @@
                   <sl-icon slot="prefix" name="archive" style="fontSize:24px;"></sl-icon>
                 </sl-button>
                 <sl-menu>
-                  <sl-menu-item v-for="_repo, idx in repos" :key="`repo-${idx}`" :checked="_repo.name === repo" @click="repoSelected(_repo)" v-html="_repo.name"></sl-menu-item>
+                  <sl-menu-item v-for="_repo, idx in repos" :key="`repo-${idx}`" :checked="_repo.name === repo" @click="repoSelected(_repo)" type="checkbox" v-html="_repo.name"></sl-menu-item>
                   <sl-divider></sl-divider>
                   <sl-menu-item class="add-repo" @click="showAddRepoDialog">
                     <sl-icon slot="prefix" name="plus-lg"></sl-icon>
