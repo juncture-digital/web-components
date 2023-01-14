@@ -21,9 +21,12 @@ import Menu from './components/Menu.ce.vue'
 import Mermaid from './components/Mermaid.ce.vue'
 import Navbar from './components/Navbar.ce.vue'
 import Pager from './components/Pager.ce.vue'
+import Prism from './components/Prism.ce.vue'
 import SiteSearch from './components/SiteSearch.ce.vue'
 import Starter from './components/Starter.ce.vue'
 import WikidataSearch from './components/WikidataSearch.ce.vue'
+
+console.log(`juncture.web-components: version=${process.env.version}`)
 
 function init() {
 	customElements.define('ve-add-media-resource-dialog', defineCustomElement(AddMediaResourceDialog))
@@ -42,16 +45,17 @@ function init() {
 	customElements.define('ve-menu', defineCustomElement(Menu))
 	customElements.define('ve-navbar', defineCustomElement(Navbar))
 	customElements.define('ve-pager', defineCustomElement(Pager))
+	customElements.define('ve-prism', defineCustomElement(Prism))
 	customElements.define('ve-site-search', defineCustomElement(SiteSearch))
 	customElements.define('ve-starter', defineCustomElement(Starter))
 	customElements.define('ve-wikidata-search', defineCustomElement(WikidataSearch))
 	document.body.style.transition = 'opacity 0.3s linear'
 	document.body.style.visibility = 'visible'
 	document.body.style.opacity = '1'
-	console.log('juncture.web-components initialized')
+	// console.log('juncture.web-components initialized')
 };
 
-(window as any).previewInit = function(){ console.log('TODO: previewInit')}
+// (window as any).previewInit = function(){ console.log('TODO: previewInit')}
 
 // Dynamically load css if needed
 // let cssSrc = 'https://unpkg.com/juncture-digital/dist/assets/css/index.css'
@@ -61,7 +65,7 @@ if (Array.from(document.querySelectorAll(`link[href="${cssSrc}"], style[data-vit
 	linkEl.href = cssSrc
 	linkEl.rel = 'stylesheet'
 	linkEl.type = 'text/css'
-	console.log('adding juncture css', linkEl)
+	// console.log('adding juncture css', linkEl)
 	linkEl.addEventListener('load', () => {init()})
 	let head = document.getElementsByTagName('head')[0]
 	let styleEls = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))

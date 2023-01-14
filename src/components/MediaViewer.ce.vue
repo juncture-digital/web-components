@@ -51,7 +51,7 @@
 
           <template v-else>
 
-            <video id="html5-player" controls playsinline :muted="props.muted" :autoplay="props.autoplay">
+            <video id="html5-player" controls playsinline :muted="props.muted" :autoplay="props.autoplay" :poster="props.poster">
               <source :src="src" :type="mime"/>
             </video>
             <ve-manifest-popup :manifest="manifests[0].id"></ve-manifest-popup>
@@ -111,7 +111,6 @@
   import '@shoelace-style/shoelace/dist/components/popup/popup'
 
   import type SLDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
-import { propsToAttrMap } from '@vue/shared'
 
   const props = defineProps({
     manifest: { type: String },
@@ -150,6 +149,7 @@ import { propsToAttrMap } from '@vue/shared'
     muted: { type: Boolean, default: true },
     start: { type: Number },
     end: { type: Number },
+    poster: { type: String },
 
     class: { type: String }
   })

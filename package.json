@@ -1,6 +1,6 @@
 {
   "name": "juncture-digital",
-  "version": "1.0.0-beta.28",
+  "version": "1.0.0-beta.30",
   "private": false,
   "type": "module",
   "scripts": {
@@ -22,6 +22,7 @@
     "leaflet": "^1.9.3",
     "mermaid": "^9.3.0",
     "openseadragon": "2.4.2",
+    "prismjs": "^1.29.0",
     "tippy.js": "^6.3.7",
     "vue": "^3.2.45",
     "youtube-player": "^5.5.2"

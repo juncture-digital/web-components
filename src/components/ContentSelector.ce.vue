@@ -292,9 +292,9 @@
     // path.value = []
     branch.value = ''
     if (repo.value) {
-      if (isLoggedIn.value) {
+      if (isLoggedIn.value && acct.value) {
         githubClient.value.user().then((userData:any) => userData.login)
-        .then((username:string) => githubClient.value.isCollaborator(acct.value, repo.value, username))
+        .then((username:string) => repo.value ? githubClient.value.isCollaborator(acct.value, repo.value, username) : false)
         .then((isCollaborator:boolean) => userCanUpdateRepo.value = isCollaborator)
       }
       getBranches().then(_branches => branches.value = _branches)
