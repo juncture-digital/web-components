@@ -1,20 +1,20 @@
 <template>
 
-  <section ref="root" class="ve-hero">
+  <section ref="root">
     <sl-dialog label="Contact Us" class="contact-dialog">
-        <sl-input id="from" type="email" label="Email address"></sl-input>
-        <sl-alert id="bad-email-alert" variant="danger">
-          <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
-          <strong>Invalid email address</strong><br />Please fix and resubmit
-        </sl-alert>
-        <sl-textarea id="message" label="Message"></sl-textarea>
-        <sl-alert id="no-message-alert" variant="danger">
-          <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
-          <strong>No message entered</strong><br />
-        </sl-alert>
-        <sl-button id="cancel" slot="footer" @click="hideContactForm">Cancel</sl-button>
-        <sl-button slot="footer" variant="primary" @click="sendmail">Submit</sl-button>
-      </sl-dialog>
+      <sl-input id="from" type="email" label="Email address"></sl-input>
+      <sl-alert id="bad-email-alert" variant="danger">
+        <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
+        <strong>Invalid email address</strong><br />Please fix and resubmit
+      </sl-alert>
+      <sl-textarea id="message" label="Message"></sl-textarea>
+      <sl-alert id="no-message-alert" variant="danger">
+        <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
+        <strong>No message entered</strong><br />
+      </sl-alert>
+      <sl-button id="cancel" slot="footer" @click="hideContactForm">Cancel</sl-button>
+      <sl-button slot="footer" variant="primary" @click="sendmail">Submit</sl-button>
+    </sl-dialog>
   </section>
 
 </template>

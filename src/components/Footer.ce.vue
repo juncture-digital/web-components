@@ -1,23 +1,64 @@
 <template>
 
   <div ref="root" class="main">
-    <div v-for="li, idx in footerElems" :key="`li-${idx}`" :class="li.className" :style="styleToObj(li.getAttribute('style') || '')" v-html="li.innerHTML"></div>
+    
+    <template v-for="li, idx in footerElems" :key="`li-${idx}`">
+
+      <sl-icon v-if="icons[li.innerHTML]" 
+        :name="icons[li.innerHTML].icon" 
+        label="icons[li.innerHTML].label"
+        @click="onClick(li, $event)"
+      ></sl-icon>
+
+      <div v-else
+        :class="li.className" 
+        :style="styleToObj(li.getAttribute('style') || '')" 
+        v-html="li.innerHTML"
+        @click="onClick(li, $event)"
+      ></div>
+
+    </template>
+
+    <sl-dialog label="Page Source" class="page-source-dialog" style="--width: 80vw;">
+      <ve-source-viewer v-if="sourcePath" :src="sourcePath"></ve-source-viewer>
+      <sl-button slot="footer" variant="primary" @click="showPageSourceDialog = false">Close</sl-button>
+    </sl-dialog>
+
   </div>
 
 </template>
   
 <script setup lang="ts">
 
-  import { computed, ref, watch } from 'vue'
+  import { computed, ref, toRaw, watch } from 'vue'
+  import '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
+  import '@shoelace-style/shoelace/dist/components/icon/icon.js'
 
   const props = defineProps({
     sticky: { type: Boolean }
   })
 
-  const footerElems = ref<HTMLElement[]>([])
+  const icons:any = {
+    'view-code': {icon: 'code', label: 'View Page Code'}
+  }
+
+  const footerElems = ref<HTMLUListElement[]>([])
 
   const root = ref<HTMLElement | null>(null)
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
+  const shadowRoot = computed(() => root?.value?.parentNode)
+
+  const showPageSourceDialog = ref(false)
+  watch(showPageSourceDialog, () => pageSourceDialog.open = showPageSourceDialog.value )
+
+  let pageSourceDialog: any
+
+  const sourcePath = ref<string>()
+
+  watch(host, () => {
+    pageSourceDialog = shadowRoot.value?.querySelector('.page-source-dialog')
+    pageSourceDialog.addEventListener('sl-hide', () => showPageSourceDialog.value = false)
+  })
 
   watch(host, () => init())
   
@@ -42,6 +83,21 @@
     return s
       ? Object.fromEntries(s.split(';').filter(s => s.trim()).map(s => s.split(':').map(s => s.trim())))
       : {}
+  }
+
+  function showSource() {
+    sourcePath.value = (window as any).PREFIX
+      ? `${(window as any).PREFIX}/${location.pathname.split('/').filter(pe => pe).filter(pe => pe !== 'editor').join('/')}`
+      : location.pathname.split('/').filter(pe => pe).filter(pe => pe !== 'editor').join('/')
+    // console.log('showSource', toRaw(sourcePath.value))
+    showPageSourceDialog.value = true
+  }
+
+  function onClick(el:HTMLUListElement, evt:MouseEvent) {
+    if (el.innerHTML === 'view-code') {
+      evt.stopPropagation()
+      showSource()
+    }
   }
 
 </script>
@@ -75,6 +131,10 @@
     gap: 12px;
   }
 
+  div {
+    cursor: pointer;
+  }
+
   img {
     height: 36px;
     vertical-align: middle;
@@ -92,5 +152,10 @@
   .push {
     margin-left: auto;
   }
+
+ sl-dialog::part(panel) {
+  color: #444;
+  font-size: medium;
+}
 
 </style>

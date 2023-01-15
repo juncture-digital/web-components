@@ -21,7 +21,7 @@ import Menu from './components/Menu.ce.vue'
 import Mermaid from './components/Mermaid.ce.vue'
 import Navbar from './components/Navbar.ce.vue'
 import Pager from './components/Pager.ce.vue'
-import Prism from './components/Prism.ce.vue'
+import Prism from './components/SourceViewer.ce.vue'
 import SiteSearch from './components/SiteSearch.ce.vue'
 import Starter from './components/Starter.ce.vue'
 import WikidataSearch from './components/WikidataSearch.ce.vue'
@@ -45,7 +45,7 @@ function init() {
 	customElements.define('ve-menu', defineCustomElement(Menu))
 	customElements.define('ve-navbar', defineCustomElement(Navbar))
 	customElements.define('ve-pager', defineCustomElement(Pager))
-	customElements.define('ve-prism', defineCustomElement(Prism))
+	customElements.define('ve-source-viewer', defineCustomElement(Prism))
 	customElements.define('ve-site-search', defineCustomElement(SiteSearch))
 	customElements.define('ve-starter', defineCustomElement(Starter))
 	customElements.define('ve-wikidata-search', defineCustomElement(WikidataSearch))

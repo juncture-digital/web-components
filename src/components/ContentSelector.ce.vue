@@ -100,7 +100,7 @@
                   <sl-icon slot="prefix" name="share" style="fontSize:24px;"></sl-icon>
                 </sl-button>
                 <sl-menu>
-                  <sl-menu-item v-for="_branch, idx in branches" :key="`branch-${idx}`" :checked="_branch.name === branch" @click="branchSelected(_branch)" v-html="_branch.name"></sl-menu-item>
+                  <sl-menu-item v-for="_branch, idx in branches" :key="`branch-${idx}`" :checked="_branch.name === branch" @click="branchSelected(_branch)"  type="checkbox" v-html="_branch.name"></sl-menu-item>
                 </sl-menu>
               </sl-dropdown>
               <sl-button v-else pill size="medium">
