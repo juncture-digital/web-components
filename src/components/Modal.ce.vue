@@ -26,9 +26,10 @@
   const apiEndpoint = location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://api.juncture-digital.org'
 
   const props = defineProps({
+    src: { type: String },
     prefix: { type: String },
     label: { type: String },
-    buttonLabel: { type: String, default: 'Show' },
+    buttonLabel: { type: String, default: 'Show me' },
     width: { type: String },
   })
 
@@ -67,26 +68,37 @@
 
   watch(content, () => {
     dialog = shadowRoot.value?.querySelector('.dialog')
-    dialog.addEventListener('sl-hide', () => showDialog.value = false)
+    dialog.addEventListener('sl-hide', (evt:CustomEvent) => {
+      if (evt.target === dialog) showDialog.value = false
+    })
   })
 
   function getHTML() {
     html.value = ''
-    fetch(`${apiEndpoint}/html/?inline=true`, {
-      method: 'POST',
-      body: JSON.stringify({
-        prefix: `${props.prefix}`,
-        path: '',
-        markdown: markdown.value
+    if (props.src) {
+      fetch(`${apiEndpoint}/html/${props.src}`)
+      .then(resp => resp.text())
+      .then(_html => {
+        html.value = _html
+        nextTick(() => initTippy(shadowRoot.value, true))
       })
-    })
-    .then(resp => resp.text())
-    .then(pageHtml => {
-      let htmlEls = new DOMParser().parseFromString(pageHtml, 'text/html').children[0].children
-      let _html = htmlEls[1].querySelector('main')?.innerHTML
-      if (_html) html.value = _html
-      nextTick(() => initTippy(shadowRoot.value, true))
-    })
+    } else {
+      fetch(`${apiEndpoint}/html/?inline=true`, {
+        method: 'POST',
+        body: JSON.stringify({
+          prefix: `${props.prefix}`,
+          path: '',
+          markdown: markdown.value
+        })
+      })
+      .then(resp => resp.text())
+      .then(pageHtml => {
+        let htmlEls = new DOMParser().parseFromString(pageHtml, 'text/html').children[0].children
+        let _html = htmlEls[1].querySelector('main')?.innerHTML
+        if (_html) html.value = _html
+        nextTick(() => initTippy(shadowRoot.value, true))
+      })
+    }
   }
 
   function onDrag(evt:DragEvent) {
@@ -104,7 +116,11 @@
 
   #main {
     font-family: Roboto, sans-serif;
-    /* margin-bottom: 2rem; */
+    margin-bottom: 2rem;
+  }
+
+  sl-dialog::part(body) {
+    padding-top: 0;
   }
 
 </style>

@@ -85,7 +85,7 @@
 
     </div>
 
-    <sl-dialog ref="dialog" id="image-dialog" no-header style="--body-spacing:0;--footer-spacing:0;">
+    <sl-dialog id="image-dialog" no-header style="--body-spacing:0;--footer-spacing:0;">
       <ve-media v-if="dialogId" :manifest="dialogId" zoom-on-scroll></ve-media>
       <sl-button slot="footer" class="close" @click="toggleDialogId" variant="primary">Close</sl-button>
     </sl-dialog>
@@ -323,6 +323,9 @@
 
   /************ Image dialog ************/
   const dialog = ref<SLDialog>()
+  watch(shadowRoot, () => {
+    dialog.value = shadowRoot.value?.querySelector('#image-dialog') as SLDialog
+  })
   watch(dialog, (_dialog) => {
     _dialog?.addEventListener('sl-after-hide', () => dialogId.value = null )
     _dialog?.addEventListener('sl-show', () => {
