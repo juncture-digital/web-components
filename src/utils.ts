@@ -10,11 +10,11 @@ export function sha256(str: string) {
 }
 
 let tippyEntities:any
-export function initTippy(force=false) {
+export function initTippy(el:any=null, force=false) {
   if (force) tippyEntities = null
-  // console.log(document.querySelectorAll('mark'))
-  let _entities = Array.from(document.querySelectorAll('mark')).filter(el =>
-    Array.from(el.attributes).find(attr => attr.name.toLowerCase() === 'qid' || isQID(attr.value))
+  el = el || document
+  let _entities = Array.from(el.querySelectorAll('mark')).filter(el =>
+    Array.from((el as HTMLElement).attributes).find(attr => attr.name.toLowerCase() === 'qid' || isQID(attr.value))
   )
   if (!tippyEntities && _entities.length > 0) {
     tippyEntities = _entities

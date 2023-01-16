@@ -21,6 +21,7 @@ import Menu from './components/Menu.ce.vue'
 import Mermaid from './components/Mermaid.ce.vue'
 import Navbar from './components/Navbar.ce.vue'
 import Pager from './components/Pager.ce.vue'
+import Preview from './components/Preview.ce.vue'
 import Prism from './components/SourceViewer.ce.vue'
 import SiteSearch from './components/SiteSearch.ce.vue'
 import Starter from './components/Starter.ce.vue'
@@ -45,6 +46,7 @@ function init() {
 	customElements.define('ve-menu', defineCustomElement(Menu))
 	customElements.define('ve-navbar', defineCustomElement(Navbar))
 	customElements.define('ve-pager', defineCustomElement(Pager))
+	customElements.define('ve-preview', defineCustomElement(Preview))
 	customElements.define('ve-source-viewer', defineCustomElement(Prism))
 	customElements.define('ve-site-search', defineCustomElement(SiteSearch))
 	customElements.define('ve-starter', defineCustomElement(Starter))
@@ -60,7 +62,8 @@ function init() {
 // Dynamically load css if needed
 // let cssSrc = 'https://unpkg.com/juncture-digital/dist/assets/css/index.css'
 let cssSrc = 'https://cdn.jsdelivr.net/npm/juncture-digital/dist/assets/css/index.css'
-if (Array.from(document.querySelectorAll(`link[href="${cssSrc}"], style[data-vite-dev-id$="/src/style.css"]`)).length === 0) {
+let junctureStyleEls = Array.from(document.querySelectorAll(`link[href="${cssSrc}"], style[data-vite-dev-id$="/src/style.css"]`))
+if (junctureStyleEls.length === 0) {
 	let linkEl = document.createElement('link')
 	linkEl.href = cssSrc
 	linkEl.rel = 'stylesheet'

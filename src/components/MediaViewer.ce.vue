@@ -427,7 +427,7 @@
   })
 
   function listenForSlotChanges() {
-    let slot = document.querySelector('ve-media > ul, ve-media > span')
+    let slot = host.value.parentElement.querySelector('ve-media > ul, ve-media > span')
     if (slot) {
       const callback = (mutationsList:any) => {
         for (let mutation of mutationsList) {
@@ -675,7 +675,7 @@
       if (veMedia) addMutationObserver(el)
     });
 
-    (Array.from(document.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
+    (Array.from(host.value.parentElement.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
       Array.from(mark.attributes).forEach(attr => {
         if (type.value === 'image' && isImageZoomTo(attr) ||
             (type.value !== 'image' && (isPlayMedia(attr) || isPauseMedia(attr)))) {
@@ -818,7 +818,7 @@
     doLayout()
   }
   async function monitor() {
-    let playerEl = document.querySelector('ve-video') as HTMLElement
+    let playerEl = host.value.parentElement.querySelector('ve-video') as HTMLElement
     let playerScrolledToTop = false
     
     setInterval(async () => {

@@ -63,6 +63,7 @@
   watch(host, () => init())
   
   function init() {
+    host.value.style.clear = 'both'
     if (props.sticky) setSticky()
     footerElems.value = Array.from(host.value?.querySelectorAll('li'))
   }
