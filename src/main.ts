@@ -1,4 +1,4 @@
-import './style.css'
+// import './style.css'
 import { defineCustomElement } from 'vue'
 
 import '@shoelace-style/shoelace/dist/themes/light.css'
@@ -19,11 +19,12 @@ import MediaCard from './components/MediaCard.ce.vue'
 import MediaViewer from './components/MediaViewer.ce.vue'
 import Menu from './components/Menu.ce.vue'
 import Mermaid from './components/Mermaid.ce.vue'
+import Modal from './components/Modal.ce.vue'
 import Navbar from './components/Navbar.ce.vue'
 import Pager from './components/Pager.ce.vue'
-import Preview from './components/Preview.ce.vue'
-import Prism from './components/SourceViewer.ce.vue'
 import SiteSearch from './components/SiteSearch.ce.vue'
+import Snippet from './components/Snippet.ce.vue'
+import SourceViewer from './components/SourceViewer.ce.vue'
 import Starter from './components/Starter.ce.vue'
 import WikidataSearch from './components/WikidataSearch.ce.vue'
 
@@ -42,12 +43,13 @@ function init() {
 	customElements.define('ve-map', defineCustomElement(Map))
 	customElements.define('ve-media', defineCustomElement(MediaViewer))
 	customElements.define('ve-media-card', defineCustomElement(MediaCard))
-	customElements.define('ve-mermaid', defineCustomElement(Mermaid))
 	customElements.define('ve-menu', defineCustomElement(Menu))
+	customElements.define('ve-mermaid', defineCustomElement(Mermaid))
+	customElements.define('ve-modal', defineCustomElement(Modal))
 	customElements.define('ve-navbar', defineCustomElement(Navbar))
 	customElements.define('ve-pager', defineCustomElement(Pager))
-	customElements.define('ve-preview', defineCustomElement(Preview))
-	customElements.define('ve-source-viewer', defineCustomElement(Prism))
+	customElements.define('ve-snippet', defineCustomElement(Snippet))
+	customElements.define('ve-source-viewer', defineCustomElement(SourceViewer))
 	customElements.define('ve-site-search', defineCustomElement(SiteSearch))
 	customElements.define('ve-starter', defineCustomElement(Starter))
 	customElements.define('ve-wikidata-search', defineCustomElement(WikidataSearch))

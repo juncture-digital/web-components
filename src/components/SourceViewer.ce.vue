@@ -46,7 +46,6 @@
   
   watch(host, () => {
     let text = host.value?.innerHTML.trim()
-    console.log(text)
     // if (text) rawText.value = `\n${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}`
     if (text) {
       rawText.value = props.language === 'html'
@@ -140,6 +139,7 @@
       .replace(/<p>\s+/g, '<p>')
       .replace(/\s+<\/p>\s+/g, '</p>\n')
       .replace(/<ve-/g, '\n<ve-')
+      .replace(/ anno-base="undefined\/"/g, '')
       .replace(/^\n\n/g, '\n')
   }
 
@@ -157,9 +157,7 @@
 
   function onDrag(evt:DragEvent) {
     let text = rawText.value
-    console.log('onDrag', text)
     if (text) evt.dataTransfer?.setData('text/plain', text)
-
   }
 
 </script>
@@ -171,7 +169,7 @@
 * { box-sizing: border-box; }
 
 .main {
-  font-size: 0.7em;
+  font-size: .8em;
   position: relative;
 }
 

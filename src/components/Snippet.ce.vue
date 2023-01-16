@@ -5,7 +5,7 @@
     <sl-tab-group>
       <sl-tab slot="nav" panel="markdown">Markdown</sl-tab>
       <sl-tab slot="nav" panel="html">HTML</sl-tab>
-      <sl-tab slot="nav" panel="preview">Preview</sl-tab>
+      <sl-tab slot="nav" panel="preview">Demo</sl-tab>
       <sl-tab-panel name="markdown">
         <ve-source-viewer v-if="active === 'markdown'" v-html="markdown"></ve-source-viewer>
       </sl-tab-panel>
@@ -13,7 +13,7 @@
         <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
       </sl-tab-panel>
       <sl-tab-panel name="preview">
-        <div v-if="active === 'preview' && html" v-html="html"></div>
+        <div v-if="active === 'preview' && html" v-html="html" draggable="true" @dragstart="onDrag"></div>
       </sl-tab-panel>
     </sl-tab-group>
 
@@ -46,11 +46,27 @@
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
   const content = computed(() => shadowRoot.value?.querySelector('sl-tab-group') as HTMLElement)
   
-  const markdown = ref<String | null>(null)
-  const html = ref<String>()
-  const active = ref<String>()
+  const markdown = ref<string>()
+  const html = ref<string>()
+  const active = ref<string>()
 
-  watch(host, () => markdown.value = host.value.textContent.trim())
+  watch(host, () => {
+    let lines:string[] = host.value.textContent.split('\n')
+    let trimmed:string[] = []
+    lines.forEach(line => {
+      if (line.trim().length > 0 || trimmed.length > 0) trimmed.push(line)
+    })
+    if (trimmed.length > 0) {
+      let firsLineIndent = (trimmed[0].match(/(^\s+)/) || [''])[0].length
+      markdown.value = trimmed.map(line => {
+        let leadingSpaces = (line.match(/(^\s+)/) || [''])[0].length
+        return leadingSpaces >= firsLineIndent
+          ? line.slice(firsLineIndent)
+          : line
+      }).join('\n')
+    }
+  })
+
   watch(active, () => {
     if (active.value !== 'markdown' && html.value === undefined) getHTML()
     if (active.value === 'preview') nextTick(() => initTippy(shadowRoot.value, true))
@@ -107,6 +123,11 @@
     })
   }
 
+  function onDrag(evt:DragEvent) {
+    let text = markdown.value
+    if (text) evt.dataTransfer?.setData('text/plain', text)
+  }
+
 </script>
 
 <style src='../style.css'></style> 
@@ -116,9 +137,12 @@
   * { box-sizing: border-box; }
 
   #main {
+    font-family: Roboto, sans-serif;
     border: 0.5px solid #ddd;
     border-radius: 6px;
-    padding: 6px;
+    padding: 0 6px;  
+    margin-bottom: 2rem;
+    font-size: 1.2rem;
   }
 
 </style>
