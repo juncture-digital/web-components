@@ -54,13 +54,12 @@ function init() {
 	document.body.style.transition = 'opacity 0.3s linear'
 	document.body.style.visibility = 'visible'
 	document.body.style.opacity = '1'
-	// console.log('juncture.web-components initialized')
 };
 
 // (window as any).previewInit = function(){ console.log('TODO: previewInit')}
 
 // Dynamically load css if needed
-// let cssSrc = 'https://unpkg.com/juncture-digital/dist/assets/css/index.css'
+/*
 let cssSrc = 'https://cdn.jsdelivr.net/npm/juncture-digital/dist/assets/css/index.css'
 let junctureStyleEls = Array.from(document.querySelectorAll(`link[href="${cssSrc}"], style[data-vite-dev-id$="/src/style.css"]`))
 if (junctureStyleEls.length === 0) {
@@ -68,7 +67,7 @@ if (junctureStyleEls.length === 0) {
 	linkEl.href = cssSrc
 	linkEl.rel = 'stylesheet'
 	linkEl.type = 'text/css'
-	// console.log('adding juncture css', linkEl)
+	console.log('adding juncture css', linkEl)
 	linkEl.addEventListener('load', () => {init()})
 	let head = document.getElementsByTagName('head')[0]
 	let styleEls = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
@@ -77,3 +76,5 @@ if (junctureStyleEls.length === 0) {
 } else {
 	init()
 }
+*/
+init()
