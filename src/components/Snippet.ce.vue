@@ -13,7 +13,7 @@
         <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
       </sl-tab-panel>
       <sl-tab-panel name="preview">
-        <div v-if="active === 'preview' && html" v-html="html" draggable="true" @dragstart="onDrag"></div>
+        <div id="preview" style="position:relative;" v-if="active === 'preview' && html" v-html="html" draggable="true" @dragstart="onDrag"></div>
       </sl-tab-panel>
     </sl-tab-group>
 
@@ -39,10 +39,11 @@
     left: { type: Boolean },
     width: { type: String },
     height: { type: String },
+    fill: { type: Boolean }
   })
 
   const root = ref<HTMLElement | null>(null)
-  const shadowRoot = computed(() => root?.value?.parentNode)
+  const shadowRoot = computed(() => root?.value?.parentNode as HTMLElement)
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
   const content = computed(() => shadowRoot.value?.querySelector('sl-tab-group') as HTMLElement)
   
@@ -70,6 +71,7 @@
   watch(active, () => {
     if (active.value !== 'markdown' && html.value === undefined) getHTML()
     if (active.value === 'preview') nextTick(() => initTippy(shadowRoot.value, true))
+    if (props.fill && html.value) nextTick(() => setFill())
   })
 
   watch(content, () => {
@@ -77,33 +79,28 @@
       const observer = new MutationObserver((mutations) => {
         let slTab = mutations[0].target as SlTab
         if (slTab.getAttribute('aria-selected') === 'true') active.value = slTab.getAttribute('panel')?.valueOf()
-        //if (slTab.getAttribute('panel') !== 'markdown' &&  {
-        //  if (html.value === undefined) getHTML()
-        //}
       })
       observer.observe(el, { attributes: true })
     })
   })
 
-  const position:string = props.right ? 'right' : props.left ? 'left' : 'full'
-
-  function doLayout() {
-    host.value.classList.add('ve-component')
-    host.value.classList.add(position)
-    if (position === 'full') {
-      host.value.style.width = '100%'
+  function setFill() {
+    let container = shadowRoot.value?.querySelector('sl-tab-panel[name="preview"]') as HTMLElement
+    if (active.value === 'preview') {
+      let main = shadowRoot.value?.querySelector('#preview') as HTMLElement
+      let width = container.clientWidth / 2
+      let filler = document.createElement('div')
+      filler.style.height = `${width}px`
+      let footer = main.querySelector('ve-footer')
+      if (footer) main.insertBefore(filler, footer)
+      else main.appendChild(filler)
+      container.style.height = `${Math.max(width/2, 500)}px`
+      container.style.overflowY = 'scroll'
     } else {
-      host.value.style.float = position
-      host.value.style.width = '50%'
+      container.style.height = ''
     }
-    host.value.style.width = window.getComputedStyle(host.value).width
-
-    content.value.style.width = props.width || '100%'
-    let width = parseInt(window.getComputedStyle(content.value).width.slice(0,-2))
-    content.value.style.width = `${width}px`
-    // content.value.style.height = `${width}px`
   }
-
+  
   function getHTML() {
     html.value = ''
     fetch(`${apiEndpoint}/html/?inline=true`, {
@@ -117,9 +114,14 @@
     .then(resp => resp.text())
     .then(pageHtml => {
       let htmlEls = new DOMParser().parseFromString(pageHtml, 'text/html').children[0].children
-      let _html = htmlEls[1].querySelector('main')?.innerHTML
-      if (_html) html.value = _html
-      nextTick(() => initTippy(shadowRoot.value, true))
+      let main = htmlEls[1].querySelector('main')
+      if (main) {
+        html.value = main.innerHTML
+        if (active.value === 'preview') nextTick(() => {
+          if (props.fill) setFill()
+          initTippy(shadowRoot.value, true)
+        })
+      }
     })
   }
 
@@ -143,6 +145,10 @@
     padding: 0 6px;  
     margin-bottom: 2rem;
     font-size: 1.2rem;
+  }
+
+  sl-tab-panel {
+    --padding: 0;
   }
 
 </style>

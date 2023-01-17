@@ -6,11 +6,18 @@
     <code v-html="rawText"></code>
   </pre>
 
-  <pre v-if="language === 'html'" id="html" class="language-markup" style="white-space:pre; white-space:pre-wrap; word-wrap:break-word;">
-    <code>
-      {{rawText}}
-    </code>
-  </pre>
+  <pre v-if="language === 'html'"
+    id="html"
+    class="language-markup"
+    :style="{
+      // whiteSpace: 'pre',
+      whiteSpace: 'pre-wrap',
+      wordWrap: 'break-word',
+      // opacity: ready ? '1' : '0',
+      // transition: 'opacity .1s linear'
+    }"
+  >
+    <code>{{rawText}}</code></pre>
 
   <sl-tooltip content="Text copied to clipboard" placement="top" hoist trigger="manual" style="--sl-tooltip-arrow-size: 0;" >
     <sl-button class="copy-button" @click="copyTextToClipboard">Copy Text</sl-button>
@@ -42,11 +49,11 @@
     language: { type: String, default: 'juncture' }
   })
 
+  // const ready = ref(false)
   const rawText = ref<string>()
   
   watch(host, () => {
     let text = host.value?.innerHTML.trim()
-    // if (text) rawText.value = `\n${text.replace(/</g,'&lt;').replace(/>/g,'&gt;')}`
     if (text) {
       rawText.value = props.language === 'html'
         ? styleHTML(text)
@@ -56,7 +63,10 @@
 
   watch(rawText, () => {
     let el = shadowRoot.value?.querySelector(`#${props.language}`)
-    if (el && rawText.value) nextTick(() => Prism.highlightElement(el))
+    if (el && rawText.value) nextTick(() => {
+      Prism.highlightElement(el)
+      // ready.value = true
+    })
   })
 
   onMounted(() => {
@@ -66,7 +76,6 @@
         .then(markdown => rawText.value = `\n${markdown.trim()}`)
     }
   })
-
 
   Prism.languages.juncture = Prism.languages.extend('markdown', {
     'tag': [
@@ -153,7 +162,6 @@
       }
     }
   }
-
 
   function onDrag(evt:DragEvent) {
     let text = rawText.value
