@@ -678,7 +678,10 @@
       if (veMedia) addMutationObserver(el)
     });
 
-    (Array.from(host.value.parentElement.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
+    let el = host.value.parentElement
+    while (el.parentElement && el.tagName !== 'BODY') el = el.parentElement;
+
+    (Array.from(el.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
       Array.from(mark.attributes).forEach(attr => {
         if (type.value === 'image' && isImageZoomTo(attr) ||
             (type.value !== 'image' && (isPlayMedia(attr) || isPauseMedia(attr)))) {
@@ -704,7 +707,7 @@
     }
     while (el.parentElement && el.tagName !== 'MAIN') {
       el = el.parentElement
-      let veMedia = el.querySelector(':scope > ve-media')
+      let veMedia = el.querySelector(':scope > ve-media, :scope > p > ve-media')
       if (veMedia) return veMedia === host.value ? veMedia : null
     }
   }

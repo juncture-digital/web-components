@@ -270,6 +270,7 @@
     acct.value = acct.value || (accts.value.length > 0 ? accts.value[0].login : null)
   })
   watch(acct, () => {
+    // console.log(`watch.acct=${toRaw(acct.value)}`)
     repo.value = ''
     getRepositories().then(_repos => repos.value = _repos)
   })
@@ -289,7 +290,9 @@
   const branches = ref<any[]>([])
   const branch = ref('')
   watch(repo, () => {
-    // path.value = []
+    // console.log(`watch.repo=${toRaw(repo.value)}`)
+    path.value = []
+    updateDirList().then(_ => setContentPath())
     branch.value = ''
     if (repo.value) {
       if (isLoggedIn.value && acct.value) {
@@ -309,7 +312,7 @@
   })
 
   watch(branch, () => {
-    // console.log(`branch branch=${toRaw(branch.value)} path=${toRaw(path.value)}`)
+    // console.log(`watch.branch=${toRaw(branch.value)}`)
     if (branch.value && path.value) {
       if (pathIsDirectory) updateDirList().then(_ => setContentPath())
     }
@@ -317,7 +320,7 @@
 
   const path = ref<string[]>([])
   watch(path, () => {
-    // console.log(`path branch=${toRaw(branch.value)} path=${toRaw(path.value)}`)
+    // console.log(`watch.path=${toRaw(path.value)}`)
     if (branch.value) updateDirList().then(_ => setContentPath())
   })
 
@@ -327,14 +330,6 @@
     pathIsDirectory = path.value.length === 0 || dirList.value.length > 0 
   })
 
-  watch(props, () => {
-    // console.log('props', props)
-    // if (props.contentPath) parseContentPath(props.contentPath)
-  })
-
-  function pathIsMarkdownFile() {
-    return path.value.length > 0 && /\.md$/.test(path.value[path.value.length -1])
-  }
 
   onMounted(() => {
     // console.log('onMounted', props)

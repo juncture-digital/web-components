@@ -359,18 +359,23 @@
   }
 
   function addInteractionHandlers() {
-    let markEls = Array.from(document.querySelectorAll('mark')) as HTMLElement[]
-    markEls.forEach(mark => {
-      Array.from(mark.attributes).forEach(attr => {
-        if (isFlyto(attr)) {
-          let veMap = findVeMap(mark.parentElement)
-          if (veMap) {
-            mark.classList.add('flyto')
-            mark.addEventListener('click', () => flyto(attr.value) )
+    let el = host.value.parentElement
+    while (el?.parentElement && el.tagName !== 'BODY') el = el.parentElement
+
+    if (el) {
+      let markEls = Array.from(el.querySelectorAll('mark')) as HTMLElement[]
+      markEls.forEach(mark => {
+        Array.from(mark.attributes).forEach(attr => {
+          if (isFlyto(attr)) {
+            let veMap = findVeMap(mark.parentElement)
+            if (veMap) {
+              mark.classList.add('flyto')
+              mark.addEventListener('click', () => flyto(attr.value) )
+            }
           }
-        }
+        })
       })
-    })
+    }
   }
 
   function findVeMap(el: any) {
@@ -381,7 +386,7 @@
     }
     while (el.parentElement && el.tagName !== 'MAIN') {
       el = el.parentElement
-      let veMap = el.querySelector(':scope > ve-map')
+      let veMap = el.querySelector(':scope > ve-map, :scope > p > ve-map')
       if (veMap) return veMap === host.value ? veMap : null
     }
   }

@@ -30,35 +30,41 @@ main > p:first-of-type {
   transition: visibility 0s .5s, opacity .5s linear;
 }
 
-section {
+#juncture section {
   display: flow-root;
   position: relative;
 }
 
-main > section {
+#juncture main > section {
   padding-top: 3rem;
 }
 
-main > section > section,
-main > section > section > section {
+#juncture main > section > section,
+#juncture main > section > section > section {
   padding-top: 2rem;
 }
 
-main > section > section > section > section,
-main > section > section > section > section > section,
-main > section > section > section > section > section > section {
+#juncture main > section > section > section > section,
+#juncture main > section > section > section > section > section,
+#juncture main > section > section > section > section > section > section {
   padding-top: 1rem;
 }
 
-section > h1, section > h2, section > h3, section > h4, section > h5, section > h6 {
+#juncture section > h1,
+#juncture section > h2,
+#juncture section > h3,
+#juncture section > h4,
+#juncture section > h5,
+#juncture section > h6 {
   margin-top: unset;
 }
 
-section ol, section ul  {
+#juncture section ol,
+#juncture section ul  {
   padding: 0.5em 0.5em 0.5em 1.4em;
 }
 
-section li > p {
+#juncture section li > p {
   margin: 0;
 }
 
@@ -70,7 +76,7 @@ body {
 
 .clear { clear: both; }
 
-section.sticky {
+#juncture section.sticky {
   position: sticky;
   top: 0;
   z-index: 3;
@@ -82,7 +88,7 @@ ve-footer ul {
   display: none;
 }
 
-section {
+#juncture section {
   width: 100%;
   /* position: relative; */
   clear: both;
@@ -147,13 +153,13 @@ section.no-offset:target:before {
 /* Mobile Devices */
 @media (max-width: 480px) {
 
-  main {
+  #juncture main {
     font-size: 1.2rem;
     line-height: 1.3;
     padding: 0 0 40vh 0;
   }
 
-  main > section {
+  #juncture main > section {
     padding: 0 6px;
   }
 
@@ -166,7 +172,7 @@ section.no-offset:target:before {
 /* Larger Devices */
 @media (min-width: 481px) {
 
-  main {
+  #juncture main {
     font-size: 1.3rem;
     line-height: 1.4;
     padding: 0;
@@ -252,8 +258,8 @@ section.no-offset:target:before {
   
   .ve-component.sticky + section, 
   .ve-component.sticky ~ section,
-  section.sticky + section, 
-  section.sticky ~ section {
+  #juncture section.sticky + section, 
+  #juncture section.sticky ~ section {
     clear: none;
   }
 
@@ -301,32 +307,32 @@ section.no-offset:target:before {
 
 /***************** tabs start *****************/
 
-.tabs {
+#juncture .tabs {
   /* height: 100%; */
 }
 
-section.tab {
+#juncture section.tab {
   height: calc(100% - 84px);
   overflow-y: scroll;
   border: 1px solid #ccc;
 }
 
-.tabs label {
+#juncture .tabs label {
   margin-bottom: 0;
 }
 
-input { display: none; }
-input + label { display: inline-block }
-input ~ .tab { visibility: hidden }
-#tab1:checked ~ .tab.content1,
-#tab2:checked ~ .tab.content2,
-#tab3:checked ~ .tab.content3,
-#tab4:checked ~ .tab.content4,
-#tab5:checked ~ .tab.content5,
-#tab6:checked ~ .tab.content6 {
+#juncture input { display: none; }
+#juncture input + label { display: inline-block }
+#juncture input ~ .tab { visibility: hidden }
+#juncture #tab1:checked ~ .tab.content1,
+#juncture #tab2:checked ~ .tab.content2,
+#juncture #tab3:checked ~ .tab.content3,
+#juncture #tab4:checked ~ .tab.content4,
+#juncture #tab5:checked ~ .tab.content5,
+#juncture #tab6:checked ~ .tab.content6 {
   visibility: visible;
 }
-input + label {
+#juncture input + label {
   border: 1px solid #999;
   background: #EEE;
   padding: 4px 12px;
@@ -335,32 +341,32 @@ input + label {
   top: 1px;
   cursor: pointer;
 }
-input:checked + label {
+#juncture input:checked + label {
   background: #FFF;
   border-bottom: 1px solid white;
   z-index: 2;
 }
-input ~ .tab {
+#juncture input ~ .tab {
   border-top: 1px solid #999;
   padding: 12px;
 }
-h1 {margin-bottom: 32px;}
+#juncture h1 {margin-bottom: 32px;}
 
-.tab { 
+#juncture .tab { 
   position: absolute;
   visibility: hidden;
   width: 100%;
   height: 100%;
   padding: 1rem 0;
 }
-.tab p {
+#juncture .tab p {
   /* height: 100%; */
 }
 /***************** tabs end *****************/
 
 
 /***************** cards start *****************/
-.cards {
+#juncture .cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(260px, 1fr) );
   grid-auto-rows: 1fr;
@@ -369,11 +375,11 @@ h1 {margin-bottom: 32px;}
   /* margin-bottom: 48px; */
 }
 
-.cards.wrapper {
+#juncture .cards.wrapper {
   padding: 0;
 }
 
-.card {
+#juncture .card {
   display: grid;
   grid-template-columns: 1fr;
   grid-template-rows: auto auto auto 1fr 0px;
@@ -381,17 +387,17 @@ h1 {margin-bottom: 32px;}
   padding: 0;
 }
 
-.card p {
+#juncture .card p {
   border: none;
 }
 
-.card-image {  /* image */
+#juncture .card-image {  /* image */
   grid-area: 1 / 1 / 2 / 2;
   width: 100%;
   height: 300px;
 }
 
-.card-title {  /* title */
+#juncture .card-title {  /* title */
   grid-area: 2 / 1 / 3 / 2;
   font-weight: bold;
   font-size: 1.5rem;
@@ -400,7 +406,7 @@ h1 {margin-bottom: 32px;}
   text-decoration: none;
 }
 
-.card-metadata {  /* metadata list */
+#juncture .card-metadata {  /* metadata list */
   grid-area: 3 / 1 / 4 / 2;
   list-style: none;
   padding: .2rem .5rem;
@@ -411,7 +417,7 @@ h1 {margin-bottom: 32px;}
   overflow-y: scroll;
 }
 
-.card-abstract{  /* abstract */
+#juncture .card-abstract{  /* abstract */
   grid-area: 4 / 1 / 5 / 2;
   align-self: flex-start;
   min-height: 110px;
@@ -432,14 +438,14 @@ h1 {margin-bottom: 32px;}
 
 
 /***************** hero start *****************/
-.hero {
+#juncture .hero {
   display: flex;
   flex-direction: column;
   height: 400px;
   margin-top: 0;
 }
 
-.hero-text {
+#juncture .hero-text {
   color: white;
   text-align: center;
   font-size: 2.5rem;
@@ -449,7 +455,7 @@ h1 {margin-bottom: 32px;}
   hyphens: unset;
 }
 
-.cta {
+#juncture .cta {
   background-color: #FFE55A;
   border-radius: 50px;
   font-family: Roboto;
@@ -461,11 +467,11 @@ h1 {margin-bottom: 32px;}
 }
 
 @media (max-width: 480px) { /* mobile */
-  .hero-text {
+  #juncture .hero-text {
     font-size: 2rem;
     max-width: 80%;
   }
-  .cta {
+  #juncture .cta {
     font-size: 1.5rem;
     padding: 12px 60px;
   }
@@ -475,17 +481,17 @@ h1 {margin-bottom: 32px;}
 
 /***************** markdown start *****************/
 
-mark {
+#juncture mark {
   cursor: pointer;
   background: unset;
   border-bottom: 1px solid #ccc;
   color: #444;
 }
-mark:hover {
+#juncture mark:hover {
   border-bottom: 2px solid #444;
   background: #eee;
 }
-mark::after {
+#juncture mark::after {
   color: #aaa;
   font-size: 50%;
   line-height: 0;
@@ -496,34 +502,35 @@ mark::after {
   padding-right: 4px;
 }
 
-mark.zoom::after {
+#juncture mark.zoom::after {
   content: "🔎";
 }
 
-mark.play::after {
+#juncture mark.play::after {
   content: "▶";
 }
 
-mark.flyto::after {
+#juncture mark.flyto::after {
   content: "✈";
   font-size: 120%;
   top: 0;
 }
 
-a { color: #0645ad; text-decoration:none;}
-a:visited{ color: #0b0080; }
-a:hover{ color: #06e; }
-a:active{ color:#faa700; }
-a:focus{ outline: thin dotted; }
-a:hover, a:active{ outline: 0; }
+#juncture a { color: #0645ad; text-decoration:none;}
+#juncture a:visited{ color: #0b0080; }
+#juncture a:hover{ color: #06e; }
+#juncture a:active{ color:#faa700; }
+#juncture a:focus{ outline: thin dotted; }
+#juncture a:hover, #juncture a:active{ outline: 0; }
 
 ::-moz-selection{background:rgba(255,255,0,0.3);color:#000}
 ::selection{background:rgba(255,255,0,0.3);color:#000}
 
-a::-moz-selection{background:rgba(255,255,0,0.3);color:#0645ad}
-a::selection{background:rgba(255,255,0,0.3);color:#0645ad}
+#juncture a::-moz-selection{background:rgba(255,255,0,0.3);color:#0645ad}
+#juncture a::selection{background:rgba(255,255,0,0.3);color:#0645ad}
 
-p, li {
+#juncture p,
+#juncture li {
   color: #444;
 
   /* These are technically the same, but use both */
@@ -543,68 +550,82 @@ p, li {
   hyphens: auto;
 }
 
-p {
+#juncture p {
   margin: 0 0 1rem 0;
 }
 
-img {
+#juncture img {
   max-width:100%;
 }
 
-h1,h2,h3,h4,h5,h6 {
+#juncture h1,
+#juncture h2,
+#juncture h3,
+#juncture h4,
+#juncture h5,
+#juncture h6 {
   font-weight:500;
   color:#444;
   line-height:1em;
 }
-h4,h5,h6{ font-weight: 500; }
-h1{ font-size:1.8em; }
-h2{ font-size:1.6em; }
-h3{ font-size:1.5em; }
-h4{ font-size:1.2em; }
-h5{ font-size:1em; }
-h6{ font-size:0.9em; }
+#juncture h4,
+#juncture h5
+#juncture h6{ font-weight: 500; }
+#juncture h1{ font-size:1.8em; }
+#juncture h2{ font-size:1.6em; }
+#juncture h3{ font-size:1.5em; }
+#juncture h4{ font-size:1.2em; }
+#juncture h5{ font-size:1em; }
+#juncture h6{ font-size:0.9em; }
 
-blockquote {
+#juncture blockquote {
   color:#666666;
   margin:0;
   padding-left: 1em;
   border-left: 0.5em #EEE solid;
 }
-hr { display: block; height: 2px; border: 0; border-top: 1px solid #aaa;border-bottom: 1px solid #eee; margin: 1em 0; padding: 0; }
-pre, code, kbd, samp { color: #990000; background-color:#eee; padding: 0 0px; font-family: monospace, monospace; _font-family: 'courier new', monospace; font-size: 1em; }
-pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; }
+#juncture hr { display: block; height: 2px; border: 0; border-top: 1px solid #aaa;border-bottom: 1px solid #eee; margin: 1em 0; padding: 0; }
+#juncture pre,
+#juncture code,
+#juncture kbd,
+#juncture samp { color: #990000; background-color:#eee; padding: 0 0px; font-family: monospace, monospace; _font-family: 'courier new', monospace; font-size: 1em; }
+#juncture pre { white-space: pre; white-space: pre-wrap; word-wrap: break-word; }
 
-b, strong { font-weight: bold; }
+#juncture b,
+#juncture strong { font-weight: bold; }
 
-dfn { font-style: italic; }
+#juncture dfn { font-style: italic; }
 
-ins { background: #ff9; color: #000; text-decoration: none; }
+#juncture ins { background: #ff9; color: #000; text-decoration: none; }
 
 /* mark { background: #ff0; color: #000; font-style: italic; font-weight: bold; } */
 
-sub, sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
-sup { top: -0.5em; }
-sub { bottom: -0.25em; }
+#juncture sub,
+#juncture sup { font-size: 75%; line-height: 0; position: relative; vertical-align: baseline; }
+#juncture sup { top: -0.5em; }
+#juncture sub { bottom: -0.25em; }
 
-ul, ol { 
+#juncture ul,
+#juncture ol { 
   /* margin: 1em 0; */
   margin: 0;
   padding: 0 0 0 2em; 
 }
-li p:last-child { margin:0 }
-dd { margin: 0 0 0 2em; }
+#juncture li p:last-child { margin:0 }
+#juncture dd { margin: 0 0 0 2em; }
 
-img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
+#juncture img { border: 0; -ms-interpolation-mode: bicubic; vertical-align: middle; }
 
-table {
+#juncture table {
   border-collapse: collapse;
   border-spacing: 0;
   width: 100%;
 }
-th { border-bottom: 1px solid black; }
-td { vertical-align: top; }
+#juncture th { border-bottom: 1px solid black; }
+#juncture td { vertical-align: top; }
 
-table td, table th {
+#juncture table td,
+#juncture table th {
   border: 1px solid #ddd;
   padding: 5px;
 }
