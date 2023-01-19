@@ -579,6 +579,8 @@
 
 </script>
 
+<style src='../style.css'></style> 
+
 <style>
 * { box-sizing: border-box; }
 
