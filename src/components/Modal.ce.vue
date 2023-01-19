@@ -15,7 +15,7 @@
   
 <script setup lang="ts">
 
-  import { computed, onMounted, nextTick, ref, toRaw, watch } from 'vue'
+  import { computed, nextTick, ref, watch } from 'vue'
   import { initTippy } from '../utils'
 
   import '@shoelace-style/shoelace/dist/components/button/button.js'
