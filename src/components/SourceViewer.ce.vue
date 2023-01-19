@@ -1,6 +1,6 @@
 <template>
 
-<div ref="root" class="main" :style="{width: '100%', height: '100%'}" draggable="true" @dragstart="onDrag">
+<div ref="root" class="main" :style="{width: '100%', height: '100%'}" :draggable="props.draggable" @dragstart="onDrag">
   
   <pre v-if="language === 'juncture'" id="juncture" class="language-juncture" style="white-space:pre; white-space:pre-wrap; word-wrap:break-word;">
     <code v-html="rawText"></code>
@@ -46,7 +46,8 @@
 
   const props = defineProps({
     src: { type: String },
-    language: { type: String, default: 'juncture' }
+    language: { type: String, default: 'juncture' },
+    draggable: { type: Boolean, default: true }
   })
 
   // const ready = ref(false)
@@ -70,6 +71,7 @@
   })
 
   onMounted(() => {
+    console.log(props.src)
     if (props.src) {
       fetch(`https://api.juncture-digital.org/markdown/${props.src}`)
         .then(resp => resp.text())

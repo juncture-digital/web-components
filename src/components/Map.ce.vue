@@ -350,12 +350,12 @@
     if (tileLayers.value && opacitySlider.value) tileLayers.value[0].setOpacity(parseFloat(opacitySlider.value.value))
   }
 
-  const flytoRegex = RegExp(/^(?<lat>[\d.]+),(?<lng>[\d.]+),?(?<zoom>[\d.]+)?$/)
+  const flytoRegex = RegExp(/^(?<lat>[-?\d.]+),(?<lng>[-?\d.]+),?(?<flyto>[\d.]+)?$/)
   function isFlyto(attr:Attr) {
     let name = attr.name.toLowerCase()
     let value = attr.value
     if ((name === 'enter' || name === 'exit') && value.indexOf('|') > 0) [name, value] = value.split('|')
-    return ['zoom', 'zoomto'].indexOf(name.toLowerCase()) === 0 || flytoRegex.test(value)
+    return ['fly', 'flyto'].indexOf(name.toLowerCase()) === 0 || flytoRegex.test(value)
   }
 
   function addInteractionHandlers() {
@@ -366,6 +366,7 @@
       let markEls = Array.from(el.querySelectorAll('mark')) as HTMLElement[]
       markEls.forEach(mark => {
         Array.from(mark.attributes).forEach(attr => {
+          console.log(mark, isFlyto(attr))
           if (isFlyto(attr)) {
             let veMap = findVeMap(mark.parentElement)
             if (veMap) {

@@ -269,15 +269,16 @@
   watch(accts, () => {
     acct.value = acct.value || (accts.value.length > 0 ? accts.value[0].login : null)
   })
-  watch(acct, () => {
-    // console.log(`watch.acct=${toRaw(acct.value)}`)
-    repo.value = ''
+  watch(acct, (_acct, _prior) => {
+    // console.log(`watch.acct=${_acct} prior=${_prior}`)
+    if (_prior) repo.value = ''
     getRepositories().then(_repos => repos.value = _repos)
   })
 
   const repos = ref<any[]>([])
   const repo = ref('')
   watch(repos, () => {
+    // console.log('watch.repos')
     if (!repo.value && repos.value.length > 0) {
       if (repos.value.length === 1) repo.value = repos.value[0].name
       else {
@@ -289,9 +290,9 @@
 
   const branches = ref<any[]>([])
   const branch = ref('')
-  watch(repo, () => {
-    // console.log(`watch.repo=${toRaw(repo.value)}`)
-    path.value = []
+  watch(repo, (_repo, _prior) => {
+    // console.log(`watch.repo=${_repo} prior=${_prior}`)
+    if (_prior) path.value = []
     updateDirList().then(_ => setContentPath())
     branch.value = ''
     if (repo.value) {
@@ -330,7 +331,6 @@
     pathIsDirectory = path.value.length === 0 || dirList.value.length > 0 
   })
 
-
   onMounted(() => {
     // console.log('onMounted', props)
     getAuthToken()
@@ -344,7 +344,7 @@
     if (username && username === acct.value) {
       let repos = await githubClient.value.repos(acct.value)
       ready = repos.find((repo:any) => repo.name === 'essays') !== undefined
-      console.log(`waitForRepoInit: repo=${repo} repos=${repos.map((repo:any) => repo.name)} found=${ready} createSubmitted=${createSubmitted}`)
+      // console.log(`waitForRepoInit: repo=${repo} repos=${repos.map((repo:any) => repo.name)} found=${ready} createSubmitted=${createSubmitted}`)
       if (!ready && !createSubmitted) {
         githubClient.value.createRepository({name:'essays', description:'Juncture visual essays'})
         githubClient.value.createRepository({name:'media', description:'Juncture media'})
@@ -356,11 +356,6 @@
       getRepositories()
     }
     if (!ready) setTimeout(() => waitForRepoInit(), 5000)
-  }
-
-  function componentWillLoad() {
-    if (props.sticky) makeSticky(host.value)
-    waitForRepoInit()
   }
 
   function parseContentPath(_contentPath:string='') {

@@ -6,7 +6,7 @@
 
       <sl-icon v-if="icons[li.innerHTML]" 
         :name="icons[li.innerHTML].icon" 
-        label="icons[li.innerHTML].label"
+        :label="icons[li.innerHTML].label"
         @click="onClick(li, $event)"
       ></sl-icon>
 
@@ -20,7 +20,7 @@
     </template>
 
     <sl-dialog label="Page Source" class="page-source-dialog" style="--width: 80vw;">
-      <ve-source-viewer v-if="sourcePath" :src="sourcePath"></ve-source-viewer>
+      <ve-source-viewer v-if="sourcePath" :src="sourcePath" draggable="false"></ve-source-viewer>
       <sl-button slot="footer" variant="primary" @click="showPageSourceDialog = false">Close</sl-button>
     </sl-dialog>
 
@@ -87,8 +87,10 @@
   }
 
   function showSource() {
-    sourcePath.value = (window as any).PREFIX
-      ? `${(window as any).PREFIX}/${location.pathname.split('/').filter(pe => pe).filter(pe => pe !== 'editor').join('/')}`
+    let prefix = (window as any).PREFIX
+    let path = location.pathname.split('/').filter(pe => pe).filter(pe => pe !== 'editor').join('/')
+    sourcePath.value = prefix && path.indexOf(prefix) !== 0
+      ? `${prefix}/${path}`
       : location.pathname.split('/').filter(pe => pe).filter(pe => pe !== 'editor').join('/')
     // console.log('showSource', toRaw(sourcePath.value))
     showPageSourceDialog.value = true
@@ -115,11 +117,20 @@
     padding: 9px 12px;
     margin: auto;
     font-family: Roboto, sans-serif;
+    font-size: .9rem;
     z-index: 100;
-    background-color: #444;
-    color: white;
+    background-color: #eee;
+    color: #444;
     margin-top: 36px;
+    border-radius: 3px;
   }
+
+  a, sl-icon { color: #0645ad; text-decoration:none;}
+  a:visited { color: #0b0080; }
+  a:hover, sl-icon:hover { color: #06e; cursor: pointer; }
+  a:active { color:#faa700; }
+  a:focus { outline: thin dotted; }
+  a:hover, a:active{ outline: 0; }
 
   .main.sticky {
     position: fixed;
@@ -132,7 +143,7 @@
     gap: 12px;
   }
 
-  div {
+  .main div {
     cursor: pointer;
   }
 
