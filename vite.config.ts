@@ -27,6 +27,9 @@ export default defineConfig(({mode})=> {
     
     build: {
       rollupOptions: {
+        input: {
+          app: './main.html',
+        },
         output: {
           assetFileNames: (assetInfo) => {
             let extType = assetInfo.name?.split('.').at(1)
