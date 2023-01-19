@@ -28,7 +28,7 @@ export default defineConfig(({mode})=> {
     build: {
       rollupOptions: {
         input: {
-          app: './main.html',
+          index: './main.html',
         },
         output: {
           assetFileNames: (assetInfo) => {
