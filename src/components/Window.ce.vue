@@ -1,16 +1,12 @@
 <template>
 
-  <div ref="root" id="main">
-
-    <sl-button @click="toggleWindow">{{ props.buttonLabel }}</sl-button>
-
-  </div>
+  <sl-button ref="root" @click="toggleWindow">{{ props.buttonLabel }}</sl-button>
 
 </template>
   
 <script setup lang="ts">
 
-  import { computed, ref, watch } from 'vue'
+  import { ref } from 'vue'
   import type SlButton from '@shoelace-style/shoelace/dist/components/button/button.js'
 
   const state:any = window
@@ -25,9 +21,6 @@
   })
 
   const root = ref<HTMLElement | null>(null)
-  const host = computed(() => (root.value?.getRootNode() as any)?.host)
-
-  watch(host, () => {host.value.style.display = 'inline-block'})
 
   function toggleWindow() {
     if (state.junctureWindow) { state.junctureWindow.close() }
@@ -37,5 +30,11 @@
 
 </script>
 
+<style src='../style.css'></style> 
+
 <style>
+  :host {
+    display: inline-block;
+    margin: 0 6px;
+  }
 </style>
