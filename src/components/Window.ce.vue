@@ -35,6 +35,5 @@
 <style>
   :host {
     display: inline-block;
-    margin: 0 6px;
   }
 </style>

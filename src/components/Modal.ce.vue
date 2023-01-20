@@ -114,9 +114,8 @@
 
   * { box-sizing: border-box; }
 
-  #main {
-    font-family: Roboto, sans-serif;
-    margin-bottom: 2rem;
+  :host {
+    display: inline-block;
   }
 
   sl-dialog::part(body) {

@@ -6,6 +6,7 @@ import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.j
 setBasePath('https://juncture-digital.github.io/web-components/src')
 
 import AddMediaResourceDialog from './components/AddMediaResourceDialog.ce.vue'
+import Auth from './components/Auth.ce.vue'
 import Contact from './components/Contact.ce.vue'
 import ContentSelector from './components/ContentSelector.ce.vue'
 import EntityCard from './components/EntityCard.ce.vue'
@@ -33,6 +34,7 @@ console.log(`juncture.web-components: version=${process.env.version}`)
 
 function init() {
 	customElements.define('ve-add-media-resource-dialog', defineCustomElement(AddMediaResourceDialog))
+	customElements.define('ve-auth', defineCustomElement(Auth))
 	customElements.define('ve-contact', defineCustomElement(Contact))
 	customElements.define('ve-content-selector', defineCustomElement(ContentSelector))
 	customElements.define('ve-entity-card', defineCustomElement(EntityCard))
