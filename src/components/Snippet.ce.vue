@@ -2,10 +2,43 @@
 
   <div ref="root" id="main">
 
-    <sl-tab-group>
-      <sl-tab slot="nav" panel="markdown">Markdown</sl-tab>
-      <sl-tab slot="nav" panel="html">HTML</sl-tab>
-      <sl-tab slot="nav" panel="preview">Demo</sl-tab>
+    <sl-details v-if="collapsible" class="custom-icons" :open="props.open">
+      
+      <sl-icon name="plus-square" slot="expand-icon"></sl-icon>
+      <sl-icon name="dash-square" slot="collapse-icon"></sl-icon>
+
+      <div slot="summary">
+        <sl-tooltip content="Show code snippets" placement="top">
+            <div :style="{display: 'flex', alignItems: 'center', gap: '9px'}">
+              <sl-icon name="markdown" style="font-size:30px"></sl-icon>
+              <sl-icon name="code-slash" style="font-size:30px"></sl-icon>
+              <sl-icon name="eye" style="font-size:30px"></sl-icon>
+              <span v-html="props.label"></span>
+          </div>
+        </sl-tooltip>
+    </div>
+
+      <sl-tab-group>
+        <sl-tab slot="nav" panel="markdown"><sl-icon name="markdown"></sl-icon>Markdown</sl-tab>
+        <sl-tab slot="nav" panel="html"><sl-icon name="code-slash"></sl-icon>HTML</sl-tab>
+        <sl-tab slot="nav" panel="preview"><sl-icon name="eye"></sl-icon>Rendered</sl-tab>
+        <sl-tab-panel name="markdown">
+          <ve-source-viewer v-if="active === 'markdown'" v-html="markdown"></ve-source-viewer>
+        </sl-tab-panel>
+        <sl-tab-panel name="html">
+          <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
+        </sl-tab-panel>
+        <sl-tab-panel name="preview">
+          <div id="preview" style="position:relative;" v-if="active === 'preview' && html" v-html="html" draggable="true" @dragstart="onDrag"></div>
+        </sl-tab-panel>
+      </sl-tab-group>
+
+    </sl-details>
+
+    <sl-tab-group v-else>
+      <sl-tab slot="nav" panel="markdown"><sl-icon name="markdown"></sl-icon>Markdown</sl-tab>
+      <sl-tab slot="nav" panel="html"><sl-icon name="code-slash"></sl-icon>HTML</sl-tab>
+      <sl-tab slot="nav" panel="preview"><sl-icon name="eye"></sl-icon>Rendered</sl-tab>
       <sl-tab-panel name="markdown">
         <ve-source-viewer v-if="active === 'markdown'" v-html="markdown"></ve-source-viewer>
       </sl-tab-panel>
@@ -26,14 +59,20 @@
   import { computed, onMounted, nextTick, ref, toRaw, watch } from 'vue'
   import { initTippy } from '../utils'
 
+  import '@shoelace-style/shoelace/dist/components/icon/icon.js'
+  import '@shoelace-style/shoelace/dist/components/details/details.js'
   import '@shoelace-style/shoelace/dist/components/tab/tab.js'
   import '@shoelace-style/shoelace/dist/components/tab-group/tab-group.js'
   import '@shoelace-style/shoelace/dist/components/tab-panel/tab-panel.js'
+  import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js'
   import type SlTab from '@shoelace-style/shoelace/dist/components/tab/tab.js'
 
   const apiEndpoint = location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://api.juncture-digital.org'
 
   const props = defineProps({
+    label: { type: String },
+    collapsible: { type: Boolean, default: false },
+    open: { type: Boolean, default: false },
     prefix: { type: String },
     right: { type: Boolean },
     left: { type: Boolean },
@@ -116,7 +155,7 @@
       let htmlEls = new DOMParser().parseFromString(pageHtml, 'text/html').children[0].children
       let main = htmlEls[1].querySelector('main')
       if (main) {
-        html.value = main.innerHTML
+        html.value = main.outerHTML
         if (active.value === 'preview') nextTick(() => {
           if (props.fill) setFill()
           initTippy(shadowRoot.value, true)
@@ -138,17 +177,41 @@
 
   * { box-sizing: border-box; }
 
+  :host {
+    display: block;
+    margin-top: 2rem;
+  }
+
   #main {
     font-family: Roboto, sans-serif;
     border: 0.5px solid #ddd;
     border-radius: 6px;
-    padding: 0 6px;  
-    margin-bottom: 2rem;
+    padding: 0;  
     font-size: 1.2rem;
   }
 
   sl-tab-panel {
     --padding: 0;
+  }
+
+  #preview {
+    padding: 12px;
+    font-size: 1em;
+    line-height: 1.3;;
+  }
+
+  sl-details::part(summary) {
+    font-size: 1rem;
+  }
+
+  sl-details.custom-icons::part(summary-icon) {
+    /* Disable the expand/collapse animation */
+    rotate: none;
+  }
+
+  sl-tab sl-icon {
+    font-size: 24px;
+    margin-right: 6px;
   }
 
 </style>

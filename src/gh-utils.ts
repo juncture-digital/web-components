@@ -104,7 +104,7 @@ export class GithubClient {
     }
   
     async getSha(acct:string, repo:string, path:string, ref:string): Promise<any> {
-      // console.log(`sha: acct=${acct} repo=${repo} path=${path} ref=${ref}`)
+      console.log(`getSha: acct=${acct} repo=${repo} path=${path} ref=${ref}`)
       let url = `https://api.github.com/repos/${acct}/${repo}/contents/${path}`
       if (ref) url += `?ref=${ref}`
       let resp:any = await fetch(url, { headers: {Authorization: `Token ${this.authToken}`} })
@@ -116,7 +116,8 @@ export class GithubClient {
     _shas:any = {}
     async putFile(acct:string, repo:string, path:string, content:any, ref:string, isBinaryString=false, sha:string=''): Promise<any> {
       let url = `https://api.github.com/repos/${acct}/${repo}/contents/${path}`
-      sha = sha || this._shas[url] || await this.getSha(acct, repo, path, ref)
+      let shaKey = `${acct}/${repo}/${ref}/${path}`
+      sha = sha || this._shas[shaKey] || await this.getSha(acct, repo, path, ref)
       console.log(`putFile: acct=${acct} repo=${repo} path=${path} ref=${ref} sha=${sha} isBinaryString=${isBinaryString}`)
       // let payload:any = { message: 'API commit', content: btoa(unescape(encodeURIComponent(content))) }
       let payload:any = { 
@@ -128,7 +129,7 @@ export class GithubClient {
       let resp:any = await fetch(url, { method: 'PUT', body: JSON.stringify(payload), headers: {Authorization: `Token ${this.authToken}`} })
       if (resp.ok) {
         let body = await resp.json()
-        this._shas[url] = body.content.sha
+        this._shas[shaKey] = body.content.sha
       } else {
         console.log(resp)
       }

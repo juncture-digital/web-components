@@ -226,20 +226,23 @@
   }
 
   async function getExifTags() {
-    let tags = await exifr.parse(image.value?.src, true)
     let data:any = {}
+    try {
+      let tags = await exifr.parse(image.value?.src, true)
 
-    if (tags.CreateDate) data.created = tags.CreateDate.toISOString()
+      if (tags.CreateDate) data.created = tags.CreateDate.toISOString()
 
-    let orientation = await exifr.orientation(image.value?.src)
-    if (orientation) data.orientation = orientation
+      let orientation = await exifr.orientation(image.value?.src)
+      if (orientation) data.orientation = orientation
 
-    let gps = await exifr.gps(image.value?.src)
-    if (gps) {
-      let {latitude, longitude} = gps
-      if (latitude) data.location = `${latitude.toFixed(7)},${longitude.toFixed(7)}`
+      let gps = await exifr.gps(image.value?.src)
+      if (gps) {
+        let {latitude, longitude} = gps
+        if (latitude) data.location = `${latitude.toFixed(7)},${longitude.toFixed(7)}`
+      } 
+    } catch (err) {
+      console.log(err)
     }
-
     return data
   }
 

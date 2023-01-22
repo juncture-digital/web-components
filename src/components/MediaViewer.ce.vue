@@ -7,7 +7,8 @@
         
         <!-- Single image -->
         <div v-if="type === 'image'" class="image-wrapper media-item">
-          <div id="osd"></div>
+          <img v-if="isGif(manifests[0])" :src="itemInfo.id" style="width:100%;"/>
+          <div v-else id="osd"></div>
           <ve-manifest-popup :manifest="manifests[0].id"></ve-manifest-popup>
         </div>
         
@@ -282,6 +283,10 @@
     }
   }
 
+  function isGif(manifest:any) {
+    return getItemInfo(manifest).format === 'image/gif'
+  }
+
   /************ Image annotations ************/
   const annotator = ref<any>()
   const annotations = ref<any[]>([])
@@ -417,10 +422,10 @@
   watch(type, () => {
     addInteractionHandlers()
     nextTick(() => {
-      if (type.value === 'image') loadImage()
+      if (type.value === 'image' && !isGif(manifest.value)) loadImage()
       // else if (type.value === 'image-compare') scaledImages.value = scaleImages()
       else if (type.value === 'video' && iiifItemsList.value.length > 0) initializeHTML5Player()
-      else if (type.value === 'audio') initializeHTML5Player()   
+      else if (type.value === 'audio') initializeHTML5Player()
       if (!caption.value && type.value === 'image') caption.value = label(manifest.value)   
     })
   })

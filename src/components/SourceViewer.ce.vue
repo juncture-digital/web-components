@@ -78,36 +78,75 @@
     }
   })
 
+  //Prism.languages.juncture = Prism.languages.extend('markdown', {})
+	//Prism.languages.insertBefore('juncture', 'front-matter-block', {
+  
   Prism.languages.juncture = Prism.languages.extend('markdown', {
-    'tag': [
-      {
-        pattern: /\.ve-[a-zA-Z-]+/
-      },
-    ],
-    'manifest-url': [
-      {
-        pattern: /\s+[a-z]+:[a-z0-9-\/\.]+/i,
+
+  'tag': {
+		pattern: /\.ve-[a-z0-9-]+.+/,
+		greedy: true,
+		inside: {
+			
+      'tag': {
+				pattern: /\.ve-[a-z0-9-]+/
+			},
+      
+      'string': [{ 
+        pattern: /[^=]\"(\\.|[^\"])*\"/,
+        alias: 'attr-value'
+      }],
+
+      'qid': [{
+        pattern: /Q[0-9]+/, 
+        alias: 'entity'
+      }],
+      
+      'manifest-url': [{
+        pattern: /\s+[a-z]+:[a-z0-9-_,%'\/\.]+/i,
         inside: {
-          'url': /\s+[a-z]+:[a-z0-9-\/\.]+/i,
+          'url': /\s+[a-z]+:[a-z0-9-_,%'\/\.]+/i,
           'punctuation': /\s+/
         }
-      },
-    ],
-    'position': [
-      {
-        pattern: /(full|left|right|sticky)/,
-        alias: 'class-name'
-      },
-    ],
-    'attribute': [
-      {
-        pattern: /\s+[a-z-]+/,
-        inside: {
-          'string': /[a-z-]+/i,
-          'punctuation': /\s+/
-        }
-      },
-    ]
+      }],
+
+      'position': [{ 
+        pattern: /\s+(full|left|right|sticky)/, 
+        alias: 'boolean'
+      }],
+
+			'special-attr': [],
+			'attr-value': {
+				pattern: /=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+)/,
+				inside: {
+					'punctuation': [
+						{
+							pattern: /^=/,
+							alias: 'attr-equals'
+						},
+						{
+							pattern: /^(\s*)["']|["']$/,
+							lookbehind: true
+						}
+					]
+				}
+			},
+
+			'punctuation': /\/?>/,
+      
+			'attr-name': {
+				pattern: /[^\s>\/]+/,
+				inside: {
+					'namespace': /^[^\s>\/:]+:/
+				}
+			}
+
+		}
+	},
+
+  'marked': [{ pattern: /==[^=]+=={[^}]+}/, alias: 'class-name' }],
+  'qid': [{ pattern: /Q[0-9]+/, alias: 'entity' }],
+  'reference': [{ pattern: /\[\^[^\]]+\]:?\s*/, alias: 'class-name' }],
 
   })
 

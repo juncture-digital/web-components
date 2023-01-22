@@ -4,7 +4,7 @@
 
     <sl-button @click="showDialog = !showDialog">{{props.buttonLabel}}</sl-button>
 
-    <sl-dialog :label="label" class="dialog" style="--width: 80vw;">
+    <sl-dialog :label="label" class="dialog" :style="{'--width': props.width}">
       <div id="content" v-html="html" draggable="true" @dragstart="onDrag"></div>
       <sl-button slot="footer" variant="primary" @click="showDialog = false">Close</sl-button>
     </sl-dialog>
@@ -30,7 +30,7 @@
     prefix: { type: String },
     label: { type: String },
     buttonLabel: { type: String, default: 'Show me' },
-    width: { type: String },
+    width: { type: String, default: '80vw' },
   })
 
   const root = ref<HTMLElement | null>(null)
@@ -76,10 +76,18 @@
   function getHTML() {
     html.value = ''
     if (props.src) {
-      fetch(`${apiEndpoint}/html/${props.src}`)
+      let url = `${apiEndpoint}/html/${props.src}`
+      let [acct, repo, ...path] = props.src.split('/')
+      if (acct === 'juncture-digital' && repo === 'juncture' && 
+         (location.hostname === 'dev.juncture-digital.org' || location.hostname === 'localhost')) {
+        url += '?ref=dev'
+      }
+      fetch(url)
       .then(resp => resp.text())
-      .then(_html => {
-        html.value = _html
+      .then(pageHtml => {
+        let htmlEls = new DOMParser().parseFromString(pageHtml, 'text/html').children[0].children
+        let _html = htmlEls[1].querySelector('main')?.outerHTML
+        if (_html) html.value = _html
         nextTick(() => initTippy(shadowRoot.value, true))
       })
     } else {
@@ -94,7 +102,7 @@
       .then(resp => resp.text())
       .then(pageHtml => {
         let htmlEls = new DOMParser().parseFromString(pageHtml, 'text/html').children[0].children
-        let _html = htmlEls[1].querySelector('main')?.innerHTML
+        let _html = htmlEls[1].querySelector('main')?.outerHTML
         if (_html) html.value = _html
         nextTick(() => initTippy(shadowRoot.value, true))
       })
