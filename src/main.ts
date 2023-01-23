@@ -3,7 +3,8 @@ import { defineCustomElement } from 'vue'
 
 import '@shoelace-style/shoelace/dist/themes/light.css'
 import { setBasePath } from '@shoelace-style/shoelace/dist/utilities/base-path.js'
-setBasePath('https://juncture-digital.github.io/web-components/src')
+// setBasePath('https://juncture-digital.github.io/web-components/src')
+setBasePath('https://raw.githubusercontent.com//juncture-digital/web-components/main/src')
 
 import AddMediaResourceDialog from './components/AddMediaResourceDialog.ce.vue'
 import Auth from './components/Auth.ce.vue'

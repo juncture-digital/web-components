@@ -10,9 +10,9 @@
       <div slot="summary">
         <sl-tooltip content="Show code snippets" placement="top">
             <div :style="{display: 'flex', alignItems: 'center', gap: '9px'}">
-              <sl-icon name="markdown" style="font-size:30px"></sl-icon>
-              <sl-icon name="code-slash" style="font-size:30px"></sl-icon>
-              <sl-icon name="eye" style="font-size:30px"></sl-icon>
+              <sl-icon name="markdown" style="font-size:24px"></sl-icon>
+              <sl-icon name="code-slash" style="font-size:24px"></sl-icon>
+              <sl-icon name="eye" style="font-size:24px"></sl-icon>
               <span v-html="props.label"></span>
           </div>
         </sl-tooltip>
@@ -180,14 +180,12 @@
   :host {
     display: block;
     margin-top: 2rem;
+    border-radius: 2px;
   }
 
   #main {
     font-family: Roboto, sans-serif;
-    border: 0.5px solid #ddd;
-    border-radius: 6px;
-    padding: 0;  
-    font-size: 1.2rem;
+    /* border: 0.5px solid #ddd; */
   }
 
   sl-tab-panel {
@@ -198,6 +196,10 @@
     padding: 12px;
     font-size: 1em;
     line-height: 1.3;;
+  }
+
+  sl-details::part(header) {
+    background: rgba(66,185,131,.1);
   }
 
   sl-details::part(summary) {

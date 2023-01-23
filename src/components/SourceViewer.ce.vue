@@ -221,6 +221,10 @@
   position: relative;
 }
 
+.main pre {
+  background-color: #fff;
+}
+
 .main:hover .copy-button {
   opacity: 1;
 }
