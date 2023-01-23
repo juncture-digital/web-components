@@ -29,7 +29,7 @@
 
   const props = defineProps({
     overlay: { type: String },
-    zoom: { type: Number },
+    zoom: { type: Number, default: 10 },
     center: { type: String },
     marker: { type: String },
     caption: { type: String },
@@ -58,7 +58,7 @@
   const tileLayers = ref<L.TileLayer[]>()
   const geoJsonLayers = ref<L.LayerGroup[]>()
 
-  let zoom:number = 10
+  const zoom = ref(10) 
 
   watch(host, () => nextTick(() => doLayout()))
 
@@ -94,6 +94,7 @@
   watch(props, () => evalProps())
 
   function evalProps() {
+    zoom.value = props.zoom 
     if (props.cards) parseCards()
   }
 
@@ -194,10 +195,10 @@
     } else if (props.entities) {
       let entity = await getEntity(entities.value[0])
       center = latLng(entity.coords)
-      zoom = 9
+      zoom.value = 9
     } else {
       center = new L.LatLng(0, 0)
-      zoom = 6
+      zoom.value = 6
     }
 
     if (map.value) {
@@ -214,7 +215,7 @@
       preferCanvas: true,
       zoomSnap: 0.1,
       center, 
-      zoom,
+      zoom: zoom.value,
       scrollWheelZoom: false,
       layers: [
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {

@@ -112,7 +112,7 @@
     if (active.value === 'preview') nextTick(() => initTippy(shadowRoot.value, true))
     if (props.fill && html.value) nextTick(() => setFill())
   })
-
+  
   watch(content, () => {
     shadowRoot.value?.querySelectorAll('sl-tab').forEach(el => {
       const observer = new MutationObserver((mutations) => {
@@ -155,7 +155,7 @@
       let htmlEls = new DOMParser().parseFromString(pageHtml, 'text/html').children[0].children
       let main = htmlEls[1].querySelector('main')
       if (main) {
-        html.value = main.outerHTML
+        html.value = main.innerHTML
         if (active.value === 'preview') nextTick(() => {
           if (props.fill) setFill()
           initTippy(shadowRoot.value, true)
@@ -179,13 +179,18 @@
 
   :host {
     display: block;
-    margin-top: 2rem;
+    margin-top: 1.5rem;
     border-radius: 2px;
+    border: 0.5px solid #ddd;
+  }
+
+  :host([collapsible]) {
+    border: none;
   }
 
   #main {
     font-family: Roboto, sans-serif;
-    /* border: 0.5px solid #ddd; */
+    margin-top: 0;
   }
 
   sl-tab-panel {
@@ -199,7 +204,7 @@
   }
 
   sl-details::part(header) {
-    background: rgba(66,185,131,.1);
+    /* background: rgba(66,185,131,.1); */
   }
 
   sl-details::part(summary) {
