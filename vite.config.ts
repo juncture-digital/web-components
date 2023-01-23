@@ -28,9 +28,10 @@ export default defineConfig(({mode})=> {
     build: {
       rollupOptions: {
         input: {
-          index: './main.html',
+          index: './index.html',
         },
         output: {
+          dir: 'docs',
           assetFileNames: (assetInfo) => {
             let extType = assetInfo.name?.split('.').at(1)
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType || '')) extType = 'img';
