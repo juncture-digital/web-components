@@ -3,7 +3,7 @@
   <div ref="root" id="main">
 
     <sl-button @click="showDialog = !showDialog">
-      <sl-icon v-if="props.buttonIcon" slot="prefix" :name="props.buttonIcon"></sl-icon>
+      <sl-icon v-if="props.buttonIcon" slot="prefix" :name="props.buttonIcon" style="font-size:20px;"></sl-icon>
       {{props.buttonLabel}}
     </sl-button>
 
