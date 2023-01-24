@@ -46,7 +46,7 @@
         <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
       </sl-tab-panel>
       <sl-tab-panel name="preview">
-        <div id="preview" style="position:relative;" v-if="active === 'preview' && html" v-html="html" draggable="true" @dragstart="onDrag"></div>
+        <div id="juncture" style="position:relative;" v-if="active === 'preview' && html" v-html="html" draggable="true" @dragstart="onDrag"></div>
       </sl-tab-panel>
     </sl-tab-group>
 
@@ -111,6 +111,7 @@
     if (active.value !== 'markdown' && html.value === undefined) getHTML()
     if (active.value === 'preview') nextTick(() => initTippy(shadowRoot.value, true))
     if (props.fill && html.value) nextTick(() => setFill())
+    if (props.height) nextTick(() => setHeight())
   })
   
   watch(content, () => {
@@ -123,10 +124,15 @@
     })
   })
 
+  function setHeight() {
+    let container = shadowRoot.value?.querySelector('sl-tab-panel[name="preview"]') as HTMLElement
+    if (active.value === 'preview' && props.height) container.style.height = props.height
+  }
+
   function setFill() {
     let container = shadowRoot.value?.querySelector('sl-tab-panel[name="preview"]') as HTMLElement
     if (active.value === 'preview') {
-      let main = shadowRoot.value?.querySelector('#preview') as HTMLElement
+      let main = shadowRoot.value?.querySelector('#juncture') as HTMLElement
       let width = container.clientWidth / 2
       let filler = document.createElement('div')
       filler.style.height = `${width}px`
@@ -197,7 +203,7 @@
     --padding: 0;
   }
 
-  #preview {
+  #juncture {
     padding: 12px;
     font-size: 1em;
     line-height: 1.3;;

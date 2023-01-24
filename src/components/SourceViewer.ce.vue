@@ -222,7 +222,7 @@
 }
 
 .main pre {
-  background-color: #fff;
+  background-color: #fffaee;
 }
 
 .main:hover .copy-button {
