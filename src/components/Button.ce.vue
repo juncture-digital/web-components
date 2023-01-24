@@ -10,7 +10,8 @@
 <script setup lang="ts">
 
   import { computed, onMounted, ref } from 'vue'
-  import type SlButton from '@shoelace-style/shoelace/dist/components/button/button.js'
+  import '@shoelace-style/shoelace/dist/components/button/button.js'
+  import '@shoelace-style/shoelace/dist/components/icon/icon.js'
 
   const state:any = window
 

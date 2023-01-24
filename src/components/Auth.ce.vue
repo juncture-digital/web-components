@@ -4,15 +4,15 @@
 
     <sl-tooltip v-if="isLoggedIn" :content="`Logged in as ${username}`" placement="bottom">
       <sl-button variant="default" @click="logout">
-        <sl-icon slot="prefix" name="person-circle"></sl-icon>
+        <sl-icon slot="prefix" name="github" style="font-size:20px;"></sl-icon>
         Logout
       </sl-button>
     </sl-tooltip>
 
-    <sl-tooltip v-else content="Click to Login" placement="top">
+    <sl-tooltip v-else content="Click to Login with Github" placement="top">
       <sl-button variant="default" @click="login">
-        <sl-icon slot="prefix" name="person-circle"></sl-icon>
-        Login
+        <sl-icon slot="prefix" name="github" style="font-size:20px;"></sl-icon>
+        Login with Github
       </sl-button>
     </sl-tooltip>
 
@@ -68,10 +68,13 @@
   function login() {
     let hostname = (new URL(window.location.href)).hostname
     let isDev = hostname === 'localhost' || hostname.indexOf('192.168.') === 0
+    console.log(window.location)
+    let redirectTo  = `${window.location.href}`
+    console.log(`login: redirectTo=${redirectTo}`)
     let href = isDev
       ? `${window.location.origin}${window.location.pathname}?code=testing&redirect_uri=${location.pathname}${location.hash}`
       : clientIds[location.hostname] !== undefined
-        ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${location.href}`
+        ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${redirectTo}`
         : null
     console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
     if (href) window.location.href = href

@@ -1,6 +1,9 @@
 <template>
 
-  <sl-button ref="root" @click="toggleWindow">{{ props.buttonLabel }}</sl-button>
+  <sl-button ref="root" @click="toggleWindow">
+    <sl-icon v-if="props.buttonIcon" slot="prefix" :name="props.buttonIcon"></sl-icon>
+    {{ props.buttonLabel }}
+  </sl-button>
 
 </template>
   
@@ -17,7 +20,8 @@
     height: { type: Number, default: 1000},
     top: { type: Number, default: 0},
     left: { type: Number, default: 0},
-    buttonLabel: { type: String, default: 'Open' }
+    buttonLabel: { type: String, default: 'Open' },
+    buttonIcon: { type: String }
   })
 
   const root = ref<HTMLElement | null>(null)

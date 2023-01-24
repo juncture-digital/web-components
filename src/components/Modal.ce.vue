@@ -2,7 +2,10 @@
 
   <div ref="root" id="main">
 
-    <sl-button @click="showDialog = !showDialog">{{props.buttonLabel}}</sl-button>
+    <sl-button @click="showDialog = !showDialog">
+      <sl-icon v-if="props.buttonIcon" slot="prefix" :name="props.buttonIcon"></sl-icon>
+      {{props.buttonLabel}}
+    </sl-button>
 
     <sl-dialog :label="label" class="dialog" :style="{'--width': props.width}">
       <div id="content" v-html="html" draggable="true" @dragstart="onDrag"></div>
@@ -20,8 +23,7 @@
 
   import '@shoelace-style/shoelace/dist/components/button/button.js'
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
-  import type SlButton from '@shoelace-style/shoelace/dist/components/button/button.js'
-  import type SlDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
+  import '@shoelace-style/shoelace/dist/components/icon/icon.js'
 
   const apiEndpoint = location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://api.juncture-digital.org'
 
@@ -30,6 +32,7 @@
     prefix: { type: String },
     label: { type: String },
     buttonLabel: { type: String, default: 'Show me' },
+    buttonIcon: { type: String },
     width: { type: String, default: '80vw' },
   })
 

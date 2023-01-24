@@ -486,6 +486,12 @@
     else emitAddEvent(evt)
   }
 
+  function toTitleCase(str:string) {
+    return str.toLowerCase().split('-').map(function (word) {
+      return (word.charAt(0).toUpperCase() + word.slice(1));
+    }).join(' ')
+  
+  }
   function showAddFileDialog() {
     let form = (shadowRoot.value?.querySelector('#add-file-form') as HTMLFormElement)
     if (!form.onclick) {
@@ -494,10 +500,12 @@
         evt.preventDefault()
         let inputEl = (shadowRoot.value?.querySelector('#add-file-input') as HTMLInputElement)
         let newFilePathElems:string[] = [...path.value, ...inputEl.value.split('/').filter(pe => pe)]
+        let essayName = newFilePathElems[newFilePathElems.length-1]
         if (newFilePathElems[newFilePathElems.length-1].indexOf('.') > 0) newFilePathElems[newFilePathElems.length-1] = newFilePathElems[newFilePathElems.length-1].replace(/readme\.md/,'README.md')
         else newFilePathElems.push('README.md')
         let _path = newFilePathElems.join('/')
-        await githubClient.value.putFile(acct.value, repo.value, _path, `# ${_path.split('/').pop()}`, branch.value)
+        essayName = toTitleCase(essayName)
+        await githubClient.value.putFile(acct.value, repo.value, _path, `# ${essayName}\n\n`, branch.value)
         path.value = newFilePathElems
         hideAddFileDialog()
       })

@@ -9,7 +9,7 @@
         <div v-if="type === 'image'" class="image-wrapper media-item">
           <img v-if="isGif(manifests[0])" :src="itemInfo.id" style="width:100%;"/>
           <div v-else id="osd"></div>
-          <ve-manifest-popup :manifest="manifests[0].id"></ve-manifest-popup>
+          <ve-manifest-popup v-if="!props.noInfoIcon" :manifest="manifests[0].id"></ve-manifest-popup>
         </div>
         
         <!-- image Grid -->
@@ -40,7 +40,7 @@
           <audio id="html5-player" controls>
             <source :src="src" :type="mime"/>
           </audio>
-          <ve-manifest-popup :manifest="manifests[0].id"></ve-manifest-popup>
+          <ve-manifest-popup v-if="!props.noInfoIcon" :manifest="manifests[0].id"></ve-manifest-popup>
         </div>
 
         <!-- Video -->
@@ -55,7 +55,7 @@
             <video id="html5-player" controls playsinline :muted="props.muted" :autoplay="props.autoplay" :poster="props.poster">
               <source :src="src" :type="mime"/>
             </video>
-            <ve-manifest-popup :manifest="manifests[0].id"></ve-manifest-popup>
+            <ve-manifest-popup v-if="!props.noInfoIcon" :manifest="manifests[0].id"></ve-manifest-popup>
 
           </template>
 
@@ -65,7 +65,7 @@
 
       <ve-pager v-if="type === 'image' && totalImages > 1" :total="totalImages" :current="currentImage" @image-selected="onPageChange"></ve-pager>
 
-      <div v-if="caption" id="caption-bar" @click="onInfoClick">
+      <div v-if="caption && !props.noCaption" id="caption-bar" @click="onInfoClick">
         <div v-if="type === 'image'" id="annotations-icon" class="button-icon-with-badge" @click="toggleAnnotations">
           
           <template v-if="annotationsEditable" >
@@ -99,7 +99,7 @@
   import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
   import YouTubePlayer from 'youtube-player'
   import VimeoPlayer from '@vimeo/player'
-  import OpenSeadragon from 'openseadragon'
+  import OpenSeadragon, { TiledImage } from 'openseadragon'
   import OpenSeadragonViewerInputHook from '@openseadragon-imaging/openseadragon-viewerinputhook'
   import { getItemInfo, imageCount, loadManifests, label, makeSticky, parseRegionString, sha256, thumbnail, top } from '../utils'
   import { Annotator } from '../annotator'
@@ -130,6 +130,8 @@
     fit: { type: String },
     entities: { type: String },
     zoomOnScroll: { type: Boolean, default: false },
+    noCaption: { type: Boolean },
+    noInfoIcon: { type: Boolean },
 
     // Multiple display options
     grid: { type: Boolean, default: false },
@@ -180,7 +182,7 @@
       host.value.style.width = '100%'
     } else {
       host.value.style.float = position
-      host.value.style.width = '50%'
+      host.value.style.width = 'calc(50% - 12px)'
     }
     host.value.style.width = window.getComputedStyle(host.value).width
 
@@ -259,20 +261,22 @@
 
       let tiledImage = osdViewer.world.getItemAt(0)
       if (tiledImage) {
-        if (tiledImage.getFullyLoaded()) onImageLoaded()
-        else tiledImage.addHandler('fully-loaded-change', (evt) => { if (evt.fullyLoaded) onImageLoaded()})
+        if (props.rotation) tiledImage.setRotation(parseInt(props.rotation), true)
+        if (tiledImage.getFullyLoaded()) onImageLoaded(tiledImage)
+        else tiledImage.addHandler('fully-loaded-change', (evt) => { if (evt.fullyLoaded) onImageLoaded(tiledImage)})
       } else {
           osdViewer.world.addHandler('add-item', () => {
           let tiledImage = osdViewer.world.getItemAt(0)
-          if (tiledImage.getFullyLoaded()) onImageLoaded()
-          else tiledImage.addHandler('fully-loaded-change', (evt) => { if (evt.fullyLoaded) onImageLoaded() })
+          if (props.rotation) tiledImage.setRotation(parseInt(props.rotation), true)
+          if (tiledImage.getFullyLoaded()) onImageLoaded(tiledImage)
+          else tiledImage.addHandler('fully-loaded-change', (evt) => { if (evt.fullyLoaded) onImageLoaded(tiledImage) })
         })
       }
     }
   })
 
   let loadedImageId: string
-  function onImageLoaded() {
+  function onImageLoaded(tiledImage:TiledImage) {
     let item = iiifItemsList.value[0]
     let imageId = sha256(itemInfo.value.id || itemInfo.value['@id']).slice(0,8)
     if (imageId !== loadedImageId) {
@@ -592,7 +596,7 @@
     const osdOptions: OpenSeadragon.Options = {
       element: container,
       prefixUrl: 'https://openseadragon.github.io/openseadragon/images/',
-      // homeFillsViewer: true,
+      homeFillsViewer: props.fit === 'cover',
       showNavigationControl: true,
       minZoomImageRatio: 1,
       maxZoomPixelRatio: 10,
