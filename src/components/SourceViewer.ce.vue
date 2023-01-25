@@ -2,7 +2,7 @@
 
 <div ref="root" class="main" :style="{width: '100%', height: '100%'}" :draggable="props.draggable" @dragstart="onDrag">
   
-  <pre v-if="language === 'juncture'" id="juncture" class="language-juncture" style="white-space:pre; white-space:pre-wrap; word-wrap:break-word;">
+  <pre v-if="language === 'juncture'" id="juncture" class="language-juncture" style="margin:0;white-space:pre; white-space:pre-wrap; word-wrap:break-word;">
     <code v-html="rawText"></code>
   </pre>
 
@@ -10,6 +10,7 @@
     id="html"
     class="language-markup"
     :style="{
+      margin: 0,
       // whiteSpace: 'pre',
       whiteSpace: 'pre-wrap',
       wordWrap: 'break-word',
@@ -205,6 +206,7 @@
 
   function onDrag(evt:DragEvent) {
     let text = rawText.value
+    console.log(text)
     if (text) evt.dataTransfer?.setData('text/plain', text)
   }
 
@@ -222,7 +224,10 @@
 }
 
 .main pre {
-  background-color: #fffaee;
+  /* background-color: #fff; */
+  /* background: rgba(0,0,0,0.03); */
+  background-color: rgb(249,249,249);
+  font-size: 1rem;
 }
 
 .main:hover .copy-button {

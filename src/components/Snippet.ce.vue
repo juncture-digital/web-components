@@ -12,8 +12,8 @@
             <div :style="{display: 'flex', alignItems: 'center', gap: '9px'}">
               <sl-icon name="markdown" style="font-size:24px"></sl-icon>
               <sl-icon name="code-slash" style="font-size:24px"></sl-icon>
-              <sl-icon name="eye" style="font-size:24px"></sl-icon>
-              <span v-html="props.label"></span>
+              <!-- <sl-icon name="eye" style="font-size:24px"></sl-icon> -->
+              <span v-html="props.label" class="label"></span>
           </div>
         </sl-tooltip>
     </div>
@@ -29,7 +29,7 @@
           <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
         </sl-tab-panel>
         <sl-tab-panel name="preview">
-          <div id="preview" style="position:relative;" v-if="active === 'preview' && html" v-html="html" draggable="true" @dragstart="onDrag"></div>
+          <div id="juncture" style="position:relative;" v-if="active === 'preview' && html" v-html="html" draggable="true" @dragstart="onDrag"></div>
         </sl-tab-panel>
       </sl-tab-group>
 
@@ -205,16 +205,22 @@
 
   #juncture {
     padding: 12px;
-    font-size: 1em;
+    font-size: 1.2em;
     line-height: 1.3;;
   }
 
   sl-details::part(header) {
     /* background: rgba(66,185,131,.1); */
+    background-color: rgb(249,249,249);
   }
 
   sl-details::part(summary) {
     font-size: 1rem;
+  }
+
+  sl-details::part(content) {
+    border-top: 1px solid #ddd;
+    padding: 0;
   }
 
   sl-details.custom-icons::part(summary-icon) {
@@ -225,6 +231,12 @@
   sl-tab sl-icon {
     font-size: 24px;
     margin-right: 6px;
+  }
+
+  .label {
+    margin-left: 12px;
+    color: #555;
+    font-weight: normal;
   }
 
 </style>

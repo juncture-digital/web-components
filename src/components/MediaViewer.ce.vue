@@ -1,7 +1,7 @@
 <template>
   <div ref="root" v-bind="$attrs"></div>
 
-  <div id="outer" :class="annotationsEditable ? 'edit' : 'view'">
+  <div id="outer" :class="annotationsEditable ? 'edit' : 'view'" :draggable="type === 'image'" @dragstart="onDrag">
     <div id="inner">
       <div id="content">
         
@@ -112,6 +112,11 @@
   import '@shoelace-style/shoelace/dist/components/popup/popup'
 
   import type SLDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
+
+  function onDrag(evt:DragEvent) {
+    console.log('onDrag', evt)
+    evt.dataTransfer?.setData('text/plain', manifest.value.id)
+  }
 
   const props = defineProps({
     manifest: { type: String },
