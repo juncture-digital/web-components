@@ -1,6 +1,6 @@
 <template>
 
-  <section ref="root">
+  <section ref="root" class="main">
     <sl-dialog label="Contact Us" class="contact-dialog">
       <sl-input id="from" type="email" label="Email address"></sl-input>
       <sl-alert id="bad-email-alert" variant="danger">
@@ -107,5 +107,16 @@
 <style>
 
   * { box-sizing: border-box; }
+
+  sl-input,
+  sl-textarea {
+    padding: 12px 0;
+  }
+
+  sl-dialog::part(title),
+  sl-input::part(form-control),
+  sl-textarea::part(form-control) {
+    text-align: left;
+  }
 
 </style>

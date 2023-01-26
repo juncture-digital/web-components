@@ -207,7 +207,7 @@
 
   function menuItemSelected(item: any) {
     console.log('menuItemSelected', item)
-    let action = item.href ? item.href.split('/').pop().toLowerCase() : null
+    let action = item.href ? item.href.split('/').pop().toLowerCase() : ''
     if ((action.indexOf('contact') === 0 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
       showContactForm()
     } else if (action === 'login') {
@@ -223,9 +223,13 @@
       if (item.newWindow) {
         if (externalWindow) { externalWindow.close() }
         externalWindow = window.open(item.href, '_blank', 'toolbar=yes,location=yes,left=0,top=0,width=1024,height=1200,scrollbars=yes,status=yes')
+      } else if (item.href.indexOf('/window.') > 0) {
+        let funcName = item.href.split('/window.').pop();
+        (window as any)[funcName]()
       } else {
         location.href = item.href
       }
+    } else {
     }
     (shadowRoot.value?.querySelector('#menu-btn') as HTMLInputElement).checked = false
   }
@@ -260,7 +264,7 @@
     max-height: 0;
     transition: max-height .2s ease-out;
     position: absolute;
-    top: 59px;
+    top: 58px;
     width: 200px;
     background-color: rgba(0, 0, 0, 0.6);
     color: white;
@@ -290,8 +294,14 @@
     position: relative;
     user-select: none;
   }
-  .menu-icon .navicon {
+  .menu-icon .navicon,
+  .menu-icon .navicon:before,
+  .menu-icon .navicon:after {
     background: #fff;
+  }
+
+  .menu-icon .navicon {
+    /* background: #fff; */
     display: block;
     height: 4px;
     border-radius: 2px;
@@ -301,7 +311,7 @@
   }
   .menu-icon .navicon:before,
   .menu-icon .navicon:after {
-    background: #fff;
+    /* background: #fff; */
     content: '';
     display: block;
     height: 100%;
