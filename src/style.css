@@ -19,6 +19,15 @@ main > p:first-of-type {
   padding-top: 24px;
 }
 
+.markdown-section h1,
+.markdown-section h2,
+.markdown-section h3,
+.markdown-section h4,
+.markdown-section h5,
+.markdown-section h6 {
+  line-height: 1.2;
+}
+
 .visible {
   visibility: visible;
   opacity: 1;
@@ -164,7 +173,7 @@ section.no-offset:target:before {
   }
 
   p {
-    text-align: justify;
+    /* text-align: justify; */
   }
 
 }

@@ -7,7 +7,7 @@
       {{props.buttonLabel}}
     </sl-button>
 
-    <sl-dialog :label="label" class="dialog" :style="{'--width': props.width}">
+    <sl-dialog :label="label" class="dialog" :style="{'--width':width}">
       <div id="content" v-html="html" draggable="true" @dragstart="onDrag"></div>
       <sl-button slot="footer" variant="primary" @click="showDialog = false">Close</sl-button>
     </sl-dialog>
@@ -19,7 +19,7 @@
 <script setup lang="ts">
 
   import { computed, nextTick, ref, watch } from 'vue'
-  import { initTippy } from '../utils'
+  import { initTippy, isMobile } from '../utils'
 
   import '@shoelace-style/shoelace/dist/components/button/button.js'
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
@@ -33,7 +33,7 @@
     label: { type: String },
     buttonLabel: { type: String, default: 'Show me' },
     buttonIcon: { type: String },
-    width: { type: String, default: '80vw' },
+    width: { type: String },
   })
 
   const root = ref<HTMLElement | null>(null)
@@ -41,6 +41,7 @@
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
   const content = computed(() => shadowRoot.value?.querySelector('#main') as HTMLElement)
   
+  const width = ref('80vw')
   const showDialog = ref(false)
   watch(showDialog, () => {
     dialog.open = showDialog.value
@@ -53,6 +54,8 @@
   const html = ref<string>()
 
   watch(host, () => {
+    width.value = props.width || isMobile() ? '100vw' : '80vw'
+    console.log(`isMobile=${isMobile()} width=${width.value}`)
     let lines:string[] = host.value.textContent.split('\n')
     let trimmed:string[] = []
     lines.forEach(line => {
@@ -131,6 +134,10 @@
 
   sl-dialog::part(body) {
     padding-top: 0;
+  }
+
+  sl-dialog::part(panel) {
+    max-width: unset;
   }
 
 </style>

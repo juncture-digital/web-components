@@ -204,6 +204,10 @@
     --padding: 0;
   }
 
+  sl-tab::part(base) {
+    padding: 12px;
+  }
+
   #juncture {
     padding: 12px;
     font-size: 1.2em;

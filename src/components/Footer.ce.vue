@@ -19,7 +19,7 @@
 
     </template>
 
-    <sl-dialog label="Page Source" class="page-source-dialog" style="--width: 80vw;">
+    <sl-dialog label="Page Source" class="page-source-dialog" :style="{'--width': isMobile() ? '100vw' : '80vw'}">
       <ve-source-viewer v-if="sourcePath" :src="sourcePath" draggable="false"></ve-source-viewer>
       <sl-button slot="footer" variant="primary" @click="showPageSourceDialog = false">Close</sl-button>
     </sl-dialog>
@@ -33,6 +33,8 @@
   import { computed, ref, toRaw, watch } from 'vue'
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
   import '@shoelace-style/shoelace/dist/components/icon/icon.js'
+
+  import { isMobile } from '../utils'
 
   const props = defineProps({
     sticky: { type: Boolean }

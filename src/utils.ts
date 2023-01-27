@@ -9,6 +9,19 @@ export function sha256(str: string) {
   return __sha256(str)
 }
 
+export function isMobile() {
+  // console.log(`isMobile: ontouchstart=${'ontouchstart' in document.documentElement} mobi=${/mobi/i.test(navigator.userAgent)}`)
+  let _isMobile = ('ontouchstart' in document.documentElement && /mobi/i.test(navigator.userAgent) )
+  console.log(`isMobile=${_isMobile}`)
+  return _isMobile
+}
+
+export function isTouchEnabled() {
+  return ( 'ontouchstart' in window ) ||
+         ( navigator.maxTouchPoints > 0 ) ||
+         ( ((navigator as any).msMaxTouchPoints || 0) > 0 )
+}
+
 let tippyEntities:any
 export function initTippy(el:any=null, force=false) {
   if (force) tippyEntities = null
