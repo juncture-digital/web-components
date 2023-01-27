@@ -9,7 +9,7 @@
   
 <script setup lang="ts">
 
-  import { computed, onMounted, ref } from 'vue'
+  import { computed, onMounted, ref, watch } from 'vue'
   import '@shoelace-style/shoelace/dist/components/button/button.js'
   import '@shoelace-style/shoelace/dist/components/icon/icon.js'
 
@@ -27,14 +27,26 @@
   })
 
   const root = ref<HTMLElement | null>(null)
-  
+  const host = computed(() => (root.value?.getRootNode() as any)?.host)
+
   const authToken = ref<string | null>('')
   const isLoggedIn = computed(() => authToken.value !== null)
-
 
   onMounted(() => {
     authToken.value = window.localStorage.getItem('gh-auth-token')
     window.addEventListener('storage', () => authToken.value = window.localStorage.getItem('gh-auth-token'))
+  })
+
+  watch(host, () => {
+    if (host.value?.parentElement.tagName === 'LI' && host.value.parentElement.children.length === 1) {
+      host.value.parentElement.style.display = !props.authRequired || isLoggedIn.value ? 'block' : 'none'
+    }
+  })
+
+  watch(isLoggedIn, () => {
+    if (host.value?.parentElement.tagName === 'LI' && host.value.parentElement.children.length === 1) {
+      host.value.parentElement.style.display = !props.authRequired || isLoggedIn.value ? 'block' : 'none'
+    }
   })
 
   function toggleWindow() {

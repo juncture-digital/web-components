@@ -188,6 +188,7 @@
     margin-top: 1.5rem;
     border-radius: 2px;
     border: 0.5px solid #ddd;
+    margin-bottom: 2rem;
   }
 
   :host([collapsible]) {
