@@ -15,7 +15,7 @@
 
   import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
   import L, { LatLng } from 'leaflet'
-  import { isQID, getEntity, makeSticky } from '../utils'
+  import { isQID, getEntity, isMobile, makeSticky } from '../utils'
 
   const markerIconTemplate = {
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-icon.png',
@@ -67,7 +67,7 @@
     doLayout()
   })
 
-  const position:string = props.right ? 'right' : props.left ? 'left' : 'full'
+  const position:string = isMobile() ? 'full' : (props.right ? 'right' : props.left ? 'left' : 'full')
 
   function doLayout() {
     host.value.classList.add('ve-component')
@@ -421,11 +421,12 @@
     position: relative;
     font-family: Roboto, sans-serif;
     background-color: white;
+    margin-bottom: 1rem;
   }
 
   .content {
     margin: auto;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    /* box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; */
   }
 
   #map {

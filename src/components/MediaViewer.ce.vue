@@ -101,7 +101,7 @@
   import VimeoPlayer from '@vimeo/player'
   import OpenSeadragon, { TiledImage } from 'openseadragon'
   import OpenSeadragonViewerInputHook from '@openseadragon-imaging/openseadragon-viewerinputhook'
-  import { getItemInfo, imageCount, loadManifests, label, makeSticky, parseRegionString, sha256, thumbnail, top } from '../utils'
+  import { getItemInfo, imageCount, isMobile, loadManifests, label, makeSticky, parseRegionString, sha256, thumbnail, top } from '../utils'
   import { Annotator } from '../annotator'
 
   import '@shoelace-style/shoelace/dist/components/badge/badge.js'
@@ -171,7 +171,7 @@
   // watch(host, () => init())
   onMounted(() => init())
 
-  const position:string = props.position || (props.right ? 'right' : props.left ? 'left' : 'full')
+  const position:string = props.position || (isMobile() ? 'full' : (props.right ? 'right' : props.left ? 'left' : 'full'))
   
   function doLayout(defaultAspect:number=16/9) {
 
