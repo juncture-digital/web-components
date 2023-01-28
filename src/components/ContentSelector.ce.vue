@@ -6,7 +6,7 @@
     <section class="content-path" style="position:relative;">
       
       <div class="workspace">
-        <sl-tooltip :content="`${acct}: ${repo} (${branch})`" placement="bottom">
+        <sl-tooltip :content="`${acct}: ${repo} (${branch})`" :disabled="isMobile" placement="bottom">
           <sl-button pill size="medium" @click="toggleDrawer">
             <sl-icon slot="prefix" name="github" style="fontSize:24px;"></sl-icon>
           </sl-button>
@@ -15,13 +15,15 @@
           <div class="breadcrumbs">
             <sl-breadcrumb>
               <sl-breadcrumb-item>
-                <sl-button pill size="medium" @click="prunePath(0)">/
+                <span v-if="compact" class="path-elem" @click="prunePath(0)">/</span>
+                <sl-button v-else pill size="medium" @click="prunePath(0)">/
                   <sl-icon slot="prefix" name="folder2" style="fontSize:24px;"></sl-icon>
-                </sl-button>          
+                </sl-button>
               </sl-breadcrumb-item>
               <sl-breadcrumb-item v-for="pathElem, idx in path" :key="`bci-${idx}`">
                 <template v-if="idx === path.length-1" >
-                  <sl-button pill size="medium" @click="prunePath(idx+1)">
+                  <span v-if="compact" class="path-elem" v-html="pathElem" @click="prunePath(idx+1)"></span>
+                  <sl-button v-else pill size="medium" @click="prunePath(idx+1)">
                     {{pathElem}}
                     <sl-icon slot="prefix" name="filetype-md" style="fontSize:24px;"></sl-icon>
                   </sl-button>
@@ -33,7 +35,8 @@
                   </sl-dropdown>
                 </template>
                 <template v-else>
-                  <sl-button pill size="medium" @click="prunePath(idx+1)">
+                  <span v-if="compact" class="path-elem" v-html="pathElem" @click="prunePath(idx+1)"></span>
+                  <sl-button v-else pill size="medium" @click="prunePath(idx+1)">
                     {{pathElem}}
                     <sl-icon slot="prefix" name="folder2" style="fontSize:24px;"></sl-icon>
                   </sl-button>
@@ -54,60 +57,86 @@
             </sl-tooltip>
           </div>
           <sl-drawer noHeader label="Workspace" placement="bottom" contained class="workspace-selector" style="--size:100%">
-            <div class="github-select">Select GitHub Repository</div>
-            <sl-icon name="chevron-double-right" style="fontSize:24px;"></sl-icon>
-            <div class="selectors">
+            <div style="display:flex; height:100%; align-items:center;">
+            <div v-if="!compact" class="github-select">Select GitHub Repository</div>
+            <sl-icon v-if="!compact" name="chevron-double-right" style="fontSize:24px;"></sl-icon>
+            
+            <sl-breadcrumb style="margin-left:12px;">
               
               <!-- Account selector -->
-              <sl-dropdown v-if="accts.length > 1">
-                <sl-button slot="trigger" pill size="medium" class="folder">
-                  {{acct}}
-                  <sl-icon slot="prefix" name="github" style="fontSize:24px;"></sl-icon>
-                </sl-button>
-                <sl-menu>
-                  <sl-menu-item v-for="_acct, idx in accts" :key="`acct-${idx}`" :checked="_acct.login === acct" @click="accountSelected(_acct)" type="checkbox" v-html="_acct.login"></sl-menu-item>
-                </sl-menu>
-              </sl-dropdown>
-              <sl-button v-else slot="trigger" pill size="medium" class="folder">
-                {{acct}}
-                <sl-icon slot="prefix" name="github" style="fontSize:24px;"></sl-icon>
-              </sl-button>
+              <sl-breadcrumb-item>
+                <sl-tooltip content="Github Account" hoist :disabled="isMobile" placement="left">
+                  <sl-dropdown v-if="accts.length > 1">
+                    <span v-if="compact"  slot="trigger" class="path-elem">{{ acct }}</span>
+                    <sl-button v-else slot="trigger" pill size="medium" class="folder">
+                      {{acct}}
+                      <sl-icon slot="prefix" name="github" style="fontSize:24px;"></sl-icon>
+                    </sl-button>
+                    <sl-menu>
+                      <sl-menu-item v-for="_acct, idx in accts" :key="`acct-${idx}`" :checked="_acct.login === acct" @click="accountSelected(_acct)" type="checkbox" v-html="_acct.login"></sl-menu-item>
+                    </sl-menu>
+                  </sl-dropdown>
+                  <template v-else>
+                    <span v-if="compact" class="path-elem">{{ branch }}</span>
+                    <sl-button v-else pill size="medium" class="folder">
+                      {{acct}}
+                      <sl-icon slot="prefix" name="github" style="fontSize:24px;"></sl-icon>
+                    </sl-button>
+                  </template>
+                </sl-tooltip>
+              </sl-breadcrumb-item>
 
               <!-- Repository selector -->
-              <sl-dropdown v-if="repos.length > 1">
-                <sl-button slot="trigger" pill size="medium">
-                  {{repo}}
-                  <sl-icon slot="prefix" name="archive" style="fontSize:24px;"></sl-icon>
-                </sl-button>
-                <sl-menu>
-                  <sl-menu-item v-for="_repo, idx in repos" :key="`repo-${idx}`" :checked="_repo.name === repo" @click="repoSelected(_repo)" type="checkbox" v-html="_repo.name"></sl-menu-item>
-                  <sl-divider></sl-divider>
-                  <sl-menu-item class="add-repo" @click="showAddRepoDialog">
-                    <sl-icon slot="prefix" name="plus-lg"></sl-icon>
-                    New repository
-                  </sl-menu-item>
-                </sl-menu>
-              </sl-dropdown>
-              <sl-button v-else slot="trigger" pill size="medium">
-                {{repo}}
-                <sl-icon slot="prefix" name="archive" style="fontSize:24px;"></sl-icon>
-              </sl-button>
+              <sl-breadcrumb-item>
+                <sl-tooltip content="Github Repository" hoist :disabled="isMobile" placement="left">
+                  <sl-dropdown v-if="repos.length > 1">
+                    <span v-if="compact"  slot="trigger" class="path-elem">{{ repo }}</span>
+                    <sl-button v-else slot="trigger" pill size="medium">
+                      {{repo}}
+                      <sl-icon slot="prefix" name="archive" style="fontSize:24px;"></sl-icon>
+                    </sl-button>
+                    <sl-menu>
+                      <sl-menu-item v-for="_repo, idx in repos" :key="`repo-${idx}`" :checked="_repo.name === repo" @click="repoSelected(_repo)" type="checkbox" v-html="_repo.name"></sl-menu-item>
+                      <sl-divider></sl-divider>
+                      <sl-menu-item class="add-repo" @click="showAddRepoDialog">
+                        <sl-icon slot="prefix" name="plus-lg"></sl-icon>
+                        New repository
+                      </sl-menu-item>
+                    </sl-menu>
+                  </sl-dropdown>
+                  <template v-else>
+                    <span v-if="compact" class="path-elem">{{ repo }}</span>
+                    <sl-button v-else pill size="medium">
+                      {{repo}}
+                      <sl-icon slot="prefix" name="archive" style="fontSize:24px;"></sl-icon>
+                    </sl-button>
+                  </template>
+                </sl-tooltip>
+              </sl-breadcrumb-item>
 
               <!-- Branch selector -->
-              <sl-dropdown v-if="branches.length > 1">
-                <sl-button slot="trigger" pill size="medium">
-                  {{branch}}
-                  <sl-icon slot="prefix" name="share" style="fontSize:24px;"></sl-icon>
-                </sl-button>
-                <sl-menu>
-                  <sl-menu-item v-for="_branch, idx in branches" :key="`branch-${idx}`" :checked="_branch.name === branch" @click="branchSelected(_branch)"  type="checkbox" v-html="_branch.name"></sl-menu-item>
-                </sl-menu>
-              </sl-dropdown>
-              <sl-button v-else pill size="medium">
-                {{branch}}
-                <sl-icon slot="prefix" name="share" style="fontSize:24px;"></sl-icon>
-              </sl-button>
-
+              <sl-breadcrumb-item>
+                <sl-tooltip content="Github Branch" hoist :disabled="isMobile" placement="left">
+                  <sl-dropdown v-if="branches.length > 1">
+                    <span v-if="compact" slot="trigger" class="path-elem">{{ branch }}</span>
+                    <sl-button v-else slot="trigger" pill size="medium">
+                      {{branch}}
+                      <sl-icon slot="prefix" name="share" style="fontSize:24px;"></sl-icon>
+                    </sl-button>
+                    <sl-menu>
+                      <sl-menu-item v-for="_branch, idx in branches" :key="`branch-${idx}`" :checked="_branch.name === branch" @click="branchSelected(_branch)"  type="checkbox" v-html="_branch.name"></sl-menu-item>
+                    </sl-menu>
+                  </sl-dropdown>
+                  <template v-else>
+                    <span v-if="compact" class="path-elem"> {{ branch }}</span>
+                    <sl-button v-else pill size="medium">
+                      {{branch}}
+                      <sl-icon slot="prefix" name="share" style="fontSize:24px;"></sl-icon>
+                    </sl-button>
+                  </template>
+                </sl-tooltip>
+              </sl-breadcrumb-item>
+            </sl-breadcrumb>
             </div>
           </sl-drawer>
         </div>
@@ -121,7 +150,7 @@
           <sl-icon slot="prefix" :name="item.type === 'dir' ? 'folder2' : 'file-earmark'"></sl-icon>
           {{item.name}}
         </sl-button>
-        
+
         <sl-tooltip v-if="path && (path.length === 0 || (path[path.length-1].split('.').pop() !== 'md')) && props.mode === 'essays'" :content="`Add ${mode === 'media' ? 'resource' : 'file'}`" placement="bottom">
           <sl-button 
             variant="default" 
@@ -170,7 +199,7 @@
 
   import { computed, onMounted, onUpdated, ref, toRaw, watch } from 'vue'
 
-  import { makeSticky } from '../utils'
+  import { isMobile as _isMobile } from '../utils'
   import { GithubClient } from '../gh-utils'
 
   import '@shoelace-style/shoelace/dist/components/breadcrumb/breadcrumb.js'
@@ -193,7 +222,8 @@
   const props = defineProps({
     contentPath: { type: String },
     sticky: { type: Boolean, default: false },
-    mode: { type: String, default: 'media' }
+    mode: { type: String, default: 'media' },
+    compact: { type: Boolean },
   })
 
   const emit = defineEmits(['accessChanged', 'addMediaResource', 'contentPathChanged'])
@@ -205,7 +235,6 @@
   // const contentPath = ref<string>()
   
   let ready: boolean = false
-  let notReadyText: string = ''
 
   const contentPath = ref<string>('')
   watch(contentPath, () => {
@@ -215,7 +244,6 @@
 
   const root = ref<HTMLElement | null>(null)
   const shadowRoot = computed(() => root?.value?.parentNode)
-  const host = computed(() => (root.value?.getRootNode() as any)?.host)
 
   let drawer: any
 
@@ -226,6 +254,8 @@
   watch(fileToDelete, () => {
     if (fileToDelete.value) showDeleteFileDialog()
   })
+
+  const isMobile = ref(_isMobile())
 
   const authToken = ref<string | null>('')
   const githubClient = ref<any>()
@@ -349,7 +379,7 @@
         githubClient.value.createRepository({name:'essays', description:'Juncture visual essays'})
         githubClient.value.createRepository({name:'media', description:'Juncture media'})
         createSubmitted = true
-        notReadyText = 'Waiting for repository creation...'
+        // notReadyText = 'Waiting for repository creation...'
       }
     } else {
       ready = true
@@ -598,14 +628,16 @@
 
 :host {
   display: block;
-  font-family: Roboto, sans-serif;
   width: 100%;
   border: 1px solid #444;
   padding: 6px;
   z-index: 9;
   background-color: white;
 }
-
+span.path-elem {
+  font-family: "Archivo Narrow", Roboto, sans-serif;
+  font-size: 1.2rem;
+}
 .workspace {
   display: flex;
   align-items: center;
@@ -720,6 +752,8 @@ sl-menu::part(base) {
 .dirs sl-button::part(base) {
   border-radius: 12px;
   font-weight: 500;
+  font-family: "Archivo Narrow", Roboto, sans-serif;
+  font-size: 1rem;
 }
 
 sl-button.dir::part(base) {
