@@ -444,19 +444,13 @@
   async function updateDirList() {
     dirList.value = []
     let _dirList:any[] = await githubClient.value.dirlist(acct.value, repo.value, path.value.join('/'), branch.value)
-    console.log(_dirList)
     //if (dirList.length === 0 && path.length > 0) dirList = await githubClient.dirlist(acct, repo, path.slice(0,-1).join('/'), ref)
     let dirs = _dirList.filter(item => item.type === 'dir')
     let files = _dirList.filter(item => item.type === 'file' && !igmore.has(item.name))
-    console.log(dirs, files)
-    console.log()
     if (useReadme && files.find(file => file.name === 'README.md') && dirs.length === 0) {
       if (path.value.length === 0 || path.value[path.value.length-1] !== 'README.md') path.value = [...path.value, `README.md`]
-    } else {
-      // dirList.value = [...dirs, ...files]
     }
     dirList.value = [...dirs, ...files]
-    console.log(toRaw(dirList.value))
   }
 
   function getDirList() {

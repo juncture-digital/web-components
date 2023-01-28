@@ -12,7 +12,6 @@ export function sha256(str: string) {
 export function isMobile() {
   // console.log(`isMobile: ontouchstart=${'ontouchstart' in document.documentElement} mobi=${/mobi/i.test(navigator.userAgent)}`)
   let _isMobile = ('ontouchstart' in document.documentElement && /mobi/i.test(navigator.userAgent) )
-  console.log(`isMobile=${_isMobile}`)
   return _isMobile
 }
 
