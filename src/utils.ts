@@ -196,18 +196,35 @@ export function summary(manifest:any, language:string = 'en') {
   return manifest ? _value(manifest.summary, language) : null
 }
 
+export function staticImage(manifest: any, options:any, width:number=0, height:number=0) {
+  // console.log('staticImage', manifest, options)
+  let _imageInfo = getItemInfo(manifest)
+  let region = options.region || 'full'
+  let size = options.size
+    ? options.size
+    : width
+      ? height
+        ? `${width},${height}`
+        : `${width},`
+      : height
+        ? `,${height}`
+        : '400,'
+  let rotation = options.rotation || '0'
+  let quality = options.quality || 'default'
+  let format = options.format || 'jpg'
+  let url =`${_imageInfo.service[0].id || _imageInfo.service[0]['@id']}/${region}/${size}/${rotation}/${quality}.${format}`
+  // console.log(url)
+  return url
+}
+
 export function thumbnail(manifest: any, width:number=400) {
   if (!manifest) return null
-  //if (manifest.thumbnail) {
-  //  return manifest.thumbnail[0].id
-  //} else {
     let _imageInfo = getItemInfo(manifest)
     return _imageInfo.service
       ? `${_imageInfo.service[0].id || _imageInfo.service[0]['@id']}/full/${width},/0/default.jpg`
       : _imageInfo.type === 'Video'
         ? `https://iiif.juncture-digital.org/thumbnail?url=${_imageInfo.id}`
         : _imageInfo.id
-  //}
 }
 
 export function parseRegionString(region: string, viewer: OpenSeadragon.Viewer) {

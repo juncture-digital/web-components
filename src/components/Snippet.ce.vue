@@ -2,7 +2,7 @@
 
   <div ref="root" id="main">
 
-    <sl-details v-if="collapsible" class="custom-icons" :open="props.open">
+    <sl-details v-if="collapsible" class="custom-icons" :open="props.open" draggable="true" @dragstart="onDrag">
       
       <sl-icon name="plus-square" slot="expand-icon"></sl-icon>
       <sl-icon name="dash-square" slot="collapse-icon"></sl-icon>

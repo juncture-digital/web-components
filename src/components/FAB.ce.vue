@@ -5,10 +5,11 @@
       right: props.right,
       bottom: props.bottom}"
     >
-    <sl-tooltip :content="props.label" placement="top" :disabled="isMobile">
+    <sl-tooltip :content="props.label" placement="top" :disabled="isMobile || props.disabled">
       <span data-action="props.action" class="fab-button" 
         @click="onClick" 
         :style="{
+          visibility: props.disabled ? 'hidden' : 'visible',
           backgroundColor: props.color,
         }">
         <sl-icon :name="props.icon" style="font-size:36px;"></sl-icon>
@@ -38,7 +39,8 @@
     icon: { type: String },
     action: { type: String },
     right: { type: String, default: '35px' },
-    bottom: { type: String, default: '35px' }
+    bottom: { type: String, default: '35px' },
+    disabled: { type: Boolean }
   })
 
   function onClick() {

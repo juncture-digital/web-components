@@ -55,7 +55,6 @@
 
   watch(host, () => {
     width.value = props.width || isMobile() ? '100vw' : '80vw'
-    console.log(`isMobile=${isMobile()} width=${width.value}`)
     let lines:string[] = host.value.textContent.split('\n')
     let trimmed:string[] = []
     lines.forEach(line => {

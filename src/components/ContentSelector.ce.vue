@@ -6,19 +6,20 @@
     <section class="content-path" style="position:relative;">
       
       <div class="workspace">
+
         <sl-tooltip :content="`${acct}: ${repo} (${branch})`" :disabled="isMobile" placement="bottom">
           <sl-button pill size="medium" @click="toggleDrawer">
             <sl-icon slot="prefix" name="github" style="fontSize:24px;"></sl-icon>
           </sl-button>
         </sl-tooltip>
+
         <div class="ws-path">   
           <div class="breadcrumbs">
             <sl-breadcrumb>
               <sl-breadcrumb-item>
-                <span v-if="compact" class="path-elem" @click="prunePath(0)">/</span>
-                <sl-button v-else pill size="medium" @click="prunePath(0)">/
-                  <sl-icon slot="prefix" name="folder2" style="fontSize:24px;"></sl-icon>
-                </sl-button>
+              <sl-button  pill size="medium" @click="prunePath(0)">/
+                <sl-icon slot="prefix" name="folder2" style="fontSize:24px;"></sl-icon>
+              </sl-button>
               </sl-breadcrumb-item>
               <sl-breadcrumb-item v-for="pathElem, idx in path" :key="`bci-${idx}`">
                 <template v-if="idx === path.length-1" >

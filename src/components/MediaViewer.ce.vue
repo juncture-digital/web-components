@@ -8,6 +8,7 @@
         <!-- Single image -->
         <div v-if="type === 'image'" class="image-wrapper media-item">
           <img v-if="isGif(manifests[0])" :src="itemInfo.id" style="width:100%;"/>
+          <img v-else-if="static" :src="staticImage(manifest, options, width)" style="width:100%;" @click="toggleDialogId(manifest.id)"/>
           <div v-else id="osd"></div>
           <ve-manifest-popup v-if="!props.noInfoIcon" :manifest="manifests[0].id"></ve-manifest-popup>
         </div>
@@ -101,7 +102,7 @@
   import VimeoPlayer from '@vimeo/player'
   import OpenSeadragon, { TiledImage } from 'openseadragon'
   import OpenSeadragonViewerInputHook from '@openseadragon-imaging/openseadragon-viewerinputhook'
-  import { getItemInfo, imageCount, isMobile, loadManifests, label, makeSticky, parseRegionString, sha256, thumbnail, top } from '../utils'
+  import { getItemInfo, imageCount, isMobile, loadManifests, label, makeSticky, parseRegionString, sha256, staticImage, thumbnail, top } from '../utils'
   import { Annotator } from '../annotator'
 
   import '@shoelace-style/shoelace/dist/components/badge/badge.js'
@@ -134,14 +135,16 @@
     caption: { type: String },
     fit: { type: String },
     entities: { type: String },
-    zoomOnScroll: { type: Boolean, default: false },
+    zoomOnScroll: { type: Boolean },
     noCaption: { type: Boolean },
     noInfoIcon: { type: Boolean },
 
+    static: { type: Boolean },
+
     // Multiple display options
-    grid: { type: Boolean, default: false },
-    cards: { type: Boolean, default: false },
-    compare: { type: Boolean, default: false },
+    grid: { type: Boolean },
+    cards: { type: Boolean },
+    compare: { type: Boolean },
 
     // Positioning props
     position: { type: String },
@@ -383,6 +386,7 @@
   const iiifItemsList = ref(<any[]>[])
   const manifests:any = ref([])
   const manifest:any = ref(null)
+  const options:any = ref(null)
   const itemInfo:any = ref(null)
   const type:any = ref(null)
   const tileSource:any = ref(null)
@@ -397,7 +401,10 @@
     })
   })
 
-  watch(manifests, () => manifest.value = manifests.value.length > 0 && manifests.value[0])
+  watch(manifests, () => {
+    manifest.value = manifests.value.length > 0 && manifests.value[0]
+    options.value = iiifItemsList.value[0]
+  })
   watch(manifest, () => {
     totalImages.value = imageCount(manifest.value)
     itemInfo.value = manifest.value ? getItemInfo(manifest.value, currentImage.value) : null
@@ -431,7 +438,7 @@
   watch(type, () => {
     addInteractionHandlers()
     nextTick(() => {
-      if (type.value === 'image' && !isGif(manifest.value)) loadImage()
+      if (type.value === 'image' && !isGif(manifest.value) && !props.static) loadImage()
       // else if (type.value === 'image-compare') scaledImages.value = scaleImages()
       else if (type.value === 'video' && iiifItemsList.value.length > 0) initializeHTML5Player()
       else if (type.value === 'audio') initializeHTML5Player()
@@ -488,12 +495,16 @@
         id: sha256(manifestUrl).slice(0,8),
         manifest: manifestUrl
       }
+      if (props.options && isIiifArg(props.options)) {
+        let match = props.options.match(iiifRegex)
+        if (match) obj = {...obj, ...match.groups}        
+      }
       obj.seq = props.seq
-      obj.region = props.region
-      obj.size = props.size
-      obj.rotation = props.rotation
-      obj.quality = props.quality
-      obj.format = props.format
+      obj.region = props.region || obj.region
+      obj.size = props.size || obj.size
+      obj.rotation = props.rotation || obj.rotation
+      obj.quality = props.quality || obj.quality
+      obj.format = props.format || obj.format
       obj.fit = props.fit
       itemsList.push(obj)
     } else {
@@ -811,7 +822,11 @@
         videoId: videoId.value,
         playerVars
       })
-    mediaPlayer.on('ready', (evt:any) => monitor())
+    mediaPlayer.on('ready', (evt:any) => {
+      monitor()
+      console.log('youtube.ready', props.autoplay)
+      if (props.autoplay) seekTo(`${props.start || ''}`, `${props.end || ''}`)
+    })
   }
 
   async function initializeVimeoPlayer() {
@@ -925,11 +940,11 @@
     return secs
   }
 
-  function seekTo(start:string, end:string) {
+  function seekTo(start:string, end:string='') {
     // console.log(`seekTo: start=${start} end=${end}`)
     let startSecs = hmsToSeconds(start)
     let endSecs = end ? hmsToSeconds(end) + 1 : -1
-    // console.log(`seekTo: start=${startSecs} end=${endSecs} isMuted=${isMuted.value} forceMuteOnPlay=${forceMuteOnPlay}`)
+    console.log(`seekTo: start=${startSecs} end=${endSecs} isMuted=${isMuted.value} forceMuteOnPlay=${forceMuteOnPlay}`)
 
     // clear delayed pause
     if (timeoutId) {
