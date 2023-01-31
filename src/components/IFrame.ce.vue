@@ -53,7 +53,7 @@
     doLayout()
   }
 
-  function doLayout(defaultAspect:number=16/9) {
+  function doLayout() {
 
     if (props.sticky) makeSticky(host.value)
 

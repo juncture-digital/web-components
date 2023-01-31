@@ -16,8 +16,8 @@
 
   const props = defineProps({
     href: { type: String },
-    width: { type: Number, default: 1040 },
-    height: { type: Number, default: 1000},
+    width: { type: Number },
+    height: { type: Number},
     top: { type: Number, default: 0},
     left: { type: Number, default: 0},
     buttonLabel: { type: String, default: 'Open' },
@@ -27,8 +27,10 @@
   const root = ref<HTMLElement | null>(null)
 
   function toggleWindow() {
+    let width = props.width || 1040
+    let height = props.height || Math.max(window.innerHeight, 1600)
     if (state.junctureWindow) { state.junctureWindow.close() }
-    let options = `toolbar=yes,location=yes,left=0,top=0,width=${props.width},height=${props.height},scrollbars=yes,status=yes`
+    let options = `toolbar=yes,location=yes,left=${props.left},top=${props.top},width=${props.width},height=${height},scrollbars=yes,status=yes`
     state.junctureWindow = window.open(props.href, '_blank', options)
   }
 

@@ -85,6 +85,7 @@
     window.dispatchEvent(new Event("storage"))
     authToken.value = window.localStorage.getItem('gh-auth-token')
     userInfo.value = null
+    location.href = ''
   }
 
   function getUserInfo() {
