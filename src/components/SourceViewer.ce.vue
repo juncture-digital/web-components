@@ -159,7 +159,7 @@
   }
 
   function styleHTML(html:string) {
-    html = html.trim();
+    html = html.trim().replace(/&amp;/g,'&');
     let result = '',
         indentLevel = 0,
         tokens = html.split(/</)

@@ -49,7 +49,7 @@
   onMounted(() => init())
   
   function init() {
-    if (props.src) src.value = decodeURIComponent(props.src)
+    if (props.src) src.value = props.src
     doLayout()
   }
 
