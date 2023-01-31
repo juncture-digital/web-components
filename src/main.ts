@@ -16,6 +16,7 @@ import FAB from './components/FAB.ce.vue'
 import Footer from './components/Footer.ce.vue'
 import Header from './components/Header.ce.vue'
 import Hero from './components/Hero.ce.vue'
+import IFrame from './components/IFrame.ce.vue'
 import Manifest from './components/Manifest.ce.vue'
 import ManifestPopup from './components/ManifestPopup.ce.vue'
 import Map from './components/Map.ce.vue'
@@ -46,6 +47,7 @@ function init() {
 	customElements.define('ve-footer', defineCustomElement(Footer))
 	customElements.define('ve-header', defineCustomElement(Header))
 	customElements.define('ve-hero', defineCustomElement(Hero))
+	customElements.define('ve-iframe', defineCustomElement(IFrame))
 	customElements.define('ve-manifest', defineCustomElement(Manifest))
 	customElements.define('ve-manifest-popup', defineCustomElement(ManifestPopup))
 	customElements.define('ve-map', defineCustomElement(Map))

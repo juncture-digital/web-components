@@ -3,7 +3,7 @@
 <div ref="root" :style="{width: '100%', height: '100%'}">
   <div class="content">
     <div id="lat-lng-zoom" v-html="latLngZoom" @click="copyTextToClipboard(`${latLngZoom}`)"></div>
-    <input v-if="tileLayers && tileLayers.length > 0" id="opacity-slider" type="range" min="0" max="1" step="0.02" value="1" @nput="updateOpacity"/>
+    <input v-if="tileLayers && tileLayers.length > 0" id="opacity-slider" type="range" min="0" max="1" step="0.02" value="1" @input="updateOpacity"/>
     <div id="map"></div>
     <div v-if="caption" id="caption" v-html="caption"></div>
   </div>
@@ -29,8 +29,8 @@
 
   const props = defineProps({
     overlay: { type: String },
-    zoom: { type: Number, default: 10 },
-    center: { type: String },
+    zoom: { type: Number, default: 2 },
+    center: { type: String, default: '55.4,6.7' },
     marker: { type: String },
     caption: { type: String },
     width: { type: String },
@@ -226,7 +226,7 @@
       map.value.on('click', (e) => getLatLngZoom(e))
       map.value.on('zoomend', (e) => getLatLngZoom(e as L.LeafletMouseEvent))
       map.value.on('moveend', (e) => getLatLngZoom(e as L.LeafletMouseEvent))
-      latLngZoom.value = `${Number((center.lat).toFixed(5))},${Number((center.lng).toFixed(5))} ${zoom}`
+      latLngZoom.value = `${Number((center.lat).toFixed(5))},${Number((center.lng).toFixed(5))} ${zoom.value}`
     }
   }
 
