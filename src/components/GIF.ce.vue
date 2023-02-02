@@ -9,6 +9,7 @@
       @click="onClick('image', $event)"
     />
     <sl-icon
+      v-if="ready"
       id="play-button"
       :name="isPlaying ? 'pause-circle' : 'play-circle'" 
       :data-state="isPlaying ? 'playing' : 'paused'"
@@ -35,7 +36,7 @@
   const shadowRoot = computed(() => root?.value?.parentNode as HTMLElement)
   const gif = computed(() => shadowRoot.value?.querySelector('#gif') as HTMLImageElement)
   
-  const pauseButton = ref<HTMLButtonElement>()
+  const ready = ref(false)
   const isPlaying = ref(false)
 
   const options = ref<any>()
@@ -72,6 +73,7 @@
 	function generateStill () {
 
     let waitForImage = () => {
+      ready.value = true
       let ext
       ext = gif.value.src.split('.')
       ext = ext[ext.length - 1].toLowerCase()
@@ -150,11 +152,14 @@
 
     //Timing is important. Wait for each image to load before generating a still.
     if (gif.value.complete) waitForImage()
-    else gif.value.addEventListener('load', () => waitForImage())
+    else gif.value.addEventListener('load', () => {
+      console.log(`onLoad gif.complete=${gif.value.complete}`)
+      if (!ready.value) nextTick(() => waitForImage())
+    })
   }
 
   function onClick(from:string, evt:MouseEvent) {
-    console.log(from, evt)
+    console.log(`onClick from=${from} isPlaying=${isPlaying.value} restartOnPlay=${options.value.restartOnPlay}`, evt)
     isPlaying.value = !isPlaying.value
 
     const canvas = gif.value.nextElementSibling as HTMLCanvasElement
