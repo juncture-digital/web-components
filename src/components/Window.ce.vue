@@ -28,7 +28,7 @@
 
   function toggleWindow() {
     let width = props.width || 1040
-    let height = props.height || Math.max(window.innerHeight, 1600)
+    let height = props.height || Math.min(window.innerHeight, 1600)
     if (state.junctureWindow) { state.junctureWindow.close() }
     let options = `toolbar=yes,location=yes,left=${props.left},top=${props.top},width=${props.width},height=${height},scrollbars=yes,status=yes`
     state.junctureWindow = window.open(props.href, '_blank', options)
