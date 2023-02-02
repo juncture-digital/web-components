@@ -14,6 +14,7 @@ import ContentSelector from './components/ContentSelector.ce.vue'
 import EntityCard from './components/EntityCard.ce.vue'
 import FAB from './components/FAB.ce.vue'
 import Footer from './components/Footer.ce.vue'
+import GIF from './components/GIF.ce.vue'
 import Header from './components/Header.ce.vue'
 import Hero from './components/Hero.ce.vue'
 import IFrame from './components/IFrame.ce.vue'
@@ -46,6 +47,7 @@ function init() {
 	customElements.define('ve-fab', defineCustomElement(FAB))
 	customElements.define('ve-footer', defineCustomElement(Footer))
 	customElements.define('ve-header', defineCustomElement(Header))
+	customElements.define('ve-gif', defineCustomElement(GIF))
 	customElements.define('ve-hero', defineCustomElement(Hero))
 	customElements.define('ve-iframe', defineCustomElement(IFrame))
 	customElements.define('ve-manifest', defineCustomElement(Manifest))

@@ -7,7 +7,7 @@
         
         <!-- Single image -->
         <div v-if="type === 'image'" class="image-wrapper media-item">
-          <img v-if="isGif(manifests[0])" :src="itemInfo.id" class="gif" style="width:100%;" alt="Animated GIF"/>
+          <ve-gif v-if="isGif(manifests[0])" :src="itemInfo.id" alt="Animated GIF" initially-paused restart-on-play></ve-gif>
           <img v-else-if="static" :src="staticImage(manifest, options, width)" style="width:100%;" @click="toggleDialogId(manifest.id)"/>
           <div v-else id="osd"></div>
           <ve-manifest-popup v-if="!props.noInfoIcon" :manifest="manifests[0].id"></ve-manifest-popup>
@@ -115,7 +115,6 @@
 
   import type SLDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
   // import { GithubClient } from '@/gh-utils'
-  import { Gifa11y } from '../gifa11y'
 
   function onDrag(evt:DragEvent) {
     console.log('onDrag', evt)
@@ -441,10 +440,6 @@
   watch(type, () => {
     addInteractionHandlers()
     nextTick(() => {
-      if (isGif(manifest.value)) {
-        let gif = shadowRoot.value?.querySelector('.gif') as HTMLElement
-        new Gifa11y({ gif, initiallyPaused: true, restartOnPlay: true})
-      }
       if (type.value === 'image' && !isGif(manifest.value) && !props.static) loadImage()
       // else if (type.value === 'image-compare') scaledImages.value = scaleImages()
       else if (type.value === 'video' && iiifItemsList.value.length > 0) initializeHTML5Player()
@@ -1400,75 +1395,5 @@
     transition: all .5s ease-in;
   }
 
-  button.gifa11y-btn,
-  span.gifa11y-warning {
-    all: unset;
-    box-sizing: border-box;
-  }
-  button.gifa11y-btn {
-    background: indigo;
-    color: white;
-    border-radius: 50%;
-    box-shadow: 0 0 16px 0 #0000004f;
-    border: 2px solid white;
-    cursor: pointer;
-    display: block;
-    line-height: normal;
-    min-height: 36px;
-    min-width: 36px;
-    text-align: center;
-    margin: 12px;
-    padding: 4px;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    transition: all .2s ease-in-out;
-    z-index: 500;
-  }
-  button.gifa11y-btn:hover, button.gifa11y-btn:focus {
-    background: rebeccapurple;
-  }
-  button.gifa11y-btn:focus {
-    box-shadow: 0 0 0 5px #00e7ffad;
-    outline: 3px solid transparent;
-  }
-  div.gifa11y-play-icon i,
-  div.gifa11y-pause-icon > i {
-    font-size: 1rem;
-    padding: 4px;
-    vertical-align: middle;
-    min-width: calc(1rem * 1.4);
-    min-height: calc(1rem * 1.4);
-  }
-  div.gifa11y-pause-icon > svg,
-  div.gifa11y-play-icon > svg {
-    flex-shrink: 0;
-    position: relative;
-    vertical-align: middle;
-    height: 1,5rem;
-    width: 1,5rem;
-    -webkit-transform: translate(0px,0px);
-  }
-  span.gifa11y-warning {
-    background: darkred;
-    color: white;
-    padding: 5px;
-    font-size: 1.1rem;
-    display: block;
-    font-family: Arial;
-    max-width: 450px;
-  }
-  /* Increase target size of button. */
-  button.gifa11y-btn:before {
-    content: "";
-    inset: -8.5px;
-    min-height: 50px;
-    min-width: 50px;
-    position: absolute;
-  }
-  canvas.gifa11y-canvas {
-    object-fit: contain;
-    max-width: 100%;
-  }
 </style>
 
