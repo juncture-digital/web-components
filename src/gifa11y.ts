@@ -21,7 +21,6 @@ export class Gifa11y {
 		};
 		this.options = { ...defaultConfig, ...options }
 		this.initialize()
-		console.log(this.options.gif)
 		this.src = this.options.gif.src
 	}
 	
