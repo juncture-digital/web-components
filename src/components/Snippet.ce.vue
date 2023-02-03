@@ -153,7 +153,6 @@
   function getHTML() {
     html.value = ''
     let url = `${apiEndpoint}/html/?inline=true`
-    console.log(url)
     fetch(url, {
       method: 'POST',
       body: JSON.stringify({

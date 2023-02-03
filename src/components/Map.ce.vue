@@ -202,8 +202,6 @@
       zoom.value = 6
     }
 
-    console.log(`initMap: center=${center} zoom=${zoom.value}`)
-
     if (map.value) {
       map.value.off()
       map.value.remove()
@@ -346,7 +344,6 @@
   }
 
   function copyTextToClipboard(text: string) {
-    console.log(`copyTextToClipboard=${text}`)
     if (navigator.clipboard) navigator.clipboard.writeText(text)
   }
 
@@ -390,7 +387,7 @@
             let attr = el.attributes.getNamedItem(currentClassState ? 'enter' : 'exit')
             if (attr) {
               const [action, ...rest] = attr.value.split(':')
-              console.log(`action=${action} arg=${rest.join(':')}`)
+              // console.log(`action=${action} arg=${rest.join(':')}`)
               if (action === 'flyto') flyto(rest.join(':'))
             }
           }
@@ -421,7 +418,7 @@
       let lng = match.groups?.lng ? parseFloat(match.groups.lng) : 0
       let qid = match.groups?.qid
       let zoom = match.groups?.zoom ? parseFloat(match?.groups?.zoom) : 10
-      console.log(`flyto: lat=${lat} lng=${lng} qid=${qid} zoom=${zoom}`)
+      // console.log(`flyto: lat=${lat} lng=${lng} qid=${qid} zoom=${zoom}`)
       let center
       if (qid) {
         let entity = await getEntity(qid)

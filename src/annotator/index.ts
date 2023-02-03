@@ -53,6 +53,7 @@ export class Annotator {
         if (annoEl) {
           annoEl.addEventListener('mouseenter', () => this.select(anno.id))
           annoEl.addEventListener('mouseleave', () => this.deselect())
+          annoEl.addEventListener('click', () => navigator.clipboard.writeText(anno.id) )
         }
       })
     }
@@ -79,6 +80,7 @@ export class Annotator {
   }
 
   onSelect(anno:any) {
+    // console.log(`annotator.onSelect=${anno.id}`)
     this.selected = anno.id
     if (navigator.clipboard) navigator.clipboard.writeText(this.selected)
   }
