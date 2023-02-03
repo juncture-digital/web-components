@@ -45,7 +45,8 @@
   })
 
   const root = ref<HTMLElement | null>(null)
-  const host = computed(() => (root.value?.getRootNode() as any)?.host as HTMLElement)
+  // const host = computed(() => (root.value?.getRootNode() as any)?.host as HTMLElement)
+  const host = computed(() => (root.value?.getRootNode() as any)?.host)
 
   const shadowRoot = computed(() => root?.value?.parentNode)
   const content = computed(() => shadowRoot.value?.querySelector('.content') as HTMLElement)
@@ -60,7 +61,7 @@
 
   const zoom = ref(10) 
 
-  watch(host, () => nextTick(() => doLayout()))
+  // watch(host, () => nextTick(() => doLayout()))
 
   onMounted(() => {
     evalProps()
@@ -76,7 +77,7 @@
       host.value.style.width = '100%'
     } else {
       host.value.style.float = position
-      host.value.style.width = '50%'
+      host.value.style.width = 'calc(50% - 16px)'
     }
     host.value.style.width = window.getComputedStyle(host.value).width
 
@@ -200,6 +201,8 @@
       center = new L.LatLng(0, 0)
       zoom.value = 6
     }
+
+    console.log(`initMap: center=${center} zoom=${zoom.value}`)
 
     if (map.value) {
       map.value.off()
@@ -351,33 +354,50 @@
     if (tileLayers.value && opacitySlider.value) tileLayers.value[0].setOpacity(parseFloat(opacitySlider.value.value))
   }
 
-  const flytoRegex = RegExp(/^(?<lat>[-?\d.]+),(?<lng>[-?\d.]+),?(?<flyto>[\d.]+)?$/)
-  function isFlyto(attr:Attr) {
-    let name = attr.name.toLowerCase()
-    let value = attr.value
-    if ((name === 'enter' || name === 'exit') && value.indexOf('|') > 0) [name, value] = value.split('|')
-    return ['fly', 'flyto'].indexOf(name.toLowerCase()) === 0 || flytoRegex.test(value)
-  }
+  const flytoRegex = RegExp(/^((?<lat>[-?\d.]+),(?<lng>[-?\d.]+)|(?<qid>Q[0-9]+)),?(?<zoom>[\d.]+)?$/)
 
   function addInteractionHandlers() {
-    let el = host.value.parentElement
-    while (el?.parentElement && el.tagName !== 'BODY') el = el.parentElement
+    Array.from(host.value.parentElement.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
+      let veMap = findVeMap(el)
+      if (veMap) addMutationObserver(el)
+    })
 
+    let el = host.value.parentElement
+    while (el?.parentElement && el.tagName !== 'BODY') el = el.parentElement;
+  
     if (el) {
-      let markEls = Array.from(el.querySelectorAll('mark')) as HTMLElement[]
-      markEls.forEach(mark => {
-        Array.from(mark.attributes).forEach(attr => {
-          console.log(mark, isFlyto(attr))
-          if (isFlyto(attr)) {
-            let veMap = findVeMap(mark.parentElement)
-            if (veMap) {
-              mark.classList.add('flyto')
-              mark.addEventListener('click', () => flyto(attr.value) )
-            }
+      (Array.from(el.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
+        let match = Array.from(mark.attributes).find(attr => attr.name === 'flyto')
+        if (match) {
+          let veMap = findVeMap(mark.parentElement)
+          if (veMap) {
+            mark.classList.add(match.name)
+            mark.addEventListener('click', () => flyto(match?.value || ''))
           }
-        })
+        }
       })
     }
+  }
+
+  function addMutationObserver(el: HTMLElement) {
+    let prevClassState = el.classList.contains('active')
+    let observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.attributeName == 'class') {
+          let currentClassState = (mutation.target as HTMLElement).classList.contains('active')
+          if (prevClassState !== currentClassState) {
+            prevClassState = currentClassState
+            let attr = el.attributes.getNamedItem(currentClassState ? 'enter' : 'exit')
+            if (attr) {
+              const [action, ...rest] = attr.value.split(':')
+              console.log(`action=${action} arg=${rest.join(':')}`)
+              if (action === 'flyto') flyto(rest.join(':'))
+            }
+          }
+        }
+      })
+    })
+    observer.observe(el, {attributes: true})
   }
 
   function findVeMap(el: any) {
@@ -393,15 +413,22 @@
     }
   }
 
-  function flyto(arg: string) {
+  async function flyto(arg: string) {
     arg = arg.replace(/^flyto\|/i,'')
     const match = arg?.match(flytoRegex)
     if (match) {
       let lat = match.groups?.lat ? parseFloat(match.groups.lat) : 0
       let lng = match.groups?.lng ? parseFloat(match.groups.lng) : 0
+      let qid = match.groups?.qid
       let zoom = match.groups?.zoom ? parseFloat(match?.groups?.zoom) : 10
-      console.log(`flyto: ${lat},${lng},${zoom}`)
-      let center = new L.LatLng(lat, lng)
+      console.log(`flyto: lat=${lat} lng=${lng} qid=${qid} zoom=${zoom}`)
+      let center
+      if (qid) {
+        let entity = await getEntity(qid)
+        center = latLng(entity.coords)
+      } else {
+        center = new L.LatLng(lat, lng)
+      }
       map.value?.flyTo(center, zoom)
     }
   }

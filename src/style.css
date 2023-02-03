@@ -511,8 +511,9 @@ section.no-offset:target:before {
   padding-right: 4px;
 }
 
-#juncture mark.zoom::after {
-  content: "🔎";
+#juncture mark.anno::after,
+#juncture mark.zoomto::after {
+    content: "🔎";
 }
 
 #juncture mark.play::after {

@@ -57,7 +57,7 @@
 <script setup lang="ts">
 
   import { computed, onMounted, nextTick, ref, toRaw, watch } from 'vue'
-  import { initTippy } from '../utils'
+  import { initTippy, observeActive } from '../utils'
 
   import '@shoelace-style/shoelace/dist/components/icon/icon.js'
   import '@shoelace-style/shoelace/dist/components/details/details.js'
@@ -78,7 +78,8 @@
     left: { type: Boolean },
     width: { type: String },
     height: { type: String },
-    fill: { type: Boolean }
+    fill: { type: Boolean },
+    showActive: { type: Boolean }
   })
 
   const root = ref<HTMLElement | null>(null)
@@ -109,7 +110,10 @@
 
   watch(active, () => {
     if (active.value !== 'markdown' && html.value === undefined) getHTML()
-    if (active.value === 'preview') nextTick(() => initTippy(shadowRoot.value, true))
+    if (active.value === 'preview') nextTick(() => {
+      initTippy(shadowRoot.value, true)
+      // observeActive(shadowRoot.value?.querySelector('#juncture') as HTMLElement)
+    })
     if (props.fill && html.value) nextTick(() => setFill())
     if (props.height) nextTick(() => setHeight())
   })
@@ -139,7 +143,7 @@
       let footer = main.querySelector('ve-footer')
       if (footer) main.insertBefore(filler, footer)
       else main.appendChild(filler)
-      container.style.height = `${Math.max(width/2, 500)}px`
+      container.style.height = props.height || `${Math.max(width/2, 500)}px`
       container.style.overflowY = 'scroll'
     } else {
       container.style.height = ''
@@ -148,10 +152,12 @@
   
   function getHTML() {
     html.value = ''
-    fetch(`${apiEndpoint}/html/?inline=true`, {
+    let url = `${apiEndpoint}/html/?inline=true`
+    console.log(url)
+    fetch(url, {
       method: 'POST',
       body: JSON.stringify({
-        prefix: `${props.prefix}`,
+        prefix: `${props.prefix || ''}`,
         path: '',
         markdown: markdown.value
       })
@@ -165,6 +171,7 @@
         if (active.value === 'preview') nextTick(() => {
           if (props.fill) setFill()
           initTippy(shadowRoot.value, true)
+          observeActive(shadowRoot.value?.querySelector('#juncture') as HTMLElement)
         })
       }
     })

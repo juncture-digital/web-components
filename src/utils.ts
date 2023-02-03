@@ -345,6 +345,10 @@ const intersectionObserver = new IntersectionObserver (
 )
 Array.from(document.querySelectorAll('p')).forEach(el => intersectionObserver.observe(el))
 
+export function observeActive(el:HTMLElement) {
+  Array.from(el.querySelectorAll('p')).forEach(p => intersectionObserver.observe(p))
+}
+
 export function domPath(el: any) {
   var stack = []
   while ( el.parentNode != null ) {

@@ -699,6 +699,7 @@
     return name === 'pause' || value === 'pause'
   }
 
+  const actionKeys = new Set(['anno', 'play', 'zoomto'])
   function addInteractionHandlers() {
     Array.from(host.value.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
       let veMedia = findVeMedia(el)
@@ -709,20 +710,19 @@
     while (el.parentElement && el.tagName !== 'BODY') el = el.parentElement;
 
     (Array.from(el.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
-      Array.from(mark.attributes).forEach(attr => {
-        if (type.value === 'image' && isImageZoomTo(attr) ||
-            (type.value !== 'image' && (isPlayMedia(attr) || isPauseMedia(attr)))) {
-          let veMedia = findVeMedia(mark.parentElement)
-          if (veMedia) {
-            mark.classList.add(type.value === 'image' ? 'zoom' : 'play')
-            mark.addEventListener('click', () => {
-              if (type.value === 'image') zoomto(attr.value)
-              else if (isPlayMedia(attr)) playMedia(attr.value)
-              else pauseMedia()
-            })
-          }
+      let match = Array.from(mark.attributes).find(attr => actionKeys.has(attr.name))
+      if (match) {
+        let veMedia = findVeMedia(mark.parentElement)
+        if (veMedia) {
+          mark.classList.add(match.name)
+          mark.addEventListener('click', () => {
+            if (match?.name === 'anno') showAnnotation(match.value)
+            else if (match?.name === 'zoomto') zoomto(match.value)
+            else if (match?.name === 'play') playMedia(match.value)
+            else pauseMedia()
+          })
         }
-      })
+      }
     })
   }
 
@@ -774,7 +774,7 @@
 
   function zoomto(arg: string) {
     arg = arg.replace(/^zoomto\|/i,'')
-    const match = arg?.match(/^(?<region>(pct:|pixel:|px:)?[\d.]+,[\d.]+,[\d.]+,[\d.]+)?\|?(?<annoid>[0-9a-f]{8})?$/)
+    const match = arg?.match(/^(?<region>(pct:|pixel:|px:)?[\d.]+,[\d.]+,[\d.]+,[\d.]+)?,?(?<annoid>[0-9a-f]{8})?$/)
     if (match) {
       let region = match?.groups?.region
       let annoid = match?.groups?.annoid
@@ -785,6 +785,18 @@
         if (region) viewer.value?.viewport.fitBounds(parseRegionString(region, viewer.value), false)
       }
       if (annoid) annotator.value.select(annoid)
+    }
+  }
+
+  function showAnnotation(arg:string) {
+    const match = arg?.match(/^(?<annoid>[0-9a-f]{8})$/)
+    if (match) {
+      let annoid = match?.groups?.annoid
+      if (annoid && annotator.value.selected && annotator.value.selected.id === annoid) {
+        viewer.value?.viewport.goHome()
+      } else {
+        annotator.value.select(annoid)
+      }
     }
   }
 
