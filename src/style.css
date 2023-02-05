@@ -1,5 +1,9 @@
 * { box-sizing: border-box; }
 
+.ve-component {
+  clear: both;
+}
+
 ve-media-card {
   height: 100%;
 }
@@ -490,17 +494,17 @@ section.no-offset:target:before {
 
 /***************** markdown start *****************/
 
-#juncture mark {
+mark {
   cursor: pointer;
   background: unset;
   border-bottom: 1px solid #ccc;
   color: #444;
 }
-#juncture mark:hover {
+mark:hover {
   border-bottom: 2px solid #444;
   background: #eee;
 }
-#juncture mark::after {
+mark::after {
   color: #aaa;
   font-size: 50%;
   line-height: 0;
@@ -511,16 +515,24 @@ section.no-offset:target:before {
   padding-right: 4px;
 }
 
-#juncture mark.anno::after,
-#juncture mark.zoomto::after {
-    content: "🔎";
+mark.anno::after,
+mark.zoomto::after {
+  content: "🔎";
 }
 
-#juncture mark.play::after {
+mark.play::after {
   content: "▶";
 }
 
-#juncture mark.flyto::after {
+/*
+mark[qid]:after {
+  content: "ⓘ";
+  font-size: .8rem;
+  color:black;
+}
+*/
+
+mark.flyto::after {
   content: "✈";
   font-size: 120%;
   top: 0;
