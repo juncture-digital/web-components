@@ -838,7 +838,7 @@
       })
     mediaPlayer.on('ready', (evt:any) => {
       monitor()
-      console.log('youtube.ready', props.autoplay)
+      // console.log('youtube.ready', props.autoplay)
       if (props.autoplay) seekTo(`${props.start || ''}`, `${props.end || ''}`)
     })
   }

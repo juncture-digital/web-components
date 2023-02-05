@@ -12,6 +12,7 @@ import Button from './components/Button.ce.vue'
 import Contact from './components/Contact.ce.vue'
 import ContentSelector from './components/ContentSelector.ce.vue'
 import EntityCard from './components/EntityCard.ce.vue'
+import Essay from './components/Essay.ce.vue'
 import FAB from './components/FAB.ce.vue'
 import Footer from './components/Footer.ce.vue'
 import GIF from './components/GIF.ce.vue'
@@ -44,6 +45,7 @@ function init() {
 	customElements.define('ve-contact', defineCustomElement(Contact))
 	customElements.define('ve-content-selector', defineCustomElement(ContentSelector))
 	customElements.define('ve-entity-card', defineCustomElement(EntityCard))
+	customElements.define('ve-essay', defineCustomElement(Essay))
 	customElements.define('ve-fab', defineCustomElement(FAB))
 	customElements.define('ve-footer', defineCustomElement(Footer))
 	customElements.define('ve-header', defineCustomElement(Header))
