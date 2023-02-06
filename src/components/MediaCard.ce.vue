@@ -32,7 +32,7 @@
 
     <div class="card-links" style="margin-top:auto;">
       <img src="https://juncture-digital.github.io/web-app/static/iiif.png" class="draggable-iiif" alt="IIIF manifest icon"
-        @click="copyTextToClipboard(manifest)" 
+        @click="copyTextToClipboard(manifest.id)" 
         @dragstart="onIiifDrag"
       />
     </div>
@@ -126,7 +126,6 @@
   watch(showImageDialog, () => { showImageDialog.value ? imageDialog.value?.show() : imageDialog.value?.hide() })
 
   function toggleShowImageDialog() {
-    console.log('toggleShowImageDialog')
     showImageDialog.value = !showImageDialog.value
   }
 
@@ -140,7 +139,6 @@
   watch(showMapDialog, () => { showMapDialog.value ? mapDialog.value?.show() : mapDialog.value?.hide() })
 
   function toggleShowMapDialog() {
-    console.log()
     showMapDialog.value = !showMapDialog.value
   }
 

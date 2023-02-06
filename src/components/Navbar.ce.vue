@@ -102,9 +102,10 @@
 
   .logo {
     margin-left: 20px;
+    background-color: white;
   }
   img.logo {
-    max-height: 40px;
+    max-height: 50px;
   }
 
   .controls {
@@ -125,7 +126,7 @@
   }
 
   .title {
-    font-size: 1.6rem;
+    font-size: 2rem;
     line-height: 1.8rem;
     padding-top: 0;
     font-weight: bold;
