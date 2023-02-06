@@ -1,7 +1,8 @@
 <template>
 
   <section ref="root" class="main">
-    <sl-dialog label="Contact Us" class="contact-dialog">
+    <a href="#" v-if="label" @click.prevent="show = !show" v-html="label"></a>
+    <sl-dialog :label="props.title || 'Contact Us'" class="contact-dialog">
       <sl-input id="from" type="email" label="Email address"></sl-input>
       <sl-alert id="bad-email-alert" variant="danger">
         <sl-icon slot="icon" name="exclamation-octagon"></sl-icon>
@@ -21,7 +22,7 @@
   
 <script setup lang="ts">
 
-  import { computed, ref, toRaw, watch } from 'vue'
+  import { computed, onMounted, ref, toRaw, watch } from 'vue'
 
   import '@shoelace-style/shoelace/dist/components/alert/alert.js'
   import '@shoelace-style/shoelace/dist/components/button/button.js'
@@ -32,6 +33,8 @@
 
   const props = defineProps({
     contact: { type: String },
+    title: { type: String },
+    subject: { type: String },
     show: { type: Boolean }
   })
   
@@ -41,6 +44,7 @@
   const root = ref<HTMLElement | null>(null)
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
   const shadowRoot = computed(() => root?.value?.parentNode)
+  const label = computed(() => host.value?.innerHTML)
 
   const show = ref(false)
   defineExpose({ show })
@@ -51,6 +55,10 @@
   let emailAlert: any
   let message: HTMLTextAreaElement
   let noMessageAlert: any
+
+  onMounted(() => {
+    show.value = props.show
+  })
 
   watch(props, () => { 
     show.value = props.show
@@ -90,14 +98,13 @@
       let body = {
         to: props.contact,
         from: from.value,
-        subject: 'Contact Us',
+        subject: props.subject || 'Contact Us',
         message: message.value
       }
       hideContactForm()
       let resp: any = await fetch(emailEndpoint, {
         method: 'POST', body: JSON.stringify(body)
       })
-      console.log(resp)
       // if (resp.ok) console.log(await resp.json())
     }
   }
@@ -107,6 +114,10 @@
 <style>
 
   * { box-sizing: border-box; }
+
+  :host {
+    display: inline-block;
+  }
 
   sl-input,
   sl-textarea {
