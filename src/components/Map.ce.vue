@@ -61,7 +61,7 @@
 
   const zoom = ref(10) 
 
-  // watch(host, () => nextTick(() => doLayout()))
+  watch(host, () => nextTick(() => doLayout()))
 
   onMounted(() => {
     evalProps()

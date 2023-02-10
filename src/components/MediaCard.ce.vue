@@ -43,7 +43,7 @@
     </sl-dialog>
 
     <sl-dialog ref="mapDialog" id="map-dialog" no-header style="--body-spacing:0;--footer-spacing:0;">
-      <ve-map v-if="showMapDialog" :center="location" :marker="location"></ve-map>
+      <ve-map v-if="showMapDialog" :center="location" :zoom="8" :marker="location"></ve-map>
       <sl-button slot="footer" class="close" @click="toggleShowMapDialog" variant="primary">Close</sl-button>
     </sl-dialog>
 
@@ -158,6 +158,8 @@
   }
 
   function onIiifDrag(dragEvent: DragEvent) {
+    dragEvent.stopPropagation()
+    console.log('onIiifDrag', manifest.value.id)
     dragEvent.dataTransfer?.setData('text/uri-list', `${manifest.value.id}?manifest=${manifest.value.id}`)
   }
 

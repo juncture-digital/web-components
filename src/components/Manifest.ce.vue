@@ -122,147 +122,136 @@
   
 </template>
   
-<script lang="ts">
+<script setup lang="ts">
 
-import { computed, ref, watch } from 'vue'
-import { getItemInfo, getManifest } from '../utils'
+  import { computed, onMounted, ref, toRaw, watch } from 'vue'
+  import { getItemInfo, getManifest } from '../utils'
 
-export default {
-  components: {},
-  props: {
-    manifest: { type: String, required: true }
-  },
-  setup(props) {
+  const props = defineProps({
+    manifest: { type: String }
+  })
 
-    const root = ref<HTMLElement | null>(null)
-    const manifest = ref<any>(null)
-    const parsed = ref<any>(null)
+  const root = ref<HTMLElement | null>(null)
+  const host = computed(() => (root.value?.getRootNode() as any)?.host)
+  const manifest = ref<any>(null)
+  const parsed = ref<any>(null)
 
-    watch(manifest, () => parsed.value = parseManifest(manifest.value))
-      
-    const licenseBadge = computed(() => parsed.value && _getLicenseBadge(parsed.value))
+  watch(manifest, () => parsed.value = parseManifest(manifest.value))
+    
+  const licenseBadge = computed(() => parsed.value && _getLicenseBadge(parsed.value))
 
-    console.log(props.manifest)
+  // watch(host, () => init())
+
+  onMounted(() => init())
+
+  function init() {
     if (typeof props.manifest === 'object') {
-      console.log('manifest.isObject')
       manifest.value = props.manifest
     } else {
-      console.log('manifest.isUrl')
       getManifest(<string>props.manifest).then(resp => manifest.value = resp )
     }
-
-    function _value(langObj: any, language='en') {
-      return typeof langObj === 'object' && !Array.isArray(langObj)
-        ? langObj[language] || langObj.none || langObj[Object.keys(langObj).sort()[0]]
-        : langObj
-    }
-
-    function parseManifest(_manifest:any) {
-      let parsed: any = {}
-
-      parsed.id = _value(_manifest.id)
-      parsed.label = _value(_manifest.label)
-
-      if (_manifest.summary) parsed.summary = _value(_manifest.summary)
-      if (_manifest.rights) parsed.rights = _manifest.rights
-      if (_manifest.thumbnail) parsed.thumbnail = _manifest.thumbnail[0].id || _manifest.thumbnail
-      
-      if (_manifest.metadata) {
-        parsed.metadata = _manifest.metadata.map((item:any) => ({label: _value(item.label)[0], value: _value(item.value)}))
-        let sourceUrl = parsed.metadata.find((item:any) => item.label == 'source_url')
-        parsed.sourceUrl = sourceUrl ? sourceUrl.value[0] : null
-
-        let depicts = parsed.metadata.find((md:any) => md.label === 'depicts')
-        if (depicts) parsed.depicts = depicts.value
-      }
-
-      if (_manifest.provider) {
-        parsed.provider = _manifest.provider.map((provider:any) => {
-          let entry: any = {label: _value(provider.label), href:provider.id}
-          if (provider.logo) entry.logo = {src:provider.logo[0].id}
-          return entry
-        })
-      }
-
-      if (_manifest.logo) {
-        parsed.logo = _manifest.logo.map((item:any) => {
-          let logoObj: any = { src: typeof item === 'object' ? item.id || item['@id'] : item }
-          if (typeof item === 'object') {
-            if (item.width) logoObj.width = item.width
-            if (item.height) logoObj.height = item.height
-          }
-          return logoObj
-        })
-      }
-
-      parsed.imageData = getItemInfo(_manifest)
-      parsed.service = parsed.imageData.service && `${(parsed.imageData.service[0].id || parsed.imageData.service[0]['@id'])
-        .replace(/\/info\.json$/,'')}/info.json`
-        if (_manifest.requiredStatement) {
-        let rs = _manifest.requiredStatement
-        parsed.requiredStatement = {label: _value(rs.label), value: _value(rs.value)}
-      }
-
-      if (_manifest.homepage) {
-        parsed.homepage = {label: _manifest.homepage.label ? _value(_manifest.homepage.label) : _manifest.homepage.id, href: _manifest.homepage.id}
-      }
-
-      if (_manifest.seeAlso) {
-        parsed.seeAlso = _manifest.seeAlso.map((seeAlso:any) => ({label: seeAlso.label ? _value(seeAlso.label) : seeAlso.id, href: seeAlso.id}))
-      }
-      
-      return parsed
-    }
-
-
-    function onIiifDrag(dragEvent: DragEvent) {
-      console.log('onIiifDrag')
-      dragEvent.dataTransfer?.setData('text/uri-list', `${manifest.value.id}?manifest=${manifest.value.id}`)
-    }
-
-    function copyTextToClipboard(text: string) {
-        console.log('copyTextToClipboard', text)
-        if (navigator.clipboard) navigator.clipboard.writeText(text)
-    }
-
-    function _getLicenseBadge(_parsed:any):string {
-      let config = {
-        cc: {
-          badgeWidth: 88,
-          badgeHeight: 31,
-          badgeTemplate: 'https://licensebuttons.net/l/${this.rightsCode}${this.rightsCode === "publicdomain" ? "" : "/"+this.version}/${this.badgeWidth}x${this.badgeHeight}.png'
-        },
-        rs: {
-          badgeTemplate: 'https://rightsstatements.org/files/buttons/${this.rightsCode}.white.svg',
-          backgroundColor: '318ac7'
-        }
-      }
-      const fillTemplate = function(templateString:string, templateVars:object) {
-        return new Function("return `"+templateString +"`;").call(templateVars);
-      }
-      let rights = _parsed.rights || ''
-      let badgeHtml: string = ''
-      let [rightsType, _, rightsCode, version] = rights.split('/').slice(2)
-      if (rightsType === 'creativecommons.org') {
-        rightsCode = rightsCode === 'zero' ? 'publicdomain' : rightsCode
-        badgeHtml = `<img src="${fillTemplate(config.cc.badgeTemplate, {...config.cc, ...{rightsCode, version}})}"/>` 
-      } else if (rightsType === 'rightsstatements.org') {
-        badgeHtml = `<div style="display:inline-block;height:25px;padding:3px;background-color:#${config.rs.backgroundColor};"><img style="height:100%;" src="${fillTemplate(config.rs.badgeTemplate, {...config.rs, ...{rightsCode}})}"/></div>`
-      }
-      return badgeHtml
-    }
-  
-    return {
-      copyTextToClipboard,
-      licenseBadge,
-      parsed,
-      onIiifDrag,
-      props,
-      root,
-    }
-
   }
-}
+
+  function _value(langObj: any, language='en') {
+    return typeof langObj === 'object' && !Array.isArray(langObj)
+      ? langObj[language] || langObj.none || langObj[Object.keys(langObj).sort()[0]]
+      : langObj
+  }
+
+  function parseManifest(_manifest:any) {
+    let parsed: any = {}
+
+    parsed.id = _value(_manifest.id)
+    parsed.label = _value(_manifest.label)
+
+    if (_manifest.summary) parsed.summary = _value(_manifest.summary)
+    if (_manifest.rights) parsed.rights = _manifest.rights
+    if (_manifest.thumbnail) parsed.thumbnail = _manifest.thumbnail[0].id || _manifest.thumbnail
+    
+    if (_manifest.metadata) {
+      parsed.metadata = _manifest.metadata.map((item:any) => ({label: _value(item.label)[0], value: _value(item.value)}))
+      let sourceUrl = parsed.metadata.find((item:any) => item.label == 'source_url')
+      parsed.sourceUrl = sourceUrl ? sourceUrl.value[0] : null
+
+      let depicts = parsed.metadata.find((md:any) => md.label === 'depicts')
+      if (depicts) parsed.depicts = depicts.value
+    }
+
+    if (_manifest.provider) {
+      parsed.provider = _manifest.provider.map((provider:any) => {
+        let entry: any = {label: _value(provider.label), href:provider.id}
+        if (provider.logo) entry.logo = {src:provider.logo[0].id}
+        return entry
+      })
+    }
+
+    if (_manifest.logo) {
+      parsed.logo = _manifest.logo.map((item:any) => {
+        let logoObj: any = { src: typeof item === 'object' ? item.id || item['@id'] : item }
+        if (typeof item === 'object') {
+          if (item.width) logoObj.width = item.width
+          if (item.height) logoObj.height = item.height
+        }
+        return logoObj
+      })
+    }
+
+    parsed.imageData = getItemInfo(_manifest)
+    parsed.service = parsed.imageData.service && `${(parsed.imageData.service[0].id || parsed.imageData.service[0]['@id'])
+      .replace(/\/info\.json$/,'')}/info.json`
+      if (_manifest.requiredStatement) {
+      let rs = _manifest.requiredStatement
+      parsed.requiredStatement = {label: _value(rs.label), value: _value(rs.value)}
+    }
+
+    if (_manifest.homepage) {
+      parsed.homepage = {label: _manifest.homepage.label ? _value(_manifest.homepage.label) : _manifest.homepage.id, href: _manifest.homepage.id}
+    }
+
+    if (_manifest.seeAlso) {
+      parsed.seeAlso = _manifest.seeAlso.map((seeAlso:any) => ({label: seeAlso.label ? _value(seeAlso.label) : seeAlso.id, href: seeAlso.id}))
+    }
+    
+    return parsed
+  }
+
+
+  function onIiifDrag(dragEvent: DragEvent) {
+    console.log('onIiifDrag')
+    dragEvent.dataTransfer?.setData('text/uri-list', `${manifest.value.id}?manifest=${manifest.value.id}`)
+  }
+
+  function copyTextToClipboard(text: string) {
+      console.log('copyTextToClipboard', text)
+      if (navigator.clipboard) navigator.clipboard.writeText(text)
+  }
+
+  function _getLicenseBadge(_parsed:any):string {
+    let config = {
+      cc: {
+        badgeWidth: 88,
+        badgeHeight: 31,
+        badgeTemplate: 'https://licensebuttons.net/l/${this.rightsCode}${this.rightsCode === "publicdomain" ? "" : "/"+this.version}/${this.badgeWidth}x${this.badgeHeight}.png'
+      },
+      rs: {
+        badgeTemplate: 'https://rightsstatements.org/files/buttons/${this.rightsCode}.white.svg',
+        backgroundColor: '318ac7'
+      }
+    }
+    const fillTemplate = function(templateString:string, templateVars:object) {
+      return new Function("return `"+templateString +"`;").call(templateVars);
+    }
+    let rights = _parsed.rights || ''
+    let badgeHtml: string = ''
+    let [rightsType, _, rightsCode, version] = rights.split('/').slice(2)
+    if (rightsType === 'creativecommons.org') {
+      rightsCode = rightsCode === 'zero' ? 'publicdomain' : rightsCode
+      badgeHtml = `<img src="${fillTemplate(config.cc.badgeTemplate, {...config.cc, ...{rightsCode, version}})}"/>` 
+    } else if (rightsType === 'rightsstatements.org') {
+      badgeHtml = `<div style="display:inline-block;height:25px;padding:3px;background-color:#${config.rs.backgroundColor};"><img style="height:100%;" src="${fillTemplate(config.rs.badgeTemplate, {...config.rs, ...{rightsCode}})}"/></div>`
+    }
+    return badgeHtml
+  }
 
 </script>
 
