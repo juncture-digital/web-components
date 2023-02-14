@@ -19,6 +19,7 @@ import GIF from './components/GIF.ce.vue'
 import Header from './components/Header.ce.vue'
 import Hero from './components/Hero.ce.vue'
 import IFrame from './components/IFrame.ce.vue'
+import InfoCard from './components/InfoCard.ce.vue'
 import Manifest from './components/Manifest.ce.vue'
 import ManifestPopup from './components/ManifestPopup.ce.vue'
 import Map from './components/Map.ce.vue'
@@ -52,6 +53,7 @@ function init() {
 	customElements.define('ve-gif', defineCustomElement(GIF))
 	customElements.define('ve-hero', defineCustomElement(Hero))
 	customElements.define('ve-iframe', defineCustomElement(IFrame))
+	customElements.define('ve-info-card', defineCustomElement(InfoCard))
 	customElements.define('ve-manifest', defineCustomElement(Manifest))
 	customElements.define('ve-manifest-popup', defineCustomElement(ManifestPopup))
 	customElements.define('ve-map', defineCustomElement(Map))

@@ -3,7 +3,7 @@
 <div ref="root" :style="{width: '100%', height: '100%'}">
   <div class="content">
     <div id="lat-lng-zoom" v-html="latLngZoom" @click="copyTextToClipboard(`${latLngZoom}`)"></div>
-    <input v-if="tileLayers && tileLayers.length > 0" id="opacity-slider" type="range" min="0" max="1" step="0.02" value="1" @input="updateOpacity"/>
+    <sl-range id="opacity-slider" value="1" min="0" max="1" step="0.01" tooltip="none" :style="{display: tileLayers && tileLayers.length > 0 ? 'block' : 'none'}"></sl-range>
     <div id="map"></div>
     <div v-if="caption" id="caption" v-html="caption"></div>
   </div>
@@ -14,8 +14,11 @@
 <script setup lang="ts">
 
   import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
-  import L, { LatLng } from 'leaflet'
-  import { isQID, getEntity, isMobile, makeSticky } from '../utils'
+  import L, { LatLng, TileLayer } from 'leaflet'
+  import { isQID, getEntity, getManifest, metadataAsObj, isMobile, makeSticky } from '../utils'
+  import '@shoelace-style/shoelace/dist/components/range/range.js'
+  import type SLRange from '@shoelace-style/shoelace/dist/components/range/range.js'
+import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
 
   const markerIconTemplate = {
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-icon.png',
@@ -52,14 +55,19 @@
   const content = computed(() => shadowRoot.value?.querySelector('.content') as HTMLElement)
 
   const map = ref<L.Map>() 
-  const opacitySlider = ref<HTMLInputElement | null>() 
+  const opacitySlider = ref<SLRange>() 
   const entities = ref<any[]>([])
   const latLngZoom = ref<String>()
   const layerObjs = ref<any[]>([])
+  
   const tileLayers = ref<L.TileLayer[]>()
   const geoJsonLayers = ref<L.LayerGroup[]>()
 
   const zoom = ref(10) 
+  const priorLoc = ref<string>()
+
+  const initialized = ref(false) 
+  const zoomed = ref()
 
   watch(host, () => nextTick(() => doLayout()))
 
@@ -122,7 +130,7 @@
 
   watch(layerObjs, async () => {
     let _layerObjs = await Promise.all(layerObjs.value)
-    let layers: any = {}
+    console.log(_layerObjs)
     let locations = _layerObjs.filter(item => item.coords || item.qid)
 
     let responses = await Promise.all(_layerObjs
@@ -139,14 +147,11 @@
     if (locations.length > 0) _geoJsonLayers.push(toGeoJSON(locations))
     geoJsonLayers.value = _geoJsonLayers
     
-    layers.tileLayers = _layerObjs.map(ls => {
-      if (ls.allmaps) {
-        return L.tileLayer(`https://allmaps.xyz/maps/${ls.allmaps}/{z}/{x}/{y}.png`, { maxZoom: 19, attribution: 'Allmaps' })
-      }
-    }).filter(layer => layer)
-
-    layers.value = layers
-
+    tileLayers.value = _layerObjs.filter(ls => ls.allmaps).map(ls =>  
+      L.tileLayer(`https://allmaps.xyz/maps/${ls.allmaps}/{z}/{x}/{y}.png`, {
+        maxZoom: 19, 
+        attribution: 'Allmaps'
+      }))
   })
 
   watch(tileLayers, () => updateMap())
@@ -154,6 +159,10 @@
   watch(map, () => updateMap())
 
   function init() {
+    if (initialized.value) return
+    initialized.value = true
+    addOpacitySlider()
+
     entities.value = props.entities ? props.entities.split(/\s+/).filter(qid => qid) : []
     if (props.cards) {
       let locations: any[] = []
@@ -182,6 +191,23 @@
     if (mapEl) resizeObserver.observe(mapEl)
     initMap()
     addInteractionHandlers()
+  }
+
+  function addOpacitySlider() {
+    if (!opacitySlider.value) {
+      opacitySlider.value = shadowRoot.value?.querySelector('sl-range') as SLRange
+      opacitySlider.value.addEventListener('sl-input', (evt) => {
+        evt.stopPropagation()
+        evt.preventDefault()
+        let _map: L.Map = map.value as L.Map
+        _map.eachLayer((layer:any) => {
+          if (layer.options.attribution === 'Allmaps') {
+            // console.log(opacitySlider.value?.value)
+            layer.setOpacity(opacitySlider.value?.value)
+          }
+        })
+      })
+    }
   }
 
   async function initMap() {
@@ -224,10 +250,14 @@
         })
       ]
       })
-      map.value.on('click', (e) => getLatLngZoom(e))
+      map.value.on('click', (e) => {
+        getLatLngZoom(e)
+        gotoPriorLoc()
+      })
       map.value.on('zoomend', (e) => getLatLngZoom(e as L.LeafletMouseEvent))
       map.value.on('moveend', (e) => getLatLngZoom(e as L.LeafletMouseEvent))
       latLngZoom.value = `${Number((center.lat).toFixed(5))},${Number((center.lng).toFixed(5))} ${zoom.value}`
+      priorLoc.value = `${Number((center.lat).toFixed(5))},${Number((center.lng).toFixed(5))},${zoom.value}`
     }
   }
 
@@ -236,14 +266,17 @@
     let zoom = e.target.getZoom()
     let resp = [point.lat, point.lng, zoom]
     latLngZoom.value = `${Number((point.lat).toFixed(5))},${Number((point.lng).toFixed(5))} ${zoom}`
+    if (!zoomed.value) priorLoc.value = `${Number((point.lat).toFixed(5))},${Number((point.lng).toFixed(5))},${zoom}`
     return resp
   }
 
   function updateMap() {
     if (map.value) {
-      tileLayers.value?.forEach(layer => map.value?.addLayer(layer))
+      tileLayers.value?.forEach(layer => {
+        map.value?.addLayer(layer)
+        layer.setOpacity(1)
+      })
       geoJsonLayers.value?.forEach(layer => map.value?.addLayer(layer))
-      if (tileLayers.value) opacitySlider.value = tileLayers.value.length > 0 ? shadowRoot.value?.querySelector('#opacity-slider') as HTMLInputElement : null
     }
   }
 
@@ -251,10 +284,11 @@
     const data: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
     locations.filter(location => location.coords)
       .forEach(location => {
+        let [lat, lng] = location.coords.split(',').map((val:string) => parseFloat(val.trim()))
         data.features.push({
           type: 'Feature',
           properties: location,
-          geometry: { type: 'Point', coordinates: [location.coords.lng, location.coords.lat] }
+          geometry: { type: 'Point', coordinates: [lng, lat] }
         })
       })
 
@@ -267,14 +301,33 @@
         if (feature.properties.iconRetinaUrl)  iconOptions.iconRetinaUrl = feature.properties.iconRetinaUrl
         return L.marker(latlng, { icon: new L.Icon(iconOptions) })
       },
-      onEachFeature: (feature, layer) => layer.bindPopup(feature.properties.caption)
+      onEachFeature: (feature, layer) => {
+        let data = JSON.stringify(feature.properties).replace(/"/g, '&quot;')
+        let html = `<ve-info-card data="${data}" style="width:100%;"></ve-info-card>`
+        layer.bindPopup(html)
+        layer.on('mouseover', () => layer.openPopup())
+        layer.on('mouseout', () => {
+          let layerId = (layer as any).feature.properties.id    
+          if (zoomed.value !== layerId) layer.closePopup()
+        })
+        
+        layer.on('click', () => {
+          if (zoomed.value) {
+            layer.closePopup()
+          } else {
+            layer.openPopup()
+            flyto(feature.properties.id)
+          }
+        })
+
+      }
     })
     
     return geoJSON
   }
   
   function getLayerStrings() {
-    let _layerObjs = Array.from(host.value.querySelectorAll('li')).map((item:any) => toObj(item.firstChild.textContent))
+    let _layerObjs = Array.from(host.value.querySelectorAll('li')).map((item:any) => toObj(item.firstChild?.textContent))
     if (props.marker) _layerObjs.push(toObj(props.marker))
     // layerObjs.value = _layerObjs
     layerObjs.value = [...layerObjs.value, ..._layerObjs]
@@ -304,35 +357,73 @@
     return /^[0-9]+$/.test(str)
   }
 
-  async function toObj(s:string) {
-    let geoJsonRegex = /\.(geo)?json$/i
+  function tokenize(s:string) {
+    s = s || ''
     let tokens:string[] = []
-
     s = s.replace(/“/,'"').replace(/”/,'"').replace(/’/,"'")
     let match = s.match(/[^\s"]+|"([^"]*)"/gmi)
     if (match) match.forEach(token => {
       if (tokens.length > 0 && tokens[tokens.length-1].indexOf('=') === tokens[tokens.length-1].length-1) tokens[tokens.length-1] = `${tokens[tokens.length-1]}${token}`
       else tokens.push(token)
     })
+    return tokens
+  }
+
+  function manifestToInfoObj(manifest:any, id:string) {
+    // console.log(manifest)
+    let obj:any = {id}
+    let metadata = metadataAsObj(manifest)
+    if (metadata.location) obj.coords = metadata.location[0]
+    if (manifest.label) obj.label = manifest.label.en
+    if (manifest.summary) obj.description = manifest.summary.en[0]
+    if (manifest.thumbnail) obj.image = manifest.thumbnail[0].id
+    return obj
+  }
+
+  function entityToInfoObj(entity:any, id:string) {
+    let obj:any = {id}
+    if (entity.coords) obj.coords = entity.coords
+    if (entity.label) obj.label = entity.label
+    if (entity.description) obj.description = entity.description
+    if (entity.thumbnail) obj.image = entity.thumbnail
+    return obj
+  }
+
+  async function toObj(s:string) {
+    let tokens = tokenize(s)
+    let geoJsonRegex = /\.(geo)?json$/i
+    let iiifRegex = /^[a-z0-9\-]+:.+/
     let obj:any = {}
     for (let i = 0; i < tokens.length; i++) {
       let token = tokens[i]
+      
       if (token.indexOf('=') > 0) {
         let split = token.split('=')
         obj[split[0]] = split[1]
+      
       } else if (isZoom(token)) {
         obj.zoom = parseInt(token)
+      
       } else if (isCoords(token)) {
-        obj.coords = latLng(token)
+        // obj.coords = latLng(token)
+        obj.coords = token
+        obj.id = token
+      
       } else if (isQID(token)) {
-        obj.qid = token
         let entity = await getEntity(token)
-        obj.coords = latLng(entity.coords)
-        obj.caption = entity.label
+        obj = {...entityToInfoObj(entity, token), ...obj}
+      
+      } else if (iiifRegex.test(token)) {
+        let manifest = await getManifest(token)
+        obj = {...manifestToInfoObj(manifest, token), ...obj}
+      
       } else if (geoJsonRegex.test(token)) {
         obj.geojson = token
+      
       } else {
-        obj.caption = token[0] === '"' && token[token.length-1] === '"' ? token.slice(1,-1) : token
+        let text = token[0] === '"' && token[token.length-1] === '"' ? token.slice(1,-1) : token
+        if (obj.label) obj.description = text
+        else obj.label = text
       }
     }
     return obj
@@ -347,11 +438,33 @@
     if (navigator.clipboard) navigator.clipboard.writeText(text)
   }
 
-  function updateOpacity() {
-    if (tileLayers.value && opacitySlider.value) tileLayers.value[0].setOpacity(parseFloat(opacitySlider.value.value))
-  }
-
   const flytoRegex = RegExp(/^((?<lat>[-?\d.]+),(?<lng>[-?\d.]+)|(?<qid>Q[0-9]+)),?(?<zoom>[\d.]+)?$/)
+
+  function parseFlytoArg(arg:string='') {
+    arg = arg.replace(/^flyto\|/i,'')
+    let id = ''
+    let zoom = 10
+    let split = arg.split(',')
+    if (split.length === 1) {
+      id = split[0]
+    } else if (split.length === 2) {
+      if (/^[+-]?\d+(.\d*|\d*)$/.test(split[0])) {
+        id = split.join(',')
+      } else {
+        id = split[0]
+        zoom = parseFloat(split[1])
+      }
+    } else {
+      id = split.slice(0,2).join(',')
+      zoom = parseFloat(split[2])
+    }
+
+    let layer:any
+    map.value?.eachLayer((_layer:any) => {
+      if (_layer?.feature?.properties?.id === id) layer = _layer
+    })
+    return {id, zoom, layer}
+  }
 
   function addInteractionHandlers() {
     Array.from(host.value.parentElement.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
@@ -368,9 +481,14 @@
         if (match) {
           let veMap = findVeMap(mark.parentElement)
           if (veMap) {
+            let flytoArg = match?.value
             mark.classList.add(match.name)
-            mark.addEventListener('click', () => flyto(match?.value || ''))
-          }
+            mark.addEventListener('click', () => flyto(flytoArg))
+            mark.addEventListener('mouseover', () => parseFlytoArg(flytoArg).layer?.openPopup())
+            mark.addEventListener('mouseleave', () => {
+              let _flyto = parseFlytoArg(flytoArg)
+              if (_flyto.id !== zoomed.value) _flyto.layer?.closePopup()
+            })          }
         }
       })
     }
@@ -388,13 +506,16 @@
             if (attr) {
               const [action, ...rest] = attr.value.split(':')
               // console.log(`action=${action} arg=${rest.join(':')}`)
-              if (action === 'flyto') flyto(rest.join(':'))
+              if (action === 'flyto') flyto(rest.join(':'), true)
+              if (attr.name === 'exit') gotoPriorLoc()
             }
           }
         }
       })
     })
-    observer.observe(el, {attributes: true})
+    // observer.observe(el, {attributes: true})
+    observer.observe(el, { attributes: true, childList: true, subtree: true, characterData: true })
+
   }
 
   function findVeMap(el: any) {
@@ -410,24 +531,31 @@
     }
   }
 
-  async function flyto(arg: string) {
-    arg = arg.replace(/^flyto\|/i,'')
-    const match = arg?.match(flytoRegex)
-    if (match) {
-      let lat = match.groups?.lat ? parseFloat(match.groups.lat) : 0
-      let lng = match.groups?.lng ? parseFloat(match.groups.lng) : 0
-      let qid = match.groups?.qid
-      let zoom = match.groups?.zoom ? parseFloat(match?.groups?.zoom) : 10
-      // console.log(`flyto: lat=${lat} lng=${lng} qid=${qid} zoom=${zoom}`)
-      let center
-      if (qid) {
-        let entity = await getEntity(qid)
-        center = latLng(entity.coords)
+  async function flyto(arg: string, force=false) {
+    let _flyto = parseFlytoArg(arg)
+    if (_flyto.layer) {
+      if (_flyto.id === zoomed.value && !force) {
+        _flyto.layer.closePopup()
+        gotoPriorLoc()
       } else {
-        center = new L.LatLng(lat, lng)
+        zoomed.value = _flyto.id
+        let center = latLng(_flyto.layer.feature.properties.coords)
+        map.value?.flyTo(center, _flyto.zoom)
+        _flyto.layer.openPopup()
       }
-      map.value?.flyTo(center, zoom)
+    } else {
+      gotoPriorLoc()
     }
+  }
+
+  function gotoPriorLoc() {
+    if (priorLoc.value) {
+      let [lat, lng, zoom] = priorLoc.value.split(',').map(val => parseFloat(val))
+      let center = new L.LatLng(lat, lng)
+      map.value?.flyTo(center, zoom)
+      map.value?.closePopup()
+    }
+    zoomed.value = undefined
   }
 
 </script>
@@ -478,6 +606,13 @@
     left: 15px;
     width: 33%;
     z-index: 1000;
+    padding: 3px 6px;
+    border-radius: 6px;
+  }
+
+  #opacity-slider:hover {
+    /* background-color: rgba(255, 255, 255, 0.8); */
+
   }
 
   #lat-lng-zoom {
@@ -554,4 +689,9 @@
     margin: 0 0 .5rem 0;
   }
   
+  .leaflet-popup-content {
+    width: 400%;
+    margin: 0;
+  }
+
 </style>

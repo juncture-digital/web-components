@@ -44,7 +44,7 @@
                 </template>
               </sl-breadcrumb-item>
             </sl-breadcrumb>
-            <sl-tooltip v-if="mode === 'media'" :content="`Add ${props.mode === 'media' ? 'resource' : 'file'}`" placement="bottom">
+            <sl-tooltip v-if="isLoggedIn && mode === 'media'" :content="`Add ${props.mode === 'media' ? 'resource' : 'file'}`" placement="bottom">
               <sl-button 
                 variant="default" 
                 :size="mode === 'media' ? 'medium' : 'small'"

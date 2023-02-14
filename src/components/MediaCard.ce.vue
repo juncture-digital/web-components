@@ -1,40 +1,43 @@
 <template>
 
-  <div ref="root" v-if="manifest" class="card">
-    <div class="card-image"
-      :style="{
-        backgroundImage: `url(${thumbnailUrl})`,
-        backgroundRepeat: 'no-repeat',
-        backgroundSize: 'contain',
-        backgroundPosition: 'top'
-      }"
-      @click="toggleShowImageDialog"
-    ></div>
-    
-    <div class="card-title" v-html="label(manifest)"></div>
+  <div ref="root" v-if="manifest" >
 
-    <div class="card-abstract" v-html="summary(manifest)"></div>
+    <div  class="card" draggable="true" @dragstart="onDrag">
+      <div class="card-image"
+        :style="{
+          backgroundImage: `url(${thumbnailUrl})`,
+          backgroundRepeat: 'no-repeat',
+          backgroundSize: 'contain',
+          backgroundPosition: 'top'
+        }"
+        @click="toggleShowImageDialog"
+      ></div>
+      
+      <div class="card-title" v-html="label(manifest)"></div>
 
-    <ul class="card-metadata">
-      <li v-for="md in metadata">
-        <span class="md-label" v-html="md.label"></span>
-          <template v-if="md.value.length === 1" >
-            <sl-icon-button v-if="md.label === 'location'" name="chat-square-text" label="Show Location" @click="toggleShowMapDialog"></sl-icon-button>
-            <span class="md-value" v-html="md.value[0]" @click="copyTextToClipboard(md.value)"></span>
-          </template>
-          <ul v-else>
-            <li v-for="val in md.value">
-              <span class="md-value" v-html="val" @click="copyTextToClipboard(val)"></span>
-            </li>
-          </ul>
-      </li>
-    </ul>
+      <div class="card-abstract" v-html="summary(manifest)"></div>
 
-    <div class="card-links" style="margin-top:auto;">
-      <img src="https://juncture-digital.github.io/web-app/static/iiif.png" class="draggable-iiif" alt="IIIF manifest icon"
-        @click="copyTextToClipboard(manifest.id)" 
-        @dragstart="onIiifDrag"
-      />
+      <ul class="card-metadata">
+        <li v-for="md in metadata">
+          <span class="md-label" v-html="md.label"></span>
+            <template v-if="md.value.length === 1" >
+              <sl-icon-button v-if="md.label === 'location'" name="chat-square-text" label="Show Location" @click="toggleShowMapDialog"></sl-icon-button>
+              <span class="md-value" v-html="md.value[0]" @click="copyTextToClipboard(md.value)"></span>
+            </template>
+            <ul v-else>
+              <li v-for="val in md.value">
+                <span class="md-value" v-html="val" @click="copyTextToClipboard(val)"></span>
+              </li>
+            </ul>
+        </li>
+      </ul>
+
+      <div class="card-links" style="margin-top:auto;">
+        <img src="https://juncture-digital.github.io/web-app/static/iiif.png" class="draggable-iiif" alt="IIIF manifest icon"
+          @click="copyTextToClipboard(manifest.id)" 
+          @dragstart="onDrag"
+        />
+      </div>
     </div>
 
     <sl-dialog ref="imageDialog" id="image-dialog" no-header style="--body-spacing:0;--footer-spacing:0;">
@@ -43,7 +46,12 @@
     </sl-dialog>
 
     <sl-dialog ref="mapDialog" id="map-dialog" no-header style="--body-spacing:0;--footer-spacing:0;">
-      <ve-map v-if="showMapDialog" :center="location" :zoom="8" :marker="location"></ve-map>
+      <ve-map v-if="showMapDialog" :center="location" :zoom="zoom">
+        <ul>
+          <li>{{ location }}</li>
+          <li v-if="allmapsid">allmaps={{ allmapsid }}</li>
+        </ul>
+      </ve-map>
       <sl-button slot="footer" class="close" @click="toggleShowMapDialog" variant="primary">Close</sl-button>
     </sl-dialog>
 
@@ -85,7 +93,16 @@
     return locMd ? `${locMd.value}` : null
   })
 
-  
+  const allmapsid = computed(() => {
+    let val = metadata.value.find((md:any) => md.label.toLowerCase() === 'allmapsid')
+    return val ? `${val.value}` : null
+  })
+
+  const zoom = computed(() => {
+    let val = metadata.value.find((md:any) => md.label.toLowerCase() === 'zoom')
+    return val ? `${parseFloat(val.value)}` : 9
+  })
+
   onUpdated(() => {
     getManifest(props.manifest).then(resp => manifest.value = resp)
   })
@@ -157,10 +174,12 @@
     return width
   }
 
-  function onIiifDrag(dragEvent: DragEvent) {
+
+  function onDrag(dragEvent:DragEvent) {
+    // dragEvent.preventDefault()
     dragEvent.stopPropagation()
-    console.log('onIiifDrag', manifest.value.id)
-    dragEvent.dataTransfer?.setData('text/uri-list', `${manifest.value.id}?manifest=${manifest.value.id}`)
+    let url = `http://localhost:8088/?manifest=${manifest.value.id}`
+    dragEvent.dataTransfer?.setData('text/uri-list', url)
   }
 
 </script>
@@ -189,8 +208,6 @@
     text-decoration: none;
     cursor: pointer;
   }
-
-
 
   .md-label {
     font-weight: bold;
@@ -249,7 +266,6 @@
     border-radius: 4px;
     padding: 0;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
-
   }
 
   .card p {

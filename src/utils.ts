@@ -26,7 +26,10 @@ export function initTippy(el:any=null, force=false) {
   if (force) tippyEntities = null
   el = el || document
   let _entities = Array.from(el.querySelectorAll('mark')).filter(el =>
-    Array.from((el as HTMLElement).attributes).find(attr => attr.name.toLowerCase() === 'qid' || isQID(attr.value))
+    Array.from((el as HTMLElement).attributes).find(attr => {
+      let attrName = attr.name.toLowerCase()
+      return attrName === 'qid' || (isQID(attr.value) && attrName !== 'flyto')
+    })
   )
   if (!tippyEntities && _entities.length > 0) {
     tippyEntities = _entities
@@ -251,6 +254,10 @@ export function getMetadata(manifest:any, language:string = 'en'): any[] {
     })
   }
   return metadata
+}
+
+export function metadataAsObj(manifest:any, language:string = 'en'): any {
+  return Object.fromEntries(getMetadata(manifest, language).map(md => [md.label, md.value]))
 }
 
 export function top() {

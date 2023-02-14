@@ -2,6 +2,7 @@
 
 .ve-component {
   clear: both;
+  z-index: 2;
 }
 
 ve-media-card {
@@ -101,9 +102,14 @@ ve-footer ul {
   display: none;
 }
 
+
 #juncture section {
+  background-color: inherit;
+}
+
+#juncture .section1,
+#juncture .section2 {
   width: 100%;
-  /* position: relative; */
   clear: both;
   background-color: inherit;
 }
