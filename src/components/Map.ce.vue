@@ -69,6 +69,8 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
   const initialized = ref(false) 
   const zoomed = ref()
 
+  const flyto = ref()
+
   watch(host, () => nextTick(() => doLayout()))
 
   onMounted(() => {
@@ -90,12 +92,18 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
     host.value.style.width = window.getComputedStyle(host.value).width
 
     if (props.sticky) makeSticky(host.value)
-    
+
     content.value.style.width = props.width || '100%'
     nextTick(() => {
       let width = parseInt(window.getComputedStyle(content.value).width.slice(0,-2))
+      let height = width
+      if (props.sticky && position === 'full') {
+        let maxStickyHeight = Math.round(window.innerHeight * .4)
+        height = Math.min(maxStickyHeight, width)
+      } 
+      // console.log(`width=${width} height=${height}`)
       content.value.style.width = `${width}px`
-      content.value.style.height = `${width}px`
+      content.value.style.height = `${height}px`
       init()
     })
   }
@@ -254,7 +262,10 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
         getLatLngZoom(e)
         gotoPriorLoc()
       })
-      map.value.on('zoomend', (e) => getLatLngZoom(e as L.LeafletMouseEvent))
+      map.value.on('zoomend', (e) => {
+        getLatLngZoom(e as L.LeafletMouseEvent)
+        if (flyto.value) flyto.value.layer.openPopup()
+      })
       map.value.on('moveend', (e) => getLatLngZoom(e as L.LeafletMouseEvent))
       latLngZoom.value = `${Number((center.lat).toFixed(5))},${Number((center.lng).toFixed(5))} ${zoom.value}`
       priorLoc.value = `${Number((center.lat).toFixed(5))},${Number((center.lng).toFixed(5))},${zoom.value}`
@@ -316,7 +327,7 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
             layer.closePopup()
           } else {
             layer.openPopup()
-            flyto(feature.properties.id)
+            flytoLocation(feature.properties.id)
           }
         })
 
@@ -374,6 +385,7 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
     let obj:any = {id}
     let metadata = metadataAsObj(manifest)
     if (metadata.location) obj.coords = metadata.location[0]
+    if (metadata.coordinates_of_the_point_of_view) obj.coords = metadata.coordinates_of_the_point_of_view[0]
     if (manifest.label) obj.label = manifest.label.en
     if (manifest.summary) obj.description = manifest.summary.en[0]
     if (manifest.thumbnail) obj.image = manifest.thumbnail[0].id
@@ -483,12 +495,17 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
           if (veMap) {
             let flytoArg = match?.value
             mark.classList.add(match.name)
-            mark.addEventListener('click', () => flyto(flytoArg))
-            mark.addEventListener('mouseover', () => parseFlytoArg(flytoArg).layer?.openPopup())
+            mark.addEventListener('click', () => flytoLocation(flytoArg))
+            mark.addEventListener('mouseover', () => {
+              let layer = parseFlytoArg(flytoArg).layer
+              layer.openPopup()
+              if (isMobile()) setTimeout(() => layer.closePopup(), 2000)
+            })
             mark.addEventListener('mouseleave', () => {
-              let _flyto = parseFlytoArg(flytoArg)
-              if (_flyto.id !== zoomed.value) _flyto.layer?.closePopup()
-            })          }
+              flyto.value = parseFlytoArg(flytoArg)
+              if (flyto.value.id !== zoomed.value) flyto.value.layer?.closePopup()
+            })          
+          }
         }
       })
     }
@@ -506,7 +523,7 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
             if (attr) {
               const [action, ...rest] = attr.value.split(':')
               // console.log(`action=${action} arg=${rest.join(':')}`)
-              if (action === 'flyto') flyto(rest.join(':'), true)
+              if (action === 'flyto') flytoLocation(rest.join(':'), true)
               if (attr.name === 'exit') gotoPriorLoc()
             }
           }
@@ -531,17 +548,16 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
     }
   }
 
-  async function flyto(arg: string, force=false) {
-    let _flyto = parseFlytoArg(arg)
-    if (_flyto.layer) {
-      if (_flyto.id === zoomed.value && !force) {
-        _flyto.layer.closePopup()
+  async function flytoLocation(arg: string, force=false) {
+    flyto.value = parseFlytoArg(arg)
+    if (flyto.value.layer) {
+      if (flyto.value.id === zoomed.value && !force) {
+        flyto.value.layer.closePopup()
         gotoPriorLoc()
       } else {
-        zoomed.value = _flyto.id
-        let center = latLng(_flyto.layer.feature.properties.coords)
-        map.value?.flyTo(center, _flyto.zoom)
-        _flyto.layer.openPopup()
+        zoomed.value = flyto.value.id
+        let center = latLng(flyto.value.layer.feature.properties.coords)
+        map.value?.flyTo(center, flyto.value.zoom)
       }
     } else {
       gotoPriorLoc()
@@ -549,6 +565,7 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
   }
 
   function gotoPriorLoc() {
+    flyto.value = null
     if (priorLoc.value) {
       let [lat, lng, zoom] = priorLoc.value.split(',').map(val => parseFloat(val))
       let center = new L.LatLng(lat, lng)
@@ -690,7 +707,7 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
   }
   
   .leaflet-popup-content {
-    width: 400%;
+    width: 280px;
     margin: 0;
   }
 

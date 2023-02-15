@@ -73,7 +73,7 @@ function observeNavbar(navbar:HTMLElement, target:HTMLElement) {
     let top = parseInt(navbar.style.top.replace(/^-/,'').replace(/px$/,''))
     let height = parseInt(navbar.style.height.replace(/px$/,''))
     let topOffset = height - top
-    if (target.style.top) topOffset += parseInt(target.style.marginTop.slice(0,-2))
+    // if (target.style.top) topOffset += parseInt(target.style.marginTop.slice(0,-2))
     target.style.top = `${topOffset}px`
   }
   setTop()

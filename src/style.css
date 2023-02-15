@@ -177,6 +177,9 @@ section.no-offset:target:before {
     line-height: 1.3;
     padding: 0 0 40vh 0;
   }
+  #juncture h1{ font-size:1.5em; }
+  #juncture h2{ font-size:1.4em; }
+  #juncture h3{ font-size:1.3em; }
 
   #juncture > section {
     padding: 0 6px;
@@ -653,10 +656,19 @@ mark.flyto::after {
 #juncture th { border-bottom: 1px solid black; }
 #juncture td { vertical-align: top; }
 
-#juncture table td,
-#juncture table th {
-  border: 1px solid #ddd;
-  padding: 5px;
+#juncture table { 
+
+  border:1px solid #555;
+}
+#juncture td, #juncture th {
+  border:1px solid #555;
+  padding: 8px;
+  line-height: 1.2;
+}
+#juncture th {
+  background-color:#E2F0F7;
+  font-weight:bold;
+  text-align:center;
 }
 
 /***************** markdown end *****************/

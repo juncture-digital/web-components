@@ -136,4 +136,13 @@
     font-size: 1.4rem;
   }
 
+  /* Mobile Devices */
+  @media (max-width: 480px) {
+
+    .title {
+      font-size: 1.6rem;
+    }
+
+  }
+
 </style>

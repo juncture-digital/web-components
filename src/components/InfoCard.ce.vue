@@ -56,9 +56,9 @@
     display: grid;
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto auto 1fr auto;
-    border: 1px solid #444;
+    /* border: 1px solid #444; */
     border-radius: 6px;
-    min-height: 150px;
+    /* min-height: 150px; */
     background-color: white;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   }
