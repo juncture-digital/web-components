@@ -43,6 +43,7 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
     left: { type: Boolean },
     right: { type: Boolean },
     entities: { type: String },
+    preferGeojson: { type: Boolean },
     cards: { type: String },
     base: { type: String }
   })
@@ -141,15 +142,17 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
     console.log(_layerObjs)
     let locations = _layerObjs.filter(item => item.coords || item.qid)
 
-    let responses = await Promise.all(_layerObjs
-      .filter(layer => layer.geojson)
+    let geojsonUrls = _layerObjs
+      .filter(layer => props.preferGeojson && layer.geojson)
       .map (layer => {
         if (layer.geojson.indexOf('http') === -1) layer.geojson = `https://raw.githubusercontent.com/${props.base}/${layer.geojson}`
         return layer
       })
-      .map(layer => fetch(layer.geojson)))
+      .map(layer => fetch(layer.geojson))
 
+    let responses = await Promise.all(geojsonUrls)
     let geoJSONs = await Promise.all(responses.map((resp:any) => resp.json()))
+
     let _geoJsonLayers = geoJSONs.map(geoJSON => L.geoJSON(geoJSON))
 
     if (locations.length > 0) _geoJsonLayers.push(toGeoJSON(locations))
@@ -247,7 +250,7 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
     let mapEl = shadowRoot.value?.querySelector('#map') as HTMLElement
     if (mapEl) {
       map.value = L.map(mapEl, {
-      preferCanvas: true,
+      preferCanvas: false,
       zoomSnap: 0.1,
       center, 
       zoom: zoom.value,
@@ -395,6 +398,7 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
   function entityToInfoObj(entity:any, id:string) {
     let obj:any = {id}
     if (entity.coords) obj.coords = entity.coords
+    if (entity.geojson) obj.geojson = entity.geojson
     if (entity.label) obj.label = entity.label
     if (entity.description) obj.description = entity.description
     if (entity.thumbnail) obj.image = entity.thumbnail
@@ -475,6 +479,7 @@ import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
     map.value?.eachLayer((_layer:any) => {
       if (_layer?.feature?.properties?.id === id) layer = _layer
     })
+    if (!layer) map.value?.eachLayer((_layer:any) => layer = _layer)
     return {id, zoom, layer}
   }
 
