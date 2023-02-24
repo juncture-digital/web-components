@@ -8,6 +8,7 @@
         :name="icons[li.innerHTML].icon" 
         :label="icons[li.innerHTML].label"
         @click="onClick(li, $event)"
+        style="font-size:24px"
       ></sl-icon>
 
       <div v-else
@@ -41,7 +42,7 @@
   })
 
   const icons:any = {
-    'view-code': {icon: 'code', label: 'View Page Code'}
+    'view-code': {icon: 'markdown', label: 'View Page Code'}
   }
 
   const footerElems = ref<HTMLUListElement[]>([])

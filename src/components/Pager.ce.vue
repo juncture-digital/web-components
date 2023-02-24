@@ -1,9 +1,10 @@
 <template>
 
   <div ref="root" class="pagination">
-    <span @click="current > 1 && --current" :disabled="current === 1">&laquo;</span>
-    <span v-for="idx in props.total" :key="`item-${idx}`" :class="{'active': current === idx}" v-html="idx" @click="current = idx"></span>
-    <span @click="current < props.total && ++current" :disabled="current === props.total">&raquo;</span>
+    <span class="prev" @click="current > 1 && --current" :disabled="current === 1">&laquo;</span>
+    <span class="current" v-html="current"></span> / 
+    <span class="total" v-html="props.total"></span>
+    <span class="next" @click="current < props.total && ++current" :disabled="current === props.total">&raquo;</span>
   </div>
 
 </template>
@@ -29,30 +30,38 @@
 
   .pagination {
     display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #eee;
+    height: 30px;
+    color: #444;
   }
 
-  .pagination span[disabled="true"] {
+  .current, .total {
+    padding: 0 12px;
+    font-size: 1.3rem;
+  }
+
+  .prev[disabled="true"],
+  .next[disabled="true"] {
     color: #ccc;
     cursor: unset;
   }
 
-  .pagination span {
-    color: black;
+  .prev, .next {
+    height: 100%;
     float: left;
-    padding: 8px 16px;
+    padding: 0 8px;
     text-decoration: none;
     transition: background-color .3s;
-    border: 1px solid #ddd;
-    margin: 0 4px;
     cursor: pointer;
+    font-size: 40px;
+    margin-top: -28px;
   }
 
-  .pagination span.active {
-    background-color: #4CAF50;
-    color: white;
-    border: 1px solid #4CAF50;
+  .prev[disabled="false"]:hover,
+  .next[disabled="false"]:hover {
+    color: var(--sl-color-primary-700);
   }
-
-  .pagination span:hover:not(.active) {background-color: #ddd;}
 
 </style>
