@@ -45,7 +45,7 @@ export function initTippy(el:any=null, force=false) {
           .map((attr:any) => attr.value)
           .flat().join()
         if (qid)
-          instance.setContent(`<ve-entity-card qid="${qid}" style="width:600px;"></ve-entity-card>`)
+          instance.setContent(`<ve-entity-card qid="${qid}" style="width:600px;max-width:90vw;"></ve-entity-card>`)
       }
     })
   }

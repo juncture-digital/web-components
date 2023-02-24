@@ -435,10 +435,10 @@ section.no-offset:target:before {
 #juncture .card-metadata {  /* metadata list */
   grid-area: 3 / 1 / 4 / 2;
   list-style: none;
-  padding: .2rem .5rem;
+  padding: .4rem .5rem;
   margin: 0;
-  font-size: 0.9rem;
-  font-weight: 400;
+  font-size: 1.1rem;
+  font-weight: bold;
   max-height: 260px;
   overflow-y: scroll;
 }
