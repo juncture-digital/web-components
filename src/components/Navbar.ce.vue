@@ -57,6 +57,7 @@
     if (props.background) host.value.style.backgroundColor = props.background
     if (props.offset) shadow.value.style.marginTop = `-${props.offset}px`
     if (props.sticky) {
+      host.value.classList.add('sticky')
       host.value.style.position = 'sticky'
       host.value.style.top = '0'
       if (props.alpha) host.value.style.background = `rgba(0, 0, 0, ${props.alpha})`
@@ -82,7 +83,7 @@
     display: block;
     position: relative;
     width: 100%;
-    z-index: 10;
+    z-index: 3;
   }
 
   .ve-navbar {

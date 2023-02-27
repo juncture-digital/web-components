@@ -41,16 +41,24 @@
 
   watch(host, () => init())
   
+  watch(props, () => {
+    if (qid.value !== props.qid) qid.value = props.qid
+  })
+
   function init() {
     _getEntity()
   }
 
+  watch(qid, () => _getEntity())
+
   async function _getEntity() {
+    // console.log(entity.value?.id, props.qid)
     if (!entity.value || entity.value.id !== props.qid) {
       let _entity:any = await getEntity(qid.value)
       let summaryText = await getSummaryText(qid.value)
-      if (summaryText) _entity = {..._entity, summaryText}  
+      if (summaryText) _entity = {..._entity, summaryText}
       entity.value = _entity
+      // console.log(toRaw(entity.value))
     }
   }
 

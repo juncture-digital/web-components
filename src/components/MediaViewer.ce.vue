@@ -14,15 +14,16 @@
         </div>
         
         <!-- image Grid -->
-        <div v-else-if="type === 'image-grid'" class="grid-wrapper">
-          <template v-for="item, idx in iiifItemsList">
+        <div v-else-if="type === 'image-grid'" :class="`grid-wrapper${props.small ? ' small' : ''}`">
+          <template v-for="item, idx in itemsList">
             
             <ve-media-card v-if="props.cards" style="width:100%;height:100%;" :manifest="item.manifest"></ve-media-card>
 
             <div v-else>
               <div class="media-item">
-                <img :src="thumbnail(manifests[idx])" @click="toggleDialogId(item.manifest)"/>
-                <ve-manifest-popup :manifest="manifests[idx].id"></ve-manifest-popup>
+                <img v-if="item.iiif" :src="thumbnail(manifestsById[item.id])" @click="toggleDialogId(item)"/>
+                <img v-else-if="item.youtube" :src="`https://img.youtube.com/vi/${item.videoid}/0.jpg`" @click="toggleDialogId(item)"/>
+                <ve-manifest-popup v-if="item.iiif" :manifest="item.src"></ve-manifest-popup>
               </div>
             </div>
 
@@ -87,8 +88,8 @@
 
     </div>
 
-    <sl-dialog id="image-dialog" no-header style="--body-spacing:0;--footer-spacing:0;">
-      <ve-media v-if="dialogId" :manifest="dialogId" zoom-on-scroll></ve-media>
+    <sl-dialog id="media-dialog" no-header style="--body-spacing:0;--footer-spacing:0;">
+      <ve-media v-if="dialogId" :src="dialogId" zoom-on-scroll></ve-media>
       <sl-button slot="footer" class="close" @click="toggleDialogId" variant="primary">Close</sl-button>
     </sl-dialog>
   
@@ -147,6 +148,7 @@
     grid: { type: Boolean },
     cards: { type: Boolean },
     compare: { type: Boolean },
+    small: { type: Boolean },
 
     // Positioning props
     position: { type: String },
@@ -171,6 +173,7 @@
   const shadowRoot = computed(() => root?.value?.parentNode)
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
   const content = computed(() => shadowRoot.value?.querySelector('#content') as HTMLElement)
+  const outer = computed(() => shadowRoot.value?.querySelector('#outer') as HTMLElement)
   const inner = computed(() => shadowRoot.value?.querySelector('#inner') as HTMLElement)
 
   // watch(host, () => init())
@@ -180,7 +183,11 @@
   
   function doLayout(defaultAspect:number=16/9) {
 
-    if (props.sticky) makeSticky(host.value)
+    if (props.sticky) {
+      makeSticky(host.value)
+      inner.value.style.paddingTop = '6px'
+      outer.value.style.paddingBottom = '6px'
+    }
 
     aspect.value = itemInfo.value
       ? Number((itemInfo.value.width/itemInfo.value.height).toFixed(4))
@@ -196,16 +203,17 @@
     }
     host.value.style.width = window.getComputedStyle(host.value).width
 
-    if ( content.value) inner.value.style.width = props.width || '100%'
+    if (content.value) inner.value.style.width = props.width || '100%'
     nextTick(() => {
       width.value = parseInt(window.getComputedStyle(content.value).width.slice(0,-2))
-      content.value.style.width = `${width}px`
+      content.value.style.width = `${width.value}px`
       content.value.style.height = props.height || (
-      type.value === 'image-grid'
-        ? ''
-        : type.value === 'audio'
-          ? '80px'
-          : `${Math.round(width?.value / aspect.value)}px`)
+        type.value === 'image-grid'
+          ? ''
+          : type.value === 'audio'
+            ? '80px'
+            : `${Math.round(width?.value / aspect.value)}px`
+      )
       height.value = parseInt(window.getComputedStyle(content.value).height.slice(0,-2))
 
       // Scale height to 40% of window height if sticky
@@ -244,13 +252,13 @@
           videoId.value = srcUrl.pathname.slice(1)
           nextTick(() => initializeVimeoPlayer())
         } else {
-          iiifItemsList.value = buildIiiFItemsList()
+          itemsList.value = builditemsList()
         }
       } else {
-        iiifItemsList.value = buildIiiFItemsList()
+        itemsList.value = builditemsList()
       }
     } else {
-      iiifItemsList.value = buildIiiFItemsList()
+      itemsList.value = builditemsList()
     }
     listenForSlotChanges()
   }
@@ -287,7 +295,7 @@
 
   let loadedImageId: string
   function onImageLoaded(tiledImage:TiledImage) {
-    let item = iiifItemsList.value[0]
+    let item = itemsList.value[0]
     let imageId = sha256(itemInfo.value.id || itemInfo.value['@id']).slice(0,8)
     if (imageId !== loadedImageId) {
       if (annotator.value) annotator.value.loadAnnotations(imageId).then((annos: any[]) => annotations.value = annos)
@@ -343,7 +351,7 @@
   /************ Image dialog ************/
   const dialog = ref<SLDialog>()
   watch(shadowRoot, () => {
-    dialog.value = shadowRoot.value?.querySelector('#image-dialog') as SLDialog
+    dialog.value = shadowRoot.value?.querySelector('#media-dialog') as SLDialog
   })
   watch(dialog, (_dialog) => {
     _dialog?.addEventListener('sl-after-hide', () => dialogId.value = null )
@@ -355,23 +363,24 @@
   watch(dialogId, (id) => {
     id ? dialog.value?.show() : dialog.value?.hide()
   })
-  function toggleDialogId(id:any=null) {
-    dialogId.value = dialogId.value ? null : id
+  function toggleDialogId(item:any=null) {
+    dialogId.value = dialogId.value ? null : item.src
   }
 
   function calcDialogWidth() {
     let width = Math.round(window.innerWidth - 100)
     let maxHeight = Math.round(window.innerHeight - 150)
     
-    let selectedManifestId = dialogId.value?.indexOf('http') === 0 ? dialogId.value : `https://iiif.juncture-digital.org/${dialogId.value}/manifest.json`
-    let selected = manifests.value.find((m:any) => m.id === selectedManifestId)
-    if (selected) {
-      let _imageInfo = getItemInfo(selected)
+    let selectedSrc = dialogId.value?.indexOf('http') === 0 ? dialogId.value : `https://iiif.juncture-digital.org/${dialogId.value}/manifest.json`
+    let manifestId = manifests.value.find((m:any) => m.id === selectedSrc)
+    if (manifestId) {
+      let _imageInfo = getItemInfo(manifestId)
       let _imageAspect = Number((_imageInfo.width/_imageInfo.height).toFixed(4))
       width = _imageAspect >= 1
         ? width / _imageAspect > maxHeight ? width = maxHeight * _imageAspect : width
         : Math.round(maxHeight * _imageAspect)
     }
+    // console.log(`calcDialogWidth=${width}`)
     return width
   }
 
@@ -385,7 +394,7 @@
   const height = ref<number>(0)
   const aspect = ref<number>(0)
 
-  const iiifItemsList = ref(<any[]>[])
+  const itemsList = ref(<any[]>[])
   const manifests:any = ref([])
   const manifest:any = ref(null)
   const options:any = ref(null)
@@ -393,9 +402,11 @@
   const type:any = ref(null)
   const tileSource:any = ref(null)
 
-  watch(iiifItemsList, () => {
-    // console.log(toRaw(iiifItemsList.value))
-    let manifestUrls = iiifItemsList.value.map(item => item.manifest)
+  const manifestsById = computed(() => Object.fromEntries(manifests.value.map((_manifest:any) => [sha256(_manifest.id).slice(0,8), _manifest])) )
+
+  watch(itemsList, () => {
+    // console.log('itemsList', toRaw(itemsList.value))
+    let manifestUrls = itemsList.value.filter(item => item.iiif).map(item => item.src)
     loadManifests(manifestUrls).then(resp => {
       manifests.value = resp
       if (props.grid) type.value = 'image-grid'
@@ -405,7 +416,7 @@
 
   watch(manifests, () => {
     manifest.value = manifests.value.length > 0 && manifests.value[0]
-    options.value = iiifItemsList.value[0]
+    options.value = itemsList.value[0]
   })
   watch(manifest, () => {
     totalImages.value = imageCount(manifest.value)
@@ -442,7 +453,7 @@
     nextTick(() => {
       if (type.value === 'image' && !isGif(manifest.value) && !props.static) loadImage()
       // else if (type.value === 'image-compare') scaledImages.value = scaleImages()
-      else if (type.value === 'video' && iiifItemsList.value.length > 0) initializeHTML5Player()
+      else if (type.value === 'video' && itemsList.value.length > 0) initializeHTML5Player()
       else if (type.value === 'audio') initializeHTML5Player()
       if (!caption.value && type.value === 'image') caption.value = label(manifest.value)   
     })
@@ -460,7 +471,7 @@
           if (mutation.type === 'childList' || mutation.type === 'characterData') {
           }
         }
-        iiifItemsList.value = buildIiiFItemsList()
+        itemsList.value = builditemsList()
       }
       const observer = new MutationObserver(callback)
       observer.observe(slot, { childList: true, subtree: true, characterData: true })
@@ -482,21 +493,20 @@
     return rotationRegex.test(str)
   }
 
-  function buildIiiFItemsList() {
+  function builditemsList() {
     let itemsList = []
-    let manifestUrl = props.manifest || props.src
-
-    if (manifestUrl) {
-      let parsedUrl = new URL(manifestUrl)
+    let src = props.manifest || props.src
+    
+    if (src) {
+      let obj:any = {}
+      obj.src = src
+      obj.src = obj.src.indexOf('http') === 0 ? obj.src : `https://iiif.juncture-digital.org/${obj.src}/manifest.json`
+      obj.id = sha256(obj.src).slice(0,8)
+    
+      let parsedUrl = new URL(obj.src)
       let domain = parsedUrl.hostname.replace(/^www\./, '')
-      if (youtubeDomains.has(domain) || vimeoDomains.has(domain)) manifestUrl = undefined
-    }
+      obj.iiif = !youtubeDomains.has(domain) && !vimeoDomains.has(domain)
 
-    if (manifestUrl) {
-      let obj:any = {
-        id: sha256(manifestUrl).slice(0,8),
-        manifest: manifestUrl
-      }
       if (props.options && isIiifArg(props.options)) {
         let match = props.options.match(iiifRegex)
         if (match) obj = {...obj, ...match.groups}        
@@ -519,10 +529,20 @@
           if (tokens.length > 0 && tokens[tokens.length-1].indexOf('=') === tokens[tokens.length-1].length-1) tokens[tokens.length-1] = `${tokens[tokens.length-1]}${token}`
           else tokens.push(token)
         })
-        let obj:any = {
-          id: sha256(tokens[0]).slice(0,8),
-          manifest: tokens[0]
+        let obj:any = {}
+        obj.src = tokens[0].indexOf('http') === 0 ? tokens[0] : `https://iiif.juncture-digital.org/${tokens[0]}/manifest.json`
+        obj.id = sha256(obj.src).slice(0,8)
+        let parsedUrl = new URL(tokens[0])
+        let domain = parsedUrl.hostname.replace(/^www\./, '')
+        if (youtubeDomains.has(domain)) {
+          obj.youtube = true
+          obj.videoid = parsedUrl.searchParams.get('v')
+        } else if (vimeoDomains.has(domain)) {
+          obj.vimeo = true
+        } else {
+          obj.iiif = true
         }
+        obj.iiif = !youtubeDomains.has(domain) && !vimeoDomains.has(domain)
         for (let i = 1; i < tokens.length; i++) {
           let token = tokens[i]
           if (token.indexOf('=') > 0) {
@@ -558,7 +578,7 @@
 
     // console.log(`scaleImages: targetWidth=${targetWidth} targetHeight=${targetHeight} targetAspectRatio=${targetAspectRatio}`)
 
-    return iiifItemsList.value.map((img, idx) => {
+    return itemsList.value.map((img, idx) => {
       
       let imgInfo = getItemInfo(manifests.value[idx], img.seq)
 
@@ -699,7 +719,7 @@
     return name === 'pause' || value === 'pause'
   }
 
-  const actionKeys = new Set(['anno', 'play', 'zoomto'])
+  const actionKeys = new Set(['anno', 'play', 'start', 'zoomto'])
   function addInteractionHandlers() {
     Array.from(host.value.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
       let veMedia = findVeMedia(el)
@@ -820,26 +840,52 @@
 
   // watch(mediaPlayer, () => monitor())
 
-  function initializeYouTubePlayer() {
-    doLayout()
-    let playerEl = shadowRoot.value?.querySelector('#youtube-placeholder') as HTMLElement
-    let width = parseInt(window.getComputedStyle(playerEl).width.slice(0,-2))
-    playerEl.style.height = `${width/16*9}px`
-    let playerVars = {
-      color: 'white',
-      rel: 0,
-      modestbranding: 1,
-      playsinline: 1
-    }
-    mediaPlayer = YouTubePlayer(
-      playerEl, {
-        videoId: videoId.value,
-        playerVars
+  function getStartTimes() {
+    startTimes.value = Object.fromEntries(
+      Array.from(host.value.parentElement.querySelectorAll('p[data-start]'))
+        .map((el:any) => [hmsToSeconds(el.dataset.start || '0'), el])
+    )
+  }
+
+  async function youtubeMetadata(videoId:any) {
+    let videoUrl = encodeURI(`https://www.youtube.com/watch?v=${videoId}`)
+    let url = `https://youtube.com/oembed?url=${videoUrl}&format=json`
+    let resp = await fetch(url)
+    let data:any = await resp.json()
+    data.aspect = data.width/data.height
+    return data
+  }
+
+  async function initializeYouTubePlayer() {
+    let metadata = await youtubeMetadata(videoId.value)
+    getStartTimes()
+      nextTick(() => {
+        doLayout(metadata.aspect)
+        nextTick(() => {
+          let playerEl = shadowRoot.value?.querySelector('#youtube-placeholder') as HTMLElement
+          let width = parseInt(window.getComputedStyle(playerEl).width.slice(0,-2))
+          playerEl.style.height = `${width/metadata.aspect}px`
+          let playerVars = {
+            color: 'white',
+            rel: 0,
+            modestbranding: 1,
+            playsinline: 1
+          }
+          mediaPlayer = YouTubePlayer(
+            playerEl, {
+              videoId: videoId.value,
+              width,
+              playerVars
+            })
+          mediaPlayer.on('ready', (evt:any) => {
+            // playerEl = shadowRoot.value?.querySelector('#youtube-placeholder') as HTMLElement
+            // console.log('post', playerEl.clientWidth, playerEl.clientHeight)
+            // doLayout()
+            monitor()
+            // console.log('youtube.ready', props.autoplay)
+            if (props.autoplay) seekTo(`${props.start || ''}`, `${props.end || ''}`)
+          })
       })
-    mediaPlayer.on('ready', (evt:any) => {
-      monitor()
-      // console.log('youtube.ready', props.autoplay)
-      if (props.autoplay) seekTo(`${props.start || ''}`, `${props.end || ''}`)
     })
   }
 
@@ -867,31 +913,30 @@
     doLayout()
   }
   async function monitor() {
-    let playerEl = host.value.parentElement.querySelector('ve-video') as HTMLElement
+    let playerEl = host.value.parentElement.querySelector('ve-media') as HTMLElement
     let playerScrolledToTop = false
     
     setInterval(async () => {
       isMuted.value = await getIsMuted()
       isPlaying.value = await getIsPlaying()
 
-      // console.log(`ve-video: isMuted=${this.isMuted} isPlaying=${this.isPlaying}`)
-      
-      if (isPlaying.value && sticky && startTimes.length > 0 && !playerScrolledToTop ) {
+      // console.log(`ve-media: isPlaying=${isPlaying.value} sticky=${props.sticky} startTimes=${Object.keys(startTimes.value).length} playerScrolledToTop=${playerScrolledToTop}`)
+      if (isPlaying.value && props.sticky && Object.keys(startTimes.value).length > 0 && !playerScrolledToTop ) {
         // scroll player to top
         let y = playerEl.getBoundingClientRect().top + window.scrollY - top()
-        // console.log(`player.scrollTo`, y)
+        console.log('scrollTo', y)
         window.scrollTo(0, y)
-        // playerScrolledToTop = true
+        playerScrolledToTop = true
       }
 
       if (isPlaying.value) {
         getCurrentTime().then(time => {
           time = Math.round(time)
           // console.log(`${type.value}: isMuted=${isMuted.value} isPlaying=${isPlaying.value} currentTime=${time}`)
-          if (startTimes[time]) {
+          if (startTimes.value[time]) {
             // scroll paragraph into active region
-            let bcr = startTimes[time].getBoundingClientRect()
-            // console.log(`elem.scrollTo`, bcr.top)
+            let p = startTimes.value[time] as HTMLParagraphElement
+            let bcr = p.getBoundingClientRect()
             window.scrollTo(0, bcr.top + window.scrollY - playerEl.getBoundingClientRect().bottom)
           }
         })
@@ -958,7 +1003,7 @@
     // console.log(`seekTo: start=${start} end=${end}`)
     let startSecs = hmsToSeconds(start)
     let endSecs = end ? hmsToSeconds(end) + 1 : -1
-    console.log(`seekTo: start=${startSecs} end=${endSecs} isMuted=${isMuted.value} forceMuteOnPlay=${forceMuteOnPlay}`)
+    // console.log(`seekTo: start=${startSecs} startElem=${startTimes.value[startSecs] !== undefined} end=${endSecs} isMuted=${isMuted.value} forceMuteOnPlay=${forceMuteOnPlay}`)
 
     // clear delayed pause
     if (timeoutId) {
@@ -967,7 +1012,7 @@
     }
 
     let wasMuted = isMuted.value
-    if (forceMuteOnPlay) setMuted(true)
+    // if (forceMuteOnPlay) setMuted(true)
 
     if (isYouTube) {
       mediaPlayer.playVideo()
@@ -1010,6 +1055,16 @@
         }
       }, 200)
     } 
+
+    if (startTimes.value[startSecs]) {
+      // scroll paragraph into active region
+      let p = startTimes.value[startSecs] as HTMLParagraphElement
+      let bcr = p.getBoundingClientRect()
+      // console.log(`elem.scrollTo`, bcr.top)
+      let playerEl = host.value.parentElement.querySelector('ve-media') as HTMLElement
+      window.scrollTo(0, bcr.top + window.scrollY - playerEl.getBoundingClientRect().bottom)
+    }
+
   }
 
   /******************* End Audio/Video Player Methods *******************/
@@ -1021,6 +1076,11 @@
   @import '../annotator/annotorious.css';
 
   * { box-sizing: border-box; }
+
+  :host {
+    display: block;
+    padding-bottom: 6px;
+  }
 
   .info-icon {
     position: absolute;
@@ -1061,7 +1121,7 @@
 
   #outer {
     margin-bottom: 12px;
-    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
+    /* box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px; */
 
   }
 
@@ -1111,6 +1171,19 @@
   .grid-wrapper {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    grid-auto-rows: 1fr;
+
+    grid-gap: 18px;
+    align-items: flex-start;
+    justify-items: center;
+    /* padding: 12px 0;
+    width: 100%;
+    margin: 24px 0; */
+  }
+
+  .grid-wrapper.small {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     grid-auto-rows: 1fr;
 
     grid-gap: 18px;

@@ -285,11 +285,12 @@ function findStickyElems() {
   // let main = document.querySelector('main')
   // if (main) main.style.paddingBottom = '75vh'
   stickyElems.forEach((el:any) => setTop(el))
+  // console.log('stickyElems', stickyElems)
   return stickyElems
 }
 
 function activeRegionOffset() {
-  let stickyNavBar = stickyElems.find(el => el.localName.toLowerCase() === 've-navbar')
+  let stickyNavBar = stickyElems.find((el:HTMLElement) => el.localName.toLowerCase() === 've-navbar')
   let offset = stickyNavBar ? stickyNavBar.getBoundingClientRect().top : 0
   stickyElems.forEach(el => {
     let bcr = el.getBoundingClientRect()
@@ -301,6 +302,7 @@ function activeRegionOffset() {
       }
     }
   })
+  // console.log(`activeRegionOffset=${offset}`)
   return offset
 }
 
@@ -332,12 +334,12 @@ let offset = 0
 const intersectionObserver = new IntersectionObserver (
   (entries) => {
     offset = activeRegionOffset()
-    // console.log(offset)
     entries.forEach(entry => targets[domPath(entry.target)] = entry)
     let intersecting = Object.values(targets)
       .filter((entry:any) => entry.isIntersecting)
       .filter((entry:any) => entry.target.getBoundingClientRect().y >= offset)
       .sort((a:any,b:any) => a.target.getBoundingClientRect().y > b.target.getBoundingClientRect().y ? 1 : -1)
+    // console.log(intersecting.map((entry:any) => ({ el:entry.target, ratio:entry.intersectionRatio })))
     let selected:any = (intersecting.find((entry:any) => entry.intersectionRatio === 1) || intersecting[0])
     if (selected) {
       let selectedEl = selected.target as HTMLElement
@@ -421,7 +423,7 @@ export async function getEntityData(qids: string[] = [], language: string = 'en'
           if (rec.pageBanner) entityData[qid].pageBanner = rec.pageBanner.value
           if (rec.image) {
             entityData[qid].image = rec.image.value
-            entityData[qid].thumbnail = mwImage(rec.image.value, 120)
+            entityData[qid].thumbnail = mwImage(rec.image.value, 300)
           }
           if (rec.whosOnFirst) entityData[qid].geojson = whosOnFirstUrl(rec.whosOnFirst.value)
         } else {

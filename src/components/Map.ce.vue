@@ -18,7 +18,6 @@
   import { isQID, getEntity, getManifest, metadataAsObj, isMobile, makeSticky } from '../utils'
   import '@shoelace-style/shoelace/dist/components/range/range.js'
   import type SLRange from '@shoelace-style/shoelace/dist/components/range/range.js'
-import { mapToStyles } from '@popperjs/core/lib/modifiers/computeStyles'
 
   const markerIconTemplate = {
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-icon.png',
