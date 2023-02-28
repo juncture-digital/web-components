@@ -8,7 +8,7 @@
         <!-- Single image -->
         <div v-if="type === 'image'" class="image-wrapper media-item">
           <ve-gif v-if="isGif(manifests[0])" :src="itemInfo.id" alt="Animated GIF" initially-paused restart-on-play></ve-gif>
-          <img v-else-if="static" :src="staticImage(manifest, options, width)" style="width:100%;" @click="toggleDialogId(manifest.id)"/>
+          <img v-else-if="static" :src="staticImage(manifest, options, width)" style="width:100%;" @click="toggleDialogId(manifest)"/>
           <div v-else id="osd"></div>
           <ve-manifest-popup v-if="!props.noInfoIcon" :manifest="manifests[0].id"></ve-manifest-popup>
         </div>
@@ -17,7 +17,7 @@
         <div v-else-if="type === 'image-grid'" :class="`grid-wrapper${props.small ? ' small' : ''}`">
           <template v-for="item, idx in itemsList">
             
-            <ve-media-card v-if="props.cards" style="width:100%;height:100%;" :manifest="item.manifest"></ve-media-card>
+            <ve-media-card v-if="props.cards" style="width:100%;height:100%;" :manifest="item.src"></ve-media-card>
 
             <div v-else>
               <div class="media-item">
@@ -364,7 +364,8 @@
     id ? dialog.value?.show() : dialog.value?.hide()
   })
   function toggleDialogId(item:any=null) {
-    dialogId.value = dialogId.value ? null : item.src
+    // console.log('toggleDialogId', item)
+    dialogId.value = dialogId.value ? null : item.src || item.id
   }
 
   function calcDialogWidth() {
@@ -406,6 +407,7 @@
   )
 
   watch(itemsList, () => {
+    // console.log(toRaw(itemsList.value))
     let manifestUrls = itemsList.value.filter(item => item.iiif).map(item => item.src)
     loadManifests(manifestUrls).then(resp => {
       manifests.value = resp
@@ -1213,6 +1215,7 @@
     box-shadow: 2px 2px 6px 0px  rgba(0,0,0,0.3);
     /* width: 240px; */
     max-width: 100%;
+    cursor: pointer;
   }
 
   #coords {
@@ -1277,6 +1280,9 @@
   .view .r6o-widget {
     display: inline-block;
     min-height: unset !important;
+    line-height: 1.4;
+    padding: 9px;
+    border-bottom: none;
   }
 
   .r6o-tag,

@@ -1,7 +1,7 @@
 * { box-sizing: border-box; }
 
 .ve-component {
-  clear: both;
+  /* clear: both; */
   z-index: 2;
 }
 

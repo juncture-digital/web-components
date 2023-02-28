@@ -124,7 +124,6 @@
     })
     return _metadata.sort()
   }
-
   getManifest(props.manifest).then(resp => manifest.value = resp)
 
   function copyTextToClipboard(text: string) {
