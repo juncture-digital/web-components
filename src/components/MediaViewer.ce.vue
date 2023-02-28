@@ -196,7 +196,7 @@
     host.value.classList.add('ve-component')
     host.value.classList.add(position)
     if (position === 'full') {
-      host.value.style.width = '100%'
+      //host.value.style.width = '100%'
     } else {
       host.value.style.float = position
       host.value.style.width = 'calc(50% - 12px)'
@@ -220,7 +220,7 @@
       if (props.sticky && position === 'full' && !(props.width || props.height)) {
         let maxStickyHeight = Math.round(window.innerHeight * .4)
         let computedWidth = Math.ceil(maxStickyHeight * aspect.value)
-        // console.log(`type=${type.value} height=${height.value} maxStickyHeight=${maxStickyHeight} computedWidth=${computedWidth}`)
+        //console.log(`type=${type.value} height=${height.value} maxStickyHeight=${maxStickyHeight} computedWidth=${computedWidth}`)
         
         if (type.value === 'image') content.value.style.height = `${maxStickyHeight}px`
         if (type.value !== 'image-grid') inner.value.classList.add('drop-shadow')
@@ -370,9 +370,8 @@
   function calcDialogWidth() {
     let width = Math.round(window.innerWidth - 100)
     let maxHeight = Math.round(window.innerHeight - 150)
-    
     let selectedSrc = dialogId.value?.indexOf('http') === 0 ? dialogId.value : `https://iiif.juncture-digital.org/${dialogId.value}/manifest.json`
-    let manifestId = manifests.value.find((m:any) => m.id === selectedSrc)
+    let manifestId = manifests.value.find((m:any) => decodeURIComponent(m.id) === selectedSrc)
     if (manifestId) {
       let _imageInfo = getItemInfo(manifestId)
       let _imageAspect = Number((_imageInfo.width/_imageInfo.height).toFixed(4))
@@ -380,7 +379,7 @@
         ? width / _imageAspect > maxHeight ? width = maxHeight * _imageAspect : width
         : Math.round(maxHeight * _imageAspect)
     }
-    // console.log(`calcDialogWidth=${width}`)
+    // console.log(`calcDialogWidth: width=${width} manifestId=${manifestId}`)
     return width
   }
 
@@ -402,10 +401,11 @@
   const type:any = ref(null)
   const tileSource:any = ref(null)
 
-  const manifestsById = computed(() => Object.fromEntries(manifests.value.map((_manifest:any) => [sha256(_manifest.id).slice(0,8), _manifest])) )
+  const manifestsById = computed(() => 
+    Object.fromEntries(manifests.value.map((_manifest:any) => [sha256(decodeURIComponent(_manifest.id)).slice(0,8), _manifest])) 
+  )
 
   watch(itemsList, () => {
-    // console.log('itemsList', toRaw(itemsList.value))
     let manifestUrls = itemsList.value.filter(item => item.iiif).map(item => item.src)
     loadManifests(manifestUrls).then(resp => {
       manifests.value = resp
@@ -531,7 +531,7 @@
         })
         let obj:any = {}
         obj.src = tokens[0].indexOf('http') === 0 ? tokens[0] : `https://iiif.juncture-digital.org/${tokens[0]}/manifest.json`
-        obj.id = sha256(obj.src).slice(0,8)
+        obj.id = sha256(decodeURIComponent(obj.src)).slice(0,8)
         let parsedUrl = new URL(tokens[0])
         let domain = parsedUrl.hostname.replace(/^www\./, '')
         if (youtubeDomains.has(domain)) {
@@ -924,7 +924,7 @@
       if (isPlaying.value && props.sticky && Object.keys(startTimes.value).length > 0 && !playerScrolledToTop ) {
         // scroll player to top
         let y = playerEl.getBoundingClientRect().top + window.scrollY - top()
-        console.log('scrollTo', y)
+        // console.log('scrollTo', y)
         window.scrollTo(0, y)
         playerScrolledToTop = true
       }
@@ -1127,6 +1127,7 @@
 
   #inner {
     margin: auto;
+    width: 100%;
   }
 
   .drop-shadow {

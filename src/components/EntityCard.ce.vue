@@ -5,16 +5,18 @@
     <div class="description" v-html="entity?.description"></div>
       <div v-if="backgroundImage" class="image" :style="{backgroundImage:backgroundImage, width: thumbnailWidth}"></div>
       <div class="links">
-        <span v-if="entity?.wikidata" class="logo" title="Wikipedia">
+        <span v-if="entity?.wikipedia" class="logo" title="Wikipedia">
           <a target="_blank" :href="entity.wikipedia">
             <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/Wikipedia_svg_logo.svg"/>
           </a>
         </span>
+        <!--
         <span class="logo" title="Wikidata">
           <a target="_blank" :href="`https://www.wikidata.org/entity/${entity?.id}`">
             <img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/Wikidata-logo.svg"/>
           </a>
         </span>
+        -->
       </div>
       <p v-if="entity?.summaryText" class="summary" v-html="unwrap(entity.summaryText)"></p>
     </div>

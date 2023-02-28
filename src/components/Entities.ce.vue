@@ -3,7 +3,7 @@
   <div ref="root" class="main">
     <div class="content">
       <div class="buttons">
-        <sl-button v-for="qid in qids" :key="qid" @click="selected = qid" pill size="small">
+        <sl-button v-for="qid in qids" :key="qid" @click="selected = qid" pill size="small" :class="{selected: qid === selected}">
           {{ entities[qid]?.label }}
         </sl-button>
       </div>
@@ -131,6 +131,11 @@
     bottom: 0;
     height: 32px;
     margin-top: 6px;
+  }
+
+  sl-button.selected::part(base) {
+    background-color: #ddd;
+    font-weight: bold;
   }
 
 </style>

@@ -208,7 +208,7 @@ section.no-offset:target:before {
 /* Larger Devices */
 @media (min-width: 481px) {
 
-  #juncture {
+  main {
     font-size: 1.3rem;
     line-height: 1.4;
     padding: 0;

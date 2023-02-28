@@ -28,9 +28,9 @@
   import type SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js'
 
   const clientIds:any = {
-  'beta.juncture-digital.org': 'f30ce4168a0bb95ecaa3',
-  'dev.juncture-digital.org': 'bb290b5a738cb6fe31c7',
-  'tools.juncture-digital.org': '0b40086fe912d97c03e6'
+    'www.juncture-digital.org': 'f7247e1e4769ba7c61e4',
+    'beta.juncture-digital.org': 'f30ce4168a0bb95ecaa3',
+    'dev.juncture-digital.org': 'bb290b5a738cb6fe31c7'
   }
 
   const authToken = ref<string | null>('')
