@@ -33,7 +33,7 @@
     overlay: { type: String },
     zoom: { type: Number, default: 2 },
     center: { type: String, default: '55.4,6.7' },
-    marker: { type: String },
+    marker: { type: Boolean },
     caption: { type: String },
     width: { type: String },
     height: { type: String },
@@ -339,11 +339,18 @@
     return geoJSON
   }
   
-  function getLayerStrings() {
+  async function getLayerStrings() {
     let _layerObjs = Array.from(host.value.querySelectorAll('li')).map((item:any) => toObj(item.firstChild?.textContent))
-    if (props.marker) _layerObjs.push(toObj(props.marker))
+    console.log(props)
+    if (props.marker && props.center) {
+      let coords = isQID(props.center)
+        ? (await getEntity(props.center)).coords
+        : props.center
+      _layerObjs.push(Promise.resolve({coords, zoom: props.zoom || 10}))
+    }
     // layerObjs.value = _layerObjs
     layerObjs.value = [...layerObjs.value, ..._layerObjs]
+    console.log(layerObjs.value)
   }
 
   function listenForSlotChanges() {
@@ -483,10 +490,14 @@
   }
 
   function addInteractionHandlers() {
-    Array.from(host.value.parentElement.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
-      let veMap = findVeMap(el)
-      if (veMap) addMutationObserver(el)
-    })
+    let scope = host.value.parentElement
+    while (scope.parentElement && scope.tagName !== 'MAIN') {
+        scope = scope.parentElement
+        Array.from(scope.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
+        let veMap = findVeMap(el)
+        if (veMap) addMutationObserver(el)
+      })
+    }
 
     let el = host.value.parentElement
     while (el?.parentElement && el.tagName !== 'BODY') el = el.parentElement;
@@ -547,7 +558,7 @@
     }
     while (el.parentElement && el.tagName !== 'MAIN') {
       el = el.parentElement
-      let veMap = el.querySelector(':scope > ve-map, :scope > p > ve-map')
+      let veMap = el.querySelector(':scope > ve-map, :scope > p > ve-map, :scope > section > ve-map')
       if (veMap) return veMap === host.value ? veMap : null
     }
   }
@@ -560,8 +571,10 @@
         gotoPriorLoc()
       } else {
         zoomed.value = flyto.value.id
-        let center = latLng(flyto.value.layer.feature.properties.coords)
-        map.value?.flyTo(center, flyto.value.zoom)
+        if (flyto.value.layer.feature?.properties) {
+          let center = latLng(flyto.value.layer.feature.properties.coords)
+          map.value?.flyTo(center, flyto.value.zoom)
+        }
       }
     } else {
       gotoPriorLoc()

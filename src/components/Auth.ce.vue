@@ -23,6 +23,8 @@
 <script setup lang="ts">
 
   import { computed, onMounted, ref, toRaw, watch } from 'vue'
+  import { GithubClient } from '../gh-utils'
+
   import type SlButton from '@shoelace-style/shoelace/dist/components/button/button.js'
   import type SlIcon from '@shoelace-style/shoelace/dist/components/icon/icon.js'
   import type SlTooltip from '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js'
@@ -34,6 +36,7 @@
   }
 
   const authToken = ref<string | null>('')
+  const githubClient = ref<any>()
   const isLoggedIn = computed(() => authToken.value !== null)
   const userInfo = ref<any>(null)
   const username = ref<String | null>(null)
@@ -101,6 +104,16 @@
   watch(userInfo, () => {
     if (userInfo.value) localStorage.setItem('gh-username', userInfo.value.login)
     username.value = window.localStorage.getItem('gh-username')
+  })
+
+  watch(githubClient, async () => {
+    if (isLoggedIn.value) {
+      let username = await githubClient.value.user().then((userData:any) => userData.login)
+      await githubClient.value.repos(username).then((repos:any[]) => {
+        if (!repos.find(repo => repo.name === 'essays')) githubClient.value.createRepository({name:'essays', description:'Juncture visual essays'})
+        if (!repos.find(repo => repo.name === 'media')) githubClient.value.createRepository({name:'media', description:'Juncture media'})
+      })
+    }
   })
 
 </script>
