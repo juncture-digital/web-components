@@ -106,9 +106,15 @@
     username.value = window.localStorage.getItem('gh-username')
   })
 
+  watch(authToken, () => {
+    githubClient.value = new GithubClient(authToken.value || '')
+  })
+
   watch(githubClient, async () => {
+    console.log(`watch.githubClient: isLoggedIn=${isLoggedIn.value}`)
     if (isLoggedIn.value) {
       let username = await githubClient.value.user().then((userData:any) => userData.login)
+      console.log(`watch.githubClient: username=${username}`)
       await githubClient.value.repos(username).then((repos:any[]) => {
         if (!repos.find(repo => repo.name === 'essays')) githubClient.value.createRepository({name:'essays', description:'Juncture visual essays'})
         if (!repos.find(repo => repo.name === 'media')) githubClient.value.createRepository({name:'media', description:'Juncture media'})
