@@ -54,7 +54,7 @@
   const html = ref<string>()
 
   watch(host, () => {
-    width.value = props.width || isMobile() ? '100vw' : '80vw'
+    width.value = props.width || (isMobile() ? '100vw' : '80vh')
     let lines:string[] = host.value.textContent.split('\n')
     let trimmed:string[] = []
     lines.forEach(line => {

@@ -71,15 +71,12 @@
   function login() {
     let hostname = (new URL(window.location.href)).hostname
     let isDev = hostname === 'localhost' || hostname.indexOf('192.168.') === 0
-    console.log(window.location)
     let redirectTo  = `${window.location.href}`
-    console.log(`login: redirectTo=${redirectTo}`)
     let href = isDev
       ? `${window.location.origin}${window.location.pathname}?code=testing&redirect_uri=${location.pathname}${location.hash}`
       : clientIds[location.hostname] !== undefined
         ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${redirectTo}`
         : null
-    console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
     if (href) window.location.href = href
   }
 
@@ -111,10 +108,8 @@
   })
 
   watch(githubClient, async () => {
-    console.log(`watch.githubClient: isLoggedIn=${isLoggedIn.value}`)
     if (isLoggedIn.value) {
       let username = await githubClient.value.user().then((userData:any) => userData.login)
-      console.log(`watch.githubClient: username=${username}`)
       await githubClient.value.repos(username).then((repos:any[]) => {
         if (!repos.find(repo => repo.name === 'essays')) githubClient.value.createRepository({name:'essays', description:'Juncture visual essays'})
         if (!repos.find(repo => repo.name === 'media')) githubClient.value.createRepository({name:'media', description:'Juncture media'})
