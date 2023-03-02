@@ -177,7 +177,7 @@
   function onDrag(dragEvent:DragEvent) {
     // dragEvent.preventDefault()
     dragEvent.stopPropagation()
-    let url = `http://localhost:8088/?manifest=${manifest.value.id}`
+    let url = `https://iiif.juncture-digital.org/#${manifest.value.id}?manifest=${manifest.value.id}`
     dragEvent.dataTransfer?.setData('text/uri-list', url)
   }
 

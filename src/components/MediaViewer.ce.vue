@@ -1,7 +1,7 @@
 <template>
   <div ref="root" v-bind="$attrs"></div>
 
-  <div id="outer" :class="annotationsEditable ? 'edit' : 'view'" :draggable="type === 'image'" @dragstart="onDrag">
+  <div id="outer" :class="annotationsEditable ? 'edit' : 'view'" :draggable="type === 'image'" @dragstart="onDrag(manifest, $event)">
     <div id="inner">
       <div id="content">
         
@@ -20,7 +20,7 @@
             <ve-media-card v-if="props.cards" style="width:100%;height:100%;" :manifest="item.src"></ve-media-card>
 
             <div v-else>
-              <div class="media-item">
+              <div class="media-item" :draggable="type === 'image'" @dragstart="onDrag(manifestsById[item.id], $event)">
                 <img v-if="item.iiif" :src="thumbnail(manifestsById[item.id])" @click="toggleDialogId(item)"/>
                 <img v-else-if="item.youtube" :src="`https://img.youtube.com/vi/${item.videoid}/0.jpg`" @click="toggleDialogId(item)"/>
                 <ve-manifest-popup v-if="item.iiif" :manifest="item.src"></ve-manifest-popup>
@@ -117,9 +117,12 @@
   import type SLDialog from '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
   // import { GithubClient } from '@/gh-utils'
 
-  function onDrag(evt:DragEvent) {
-    console.log('onDrag', evt)
-    evt.dataTransfer?.setData('text/plain', manifest.value.id)
+  function onDrag(manifest:any, evt:DragEvent) {
+    evt.stopPropagation()
+    console.log(manifest, evt)
+    let url = `https://iiif.juncture-digital.org/?manifest=${encodeURIComponent(manifest.id)}`
+    console.log('onDrag', url)
+    evt.dataTransfer?.setData('text/uri-list', url)
   }
 
   const props = defineProps({
@@ -907,6 +910,7 @@
   }
 
   function initializeHTML5Player() {
+    getStartTimes()
     isHTML5 = true
     nextTick(() => {
       mediaPlayer = shadowRoot.value?.querySelector('#html5-player') as HTMLVideoElement
@@ -1002,7 +1006,7 @@
   }
 
   function seekTo(start:string, end:string='') {
-    // console.log(`seekTo: start=${start} end=${end}`)
+    console.log(`seekTo: start=${start} end=${end}`)
     let startSecs = hmsToSeconds(start)
     let endSecs = end ? hmsToSeconds(end) + 1 : -1
     // console.log(`seekTo: start=${startSecs} startElem=${startTimes.value[startSecs] !== undefined} end=${endSecs} isMuted=${isMuted.value} forceMuteOnPlay=${forceMuteOnPlay}`)

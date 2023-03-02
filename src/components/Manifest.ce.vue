@@ -9,7 +9,7 @@
       <a v-if="parsed?.rights" :href="parsed?.rights" v-html="licenseBadge"/>
       <div class="links">
         <img src="https://juncture-digital.github.io/web-app/static/iiif.png" class="iiif" alt="IIIF manifest icon"
-          @click="copyTextToClipboard(manifest)" 
+          @click="copyTextToClipboard(manifest.id)" 
         />
       </div>
 
@@ -222,7 +222,7 @@
   }
 
   function copyTextToClipboard(text: string) {
-      console.log('copyTextToClipboard', text)
+      // console.log('copyTextToClipboard', text)
       if (navigator.clipboard) navigator.clipboard.writeText(text)
   }
 
