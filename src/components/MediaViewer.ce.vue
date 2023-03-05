@@ -2,7 +2,7 @@
   <div ref="root" v-bind="$attrs"></div>
 
   <div id="outer" :class="annotationsEditable ? 'edit' : 'view'" :draggable="type === 'image'" @dragstart="onDrag(manifest, $event)">
-    <div id="inner">
+    <div id="inner" :class="type">
       <div id="content">
         
         <!-- Single image -->
@@ -120,7 +120,7 @@
   function onDrag(manifest:any, evt:DragEvent) {
     evt.stopPropagation()
     console.log(manifest, evt)
-    let url = `https://iiif.juncture-digital.org/?manifest=${encodeURIComponent(manifest.id)}`
+    let url = `https://iiif.juncture-digital.org/?manifest=${manifest.id}`
     console.log('onDrag', url)
     evt.dataTransfer?.setData('text/uri-list', url)
   }
@@ -1134,6 +1134,10 @@
   #inner {
     margin: auto;
     width: 100%;
+  }
+
+  #inner.image {
+    box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   }
 
   .drop-shadow {

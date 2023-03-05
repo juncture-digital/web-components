@@ -390,7 +390,7 @@ export async function getEntityData(qids: string[] = [], language: string = 'en'
   // console.log(`getEntityData: qids=${qids.length} toGet=${values.length}`)
   if (values.length > 0) {
     let query = `
-      SELECT ?item ?label ?description ?alias ?image ?coords ?pageBanner ?whosOnFirst ?wikipedia WHERE {
+      SELECT ?item ?label ?description ?alias ?image ?logoImage ?coords ?pageBanner ?whosOnFirst ?wikipedia WHERE {
         VALUES (?item) { ${values.join(' ')} }
         ?item rdfs:label ?label . 
         FILTER (LANG(?label) = "${language}" || LANG(?label) = "en")
@@ -398,6 +398,7 @@ export async function getEntityData(qids: string[] = [], language: string = 'en'
         OPTIONAL { ?item skos:altLabel ?alias . FILTER (LANG(?alias) = "${language}" || LANG(?alias) = "en")}
         OPTIONAL { ?item wdt:P625 ?coords . }
         OPTIONAL { ?item wdt:P18 ?image . }
+        OPTIONAL { ?item wdt:P154 ?logoImage . }
         OPTIONAL { ?item wdt:P948 ?pageBanner . }
         OPTIONAL { ?item wdt:P6766 ?whosOnFirst . }
         OPTIONAL { ?wikipedia schema:about ?item; schema:isPartOf <https://${language}.wikipedia.org/> . }
@@ -424,6 +425,10 @@ export async function getEntityData(qids: string[] = [], language: string = 'en'
           if (rec.image) {
             entityData[qid].image = rec.image.value
             entityData[qid].thumbnail = mwImage(rec.image.value, 300)
+          }
+          if (rec.logoImage) {
+            entityData[qid].logoImage = rec.logoImage.value
+            if (!entityData[qid].thumbnail) entityData[qid].thumbnail = mwImage(rec.logoImage.value, 300)
           }
           if (rec.whosOnFirst) entityData[qid].geojson = whosOnFirstUrl(rec.whosOnFirst.value)
         } else {

@@ -18,6 +18,7 @@
   import { isQID, getEntity, getManifest, metadataAsObj, isMobile, makeSticky } from '../utils'
   import '@shoelace-style/shoelace/dist/components/range/range.js'
   import type SLRange from '@shoelace-style/shoelace/dist/components/range/range.js'
+import { objectToString } from '@vue/shared'
 
   const markerIconTemplate = {
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-icon.png',
@@ -34,6 +35,7 @@
     zoom: { type: Number, default: 2 },
     center: { type: String, default: '55.4,6.7' },
     marker: { type: Boolean },
+    basemaps: { type: String, default: 'OpenStreetMap' },
     caption: { type: String },
     width: { type: String },
     height: { type: String },
@@ -47,6 +49,164 @@
     base: { type: String }
   })
 
+  const baseMapsConfigs:any = {
+    CartoDB_DarkMatter: ['https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	        subdomains: 'abcd',
+	        maxZoom: 20 }],
+    CartoDB_DarkMatterNoLabels: ['https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	        subdomains: 'abcd',
+	        maxZoom: 20 }],
+    CartoDB_DarkMatterOnlyLabels: ['https://{s}.basemaps.cartocdn.com/dark_only_labels/{z}/{x}/{y}{r}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	        subdomains: 'abcd',
+	        maxZoom: 20 }],
+    CartoDB_Positron: ['https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	        subdomains: 'abcd',
+	        maxZoom: 20 }],
+    CartoDB_PositronNoLabels: ['https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	        subdomains: 'abcd',
+	        maxZoom: 20 }],
+    CartoDB_PositronOnlyLabels: ['https://{s}.basemaps.cartocdn.com/light_only_labels/{z}/{x}/{y}{r}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	        subdomains: 'abcd',
+	        maxZoom: 20 }],    
+    CartoDB_Voyager: ['https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+          subdomains: 'abcd',
+          maxZoom: 20 }],
+    CartoDB_VoyagerNoLabels: ['https://{s}.basemaps.cartocdn.com/rastertiles/voyager_nolabels/{z}/{x}/{y}{r}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	        subdomains: 'abcd',
+	        maxZoom: 20 }],
+    CartoDB_VoyagerOnlyLabels: ['https://{s}.basemaps.cartocdn.com/rastertiles/voyager_only_labels/{z}/{x}/{y}{r}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	        subdomains: 'abcd',
+	        maxZoom: 20}],
+    CartoDB_VoyagerLabelsUnder: ['https://{s}.basemaps.cartocdn.com/rastertiles/voyager_labels_under/{z}/{x}/{y}{r}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &copy; <a href="https://carto.com/attributions">CARTO</a>',
+	        subdomains: 'abcd',
+	        maxZoom: 20 }],
+    Esri_DeLorme: ['https://server.arcgisonline.com/ArcGIS/rest/services/Specialty/DeLorme_World_Base_Map/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles &copy; Esri &mdash; Copyright: &copy;2012 DeLorme',
+          minZoom: 1,
+          maxZoom: 11 }],
+    Esri_NatGeoWorldMap: ['https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles &copy; Esri &mdash; National Geographic, Esri, DeLorme, NAVTEQ, UNEP-WCMC, USGS, NASA, ESA, METI, NRCAN, GEBCO, NOAA, iPC',
+          maxZoom: 16 }],
+    Esri_OceanBasemap: ['https://server.arcgisonline.com/ArcGIS/rest/services/Ocean/World_Ocean_Base/MapServer/tile/{z}/{y}/{x}', {
+        attribution: 'Tiles &copy; Esri &mdash; Sources: GEBCO, NOAA, CHS, OSU, UNH, CSUMB, National Geographic, DeLorme, NAVTEQ, and Esri',
+        maxZoom: 13 }],
+    Esri_WorldGrayCanvas: ['https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+          attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ',
+          maxZoom: 16 }],
+    Esri_WorldImagery: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+	        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community' }],
+    Esri_WorldPhysical: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
+          maxZoom: 8,
+          attribution: 'Tiles &copy; Esri &mdash; Source: US National Park Service' }],
+    Esri_WorldShadedRelief: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+	        attribution: 'Tiles &copy; Esri &mdash; Source: Esri',
+	        maxZoom: 13 }],
+    Esri_WorldStreetMap: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+	        attribution: 'Tiles &copy; Esri &mdash; Source: Esri, DeLorme, NAVTEQ, USGS, Intermap, iPC, NRCAN, Esri Japan, METI, Esri China (Hong Kong), Esri (Thailand), TomTom, 2012' }],
+    Esri_WorldTerrain: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', {
+	        attribution: 'Tiles &copy; Esri &mdash; Source: USGS, Esri, TANA, DeLorme, and NPS',
+	        maxZoom: 13 }],
+    Esri_WorldTopoMap: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+	        attribution: 'Tiles &copy; Esri &mdash; Esri, DeLorme, NAVTEQ, TomTom, Intermap, iPC, USGS, FAO, NPS, NRCAN, GeoBase, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), and the GIS User Community' }],
+    MtbMap: ['http://tile.mtbmap.cz/mtbmap_tiles/{z}/{x}/{y}.png', {
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors &amp; USGS' }],
+    OpenStreetMap: ['https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          maxZoom: 18, 
+          attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>' }],
+    OpenStreetMap_DE: ['https://{s}.tile.openstreetmap.de/{z}/{x}/{y}.png', {
+	        maxZoom: 18,
+	        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }],
+    OpenStreetMap_France: ['https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+	        maxZoom: 20,
+	        attribution: '&copy; OpenStreetMap France | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }],
+    OpenStreetMap_HOT: ['https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, Tiles style by <a href="https://www.hotosm.org/" target="_blank">Humanitarian OpenStreetMap Team</a> hosted by <a href="https://openstreetmap.fr/" target="_blank">OpenStreetMap France</a>',
+          maxZoom: 19 }],
+    OpenStreetMap_Mapnik: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19 }],
+    OpenTopoMap: ['https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+          maxZoom: 17,
+          attribution: 'Map data: &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, <a href="http://viewfinderpanoramas.org">SRTM</a> | Map style: &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (<a href="https://creativecommons.org/licenses/by-sa/3.0/">CC-BY-SA</a>)' }],
+    OPNVKarte: ['https://tileserver.memomaps.de/tilegen/{z}/{x}/{y}.png', {
+          attribution: 'Map <a href="https://memomaps.de/">memomaps.de</a> <a href="http://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 18}],
+    Stadia_AlidadeSmooth: ['https://tiles.stadiamaps.com/tiles/alidade_smooth/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+          maxZoom: 20 }],
+    Stadia_AlidadeSmoothDark: ['https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+          maxZoom: 20 }],
+    Stadia_OSMBright: ['https://tiles.stadiamaps.com/tiles/osm_bright/{z}/{x}/{y}{r}.png', {
+          attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors',
+	        maxZoom: 20 }],
+    Stadia_Outdoors: ['https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png', {
+          maxZoom: 20,
+          attribution: '&copy; <a href="https://stadiamaps.com/">Stadia Maps</a>, &copy; <a href="https://openmaptiles.org/">OpenMapTiles</a> &copy; <a href="http://openstreetmap.org">OpenStreetMap</a> contributors' }],
+    Stamen_Terrain: ['https://stamen-tiles-{s}.a.ssl.fastly.net/terrain/{z}/{x}/{y}{r}.{ext}', {
+	        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          subdomains: 'abcd',
+          minZoom: 0,
+          maxZoom: 18,
+          ext: 'png' }],
+    Stamen_TerrainBackground: ['https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-background/{z}/{x}/{y}{r}.{ext}', {
+          attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          subdomains: 'abcd',
+          minZoom: 0,
+          maxZoom: 18,
+          ext: 'png' }],
+    Stamen_TerrainLabels: ['https://stamen-tiles-{s}.a.ssl.fastly.net/terrain-labels/{z}/{x}/{y}{r}.{ext}', {
+          attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          subdomains: 'abcd',
+          minZoom: 0,
+          maxZoom: 18,
+          ext: 'png' }],
+    Stamen_Toner: ['https://stamen-tiles-{s}.a.ssl.fastly.net/toner/{z}/{x}/{y}{r}.{ext}', {
+	        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	        subdomains: 'abcd',
+	        minZoom: 0,
+	        maxZoom: 20,
+	        ext: 'png' }],
+    Stamen_TonerBackground : ['https://stamen-tiles-{s}.a.ssl.fastly.net/toner-background/{z}/{x}/{y}{r}.{ext}', {
+	        attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+	        subdomains: 'abcd',
+	        minZoom: 0,
+	        maxZoom: 20,
+	        ext: 'png' }],
+    Stamen_TonerLite: ['https://stamen-tiles-{s}.a.ssl.fastly.net/toner-lite/{z}/{x}/{y}{r}.{ext}', {
+          attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          subdomains: 'abcd',
+          minZoom: 0,
+          maxZoom: 20,
+          ext: 'png' }],
+    Stamen_Watercolor: ['https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
+          subdomains: 'abcd',
+          minZoom: 1,
+          maxZoom: 16,
+          ext: 'jpg',
+          attribution: 'Map tiles by <a href="http://stamen.com">Stamen Design</a>, <a href="http://creativecommons.org/licenses/by/3.0">CC BY 3.0</a> &mdash; Map data &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors' }],
+    USGS_USTopo : ['https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/tile/{z}/{y}/{x}', {
+	        maxZoom: 20,
+	        attribution: 'Tiles courtesy of the <a href="https://usgs.gov/">U.S. Geological Survey</a>'}],
+    USGS_USImagery: ['https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryOnly/MapServer/tile/{z}/{y}/{x}', {
+	        maxZoom: 20,
+	        attribution: 'Tiles courtesy of the <a href="https://usgs.gov/">U.S. Geological Survey</a>'}],
+    USGS_USImageryTopo: ['https://basemap.nationalmap.gov/arcgis/rest/services/USGSImageryTopo/MapServer/tile/{z}/{y}/{x}', {
+	        maxZoom: 20,
+	        attribution: 'Tiles courtesy of the <a href="https://usgs.gov/">U.S. Geological Survey</a>'
+      }],
+  }
+
   const root = ref<HTMLElement | null>(null)
   // const host = computed(() => (root.value?.getRootNode() as any)?.host as HTMLElement)
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
@@ -59,9 +219,12 @@
   const entities = ref<any[]>([])
   const latLngZoom = ref<String>()
   const layerObjs = ref<any[]>([])
+  const layerControl = ref<L.Control.Layers>()
   
   const tileLayers = ref<L.TileLayer[]>()
-  const geoJsonLayers = ref<L.LayerGroup[]>()
+  const geoJSONs = ref<any>()
+
+  // const geoJsonLayers = ref<L.LayerGroup[]>()
 
   const zoom = ref(10) 
   const priorLoc = ref<string>()
@@ -138,35 +301,70 @@
 
   watch(layerObjs, async () => {
     let _layerObjs = await Promise.all(layerObjs.value)
-    console.log(_layerObjs)
-    let locations = _layerObjs.filter(item => item.coords || item.qid)
+    console.log(toRaw(_layerObjs))
 
     let geojsonUrls = _layerObjs
-      .filter(layer => props.preferGeojson && layer.geojson)
-      .map (layer => {
-        if (layer.geojson.indexOf('http') === -1) layer.geojson = `https://raw.githubusercontent.com/${props.base}/${layer.geojson}`
-        return layer
+      .filter(item => item.geojson && item.preferGeojson)
+      .map (item => {
+        if (item.geojson.indexOf('http') === -1) item.geojson = `https://raw.githubusercontent.com/${props.base}/${item.geojson}`
+        return item
       })
-      .map(layer => fetch(layer.geojson))
+      .map(item => ({url:item.geojson, item}))
+    let responses = await Promise.all(geojsonUrls.map(item => fetch(item.url)))
+    let _geoJSONs = await Promise.all(responses.map((resp:any) => resp.json()))
 
-    let responses = await Promise.all(geojsonUrls)
-    let geoJSONs = await Promise.all(responses.map((resp:any) => resp.json()))
+    let geojsonsByLayer: any = {}
+    for (let i = 0; i < geojsonUrls.length; i++) {
+      if (geojsonUrls[i].item.id && /^Q[0-9]+$/.test(geojsonUrls[i].item.id)) {
+        _geoJSONs[i].properties.qid = geojsonUrls[i].item.id
+      } else {
+        _geoJSONs[i].properties = {..._geoJSONs[i].properties, ...geojsonUrls[i].item}
+      }
+      let layerName = geojsonUrls[i].item.layer || 'Default'
+      if (!geojsonsByLayer[layerName]) geojsonsByLayer[layerName] = []
+      geojsonsByLayer[layerName].push(_geoJSONs[i])
+    }
 
-    let _geoJsonLayers = geoJSONs.map(geoJSON => L.geoJSON(geoJSON))
+    let markersByLayer: any = {}
+    _layerObjs
+      .filter(item => !item.geojson || !item.preferGeojson)
+      .forEach(item => {
+        let layerName = item.layer || 'Default'
+        if (!markersByLayer[layerName]) markersByLayer[layerName] = []
+        markersByLayer[layerName].push(item)
+      })
 
-    if (locations.length > 0) _geoJsonLayers.push(toGeoJSON(locations))
-    geoJsonLayers.value = _geoJsonLayers
+    _layerObjs.forEach(item => {
+      let layerName = item.layer || 'Default'
+      if (geojsonsByLayer[layerName]) {
+        if (markersByLayer[layerName]) {
+          geojsonsByLayer[layerName].push(toGeoJSON(markersByLayer[layerName]))
+          delete markersByLayer[layerName]
+        }
+      } else {
+        geojsonsByLayer[layerName] = [toGeoJSON(markersByLayer[layerName])]
+        delete markersByLayer[layerName]
+      }
+    })
+
+    // console.log(geojsonsByLayer)
+
+    geoJSONs.value = geojsonsByLayer
     
-    tileLayers.value = _layerObjs.filter(ls => ls.allmaps).map(ls =>  
-      L.tileLayer(`https://allmaps.xyz/maps/${ls.allmaps}/{z}/{x}/{y}.png`, {
-        maxZoom: 19, 
-        attribution: 'Allmaps'
-      }))
+    tileLayers.value = _layerObjs
+      .filter(ls => ls.allmaps)
+      .map(ls =>  
+        L.tileLayer(`https://allmaps.xyz/maps/${ls.allmaps}/{z}/{x}/{y}.png`, {
+          maxZoom: 19, 
+          attribution: 'Allmaps'
+        })
+      )
   })
 
-  watch(tileLayers, () => updateMap())
-  watch(geoJsonLayers, () => updateMap())
-  watch(map, () => updateMap())
+  // watch(tileLayers, () => updateMap())
+  // watch(geoJsonLayers, () => updateMap())
+  // watch(map, () => updateMap())
+  watch(geoJSONs, () => updateMap())
 
   function init() {
     if (initialized.value) return
@@ -248,18 +446,26 @@
     }
     let mapEl = shadowRoot.value?.querySelector('#map') as HTMLElement
     if (mapEl) {
-      map.value = L.map(mapEl, {
-      preferCanvas: false,
-      zoomSnap: 0.1,
-      center, 
-      zoom: zoom.value,
-      scrollWheelZoom: false,
-      layers: [
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          maxZoom: 19, attribution: '© OpenStreetMap'
-        })
-      ]
+      let _basemaps = props.basemaps.split(',').map(name => {
+        let [url, options] = baseMapsConfigs[name]
+        return [name.replace(/_/,' '), L.tileLayer(url, options)]
       })
+      let layers = 
+      map.value = L.map(mapEl, {
+        preferCanvas: false,
+        zoomSnap: 0.1,
+        center, 
+        zoom: zoom.value,
+        zoomAnimation: true,
+        scrollWheelZoom: false,
+        layers: [_basemaps[0][1] as L.Layer]
+      })
+
+      let overlayMaps: any = {}
+      // if (geoJsonLayers.value) overlayMaps['Markers'] = geoJsonLayers.value[0]
+
+      layerControl.value = L.control.layers(Object.fromEntries(_basemaps), overlayMaps).addTo(map.value)
+    
       map.value.on('click', (e) => {
         getLatLngZoom(e)
         gotoPriorLoc()
@@ -269,6 +475,15 @@
         if (flyto.value) flyto.value.layer.openPopup()
       })
       map.value.on('moveend', (e) => getLatLngZoom(e as L.LeafletMouseEvent))
+      map.value.on('layeradd', e => {
+        if ((e.layer as any).feature) {
+          let geoJSON = e.layer as L.GeoJSON
+          if (geoJSON.feature?.type == 'Feature' && geoJSON.feature?.properties.qid) {
+            geoJSON.feature
+          }
+        }
+        // if (layer.feature?.properties.qid) {}
+      })
       latLngZoom.value = `${Number((center.lat).toFixed(5))},${Number((center.lng).toFixed(5))} ${zoom.value}`
       priorLoc.value = `${Number((center.lat).toFixed(5))},${Number((center.lng).toFixed(5))},${zoom.value}`
     }
@@ -283,17 +498,112 @@
     return resp
   }
 
+  function toGeoJSONLayer(data:any) {
+    return L.geoJSON(data, {
+      pointToLayer: (feature, _latlng) => {
+        const _props = feature.properties
+        let iconOptions:any = {...markerIconTemplate}
+        if (feature.properties.icon) iconOptions.iconUrl = feature.properties.icon
+        if (feature.properties.shadowUrl)  iconOptions.shadowUrl = feature.properties.shadowUrl
+        if (feature.properties.iconRetinaUrl)  iconOptions.iconRetinaUrl = feature.properties.iconRetinaUrl
+
+        if (_props['markerType'] === 'circle') {
+          return L.circleMarker(_latlng, { radius: _props.radius || 4 })
+        } else {
+          // return makeMarker(latLng, _props)
+          return L.marker(_latlng, { icon: new L.Icon(iconOptions) })
+        }
+      },
+      onEachFeature: async (feature, layer) => {
+        let fg: L.GeoJSON = layer as L.GeoJSON
+        if (!feature.properties.coords && fg.feature?.bbox) {
+            let center = fg.getBounds().getCenter()
+            feature.properties.coords = `${center.lat},${center.lng}`
+          }
+        if (feature.properties.qid) {
+          let entityData = await getEntity(feature.properties.qid)
+          feature.properties.entityData = entityData
+          let serializedEntityData = JSON.stringify(entityData).replace(/"/g, '&quot;')
+          let html = `<ve-info-card data="${serializedEntityData}" style="width:100%;"></ve-info-card>`
+          layer.bindPopup(html)
+        } else {
+          let featureData = JSON.stringify(feature.properties).replace(/"/g, '&quot;')
+          let html = `<ve-info-card data="${featureData}" style="width:100%;"></ve-info-card>`
+          layer.bindPopup(html)
+        }
+
+        layer.on('mouseover', () => layer.openPopup())
+        
+        layer.on('mouseout', () => layer.closePopup())
+      
+        layer.on('click', () => {
+          if (zoomed.value) {
+            layer.closePopup()
+          } else {
+            let fg: L.GeoJSON = layer as L.GeoJSON
+            layer.openPopup()
+            flytoLocation(feature.properties.coords)
+          }
+        })
+      },
+      style: (feature) => {
+        const _props = feature?.properties
+        console.log(toRaw(_props))
+        const _geometry = feature?.geometry.type
+        for (let [prop, value] of Object.entries(_props)) {
+          if (value === 'null') _props[prop] = null
+        }
+        const style = {
+          color: _props.color || '#FB683F',
+          weight: _props.weight || (_geometry === 'Polygon' || _geometry === 'MultiPolygon' ? 0 : 4),
+          opacity: _props.opacity || 1,                  
+          fillColor: _props.fillColor || '#32C125',
+          fillOpacity: _props.fillOpacity || 0.5,
+        }
+        return style
+      }
+    })
+  }
+
+  function makeMarker(_latlng:any, _props:any) {
+    // const faIcon = iconMap[props['marker-symbol']] || props['marker-symbol'] || 'circle'
+    return L.marker(_latlng, {
+      /*
+      icon: L.icon.fontAwesome({
+        iconClasses: `fa fa-${faIcon}`, // you _could_ add other icon classes, not tested.
+        markerColor: _props['marker-color'] || _props['fill'] || '#2C84CB',
+        markerFillOpacity: _props['opacity'] || 1,
+        markerStrokeColor: _props['stroke'] || _props['marker-color']|| _props['fill'] || '#2C84CB',
+        markerStrokeWidth: _props['stroke-width'] || 0,
+        iconColor: _props['marker-symbol-color'] || '#FFF',
+        iconXOffset: _props['marker-symbol-xoffset'] || 0,
+        iconYOffset: _props['marker-symbol-yoffset'] || 0,
+      }),
+      */
+      // id: _props.qid
+    })
+  }
+
   function updateMap() {
     if (map.value) {
       tileLayers.value?.forEach(layer => {
         map.value?.addLayer(layer)
         layer.setOpacity(1)
       })
-      geoJsonLayers.value?.forEach(layer => map.value?.addLayer(layer))
+
+      Object.keys(geoJSONs.value).forEach(layerName => {
+        let layerGroup = new L.LayerGroup()
+        geoJSONs.value[layerName].forEach((data:any) => {   
+          let geoJSONLayer = toGeoJSONLayer(data)
+          layerGroup.addLayer(geoJSONLayer)
+        })
+        map.value?.addLayer(layerGroup)
+        if (layerControl.value) layerControl.value.addOverlay(layerGroup, layerName)
+      })
     }
   }
 
-  function toGeoJSON(locations:any[]): L.GeoJSON {
+  function toGeoJSON(locations:any[]):any {
     const data: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
     locations.filter(location => location.coords)
       .forEach(location => {
@@ -305,7 +615,7 @@
         })
       })
 
-  
+    /*
     const geoJSON = L.geoJSON(data, {
       pointToLayer: (feature, latlng) => {
         let iconOptions:any = {...markerIconTemplate}
@@ -337,20 +647,22 @@
     })
     
     return geoJSON
+    */
+    return data
   }
   
   async function getLayerStrings() {
     let _layerObjs = Array.from(host.value.querySelectorAll('li')).map((item:any) => toObj(item.firstChild?.textContent))
-    console.log(props)
     if (props.marker && props.center) {
-      let coords = isQID(props.center)
-        ? (await getEntity(props.center)).coords
-        : props.center
-      _layerObjs.push(Promise.resolve({coords, zoom: props.zoom || 10}))
+      if (isQID(props.center)) {
+        let entity = await getEntity(props.center)
+        _layerObjs.push(Promise.resolve(entityToInfoObj(entity)))
+      } else {
+        _layerObjs.push(Promise.resolve({coords: props.center, zoom: props.zoom || 10}))
+      }
     }
     // layerObjs.value = _layerObjs
     layerObjs.value = [...layerObjs.value, ..._layerObjs]
-    console.log(layerObjs.value)
   }
 
   function listenForSlotChanges() {
@@ -390,7 +702,6 @@
   }
 
   function manifestToInfoObj(manifest:any, id:string) {
-    // console.log(manifest)
     let obj:any = {id}
     let metadata = metadataAsObj(manifest)
     if (metadata.location) obj.coords = metadata.location[0]
@@ -401,8 +712,8 @@
     return obj
   }
 
-  function entityToInfoObj(entity:any, id:string) {
-    let obj:any = {id}
+  function entityToInfoObj(entity:any, id:string='') {
+    let obj:any = {id: id || entity.id}
     if (entity.coords) obj.coords = entity.coords
     if (entity.geojson) obj.geojson = entity.geojson
     if (entity.label) obj.label = entity.label
@@ -420,8 +731,9 @@
       let token = tokens[i]
       
       if (token.indexOf('=') > 0) {
-        let split = token.split('=')
-        obj[split[0]] = split[1]
+        let [key, value] = token.split('=')
+        value = '"' && value[value.length-1] === '"' ? value.slice(1,-1) : value
+        obj[key] = value
       
       } else if (isZoom(token)) {
         obj.zoom = parseInt(token)
@@ -435,19 +747,23 @@
         let entity = await getEntity(token)
         obj = {...entityToInfoObj(entity, token), ...obj}
       
+      } else if (geoJsonRegex.test(token)) {
+        obj.geojson = token
+
       } else if (iiifRegex.test(token)) {
         let manifest = await getManifest(token)
         obj = {...manifestToInfoObj(manifest, token), ...obj}
-      
-      } else if (geoJsonRegex.test(token)) {
-        obj.geojson = token
-      
+
+      } else if (token === 'prefer-geojson') {
+        obj.preferGeojson = true
+
       } else {
         let text = token[0] === '"' && token[token.length-1] === '"' ? token.slice(1,-1) : token
         if (obj.label) obj.description = text
         else obj.label = text
       }
     }
+    obj.preferGeojson = ((obj.preferGeojson || props.preferGeojson) && obj.geojson ) || (obj.geojson && !obj.coords)
     return obj
   }
 
@@ -483,7 +799,7 @@
 
     let layer:any
     map.value?.eachLayer((_layer:any) => {
-      if (_layer?.feature?.properties?.id === id) layer = _layer
+      if (_layer?.feature?.properties?.id === id || _layer?.feature?.properties?.coords === id) layer = _layer
     })
     if (!layer) map.value?.eachLayer((_layer:any) => layer = _layer)
     return {id, zoom, layer}
@@ -537,7 +853,6 @@
             let attr = el.attributes.getNamedItem(currentClassState ? 'enter' : 'exit')
             if (attr) {
               const [action, ...rest] = attr.value.split(':')
-              // console.log(`action=${action} arg=${rest.join(':')}`)
               if (action === 'flyto') flytoLocation(rest.join(':'), true)
               if (attr.name === 'exit') gotoPriorLoc()
             }
@@ -564,6 +879,7 @@
   }
 
   async function flytoLocation(arg: string, force=false) {
+    // console.log('flyToLocation', arg)
     flyto.value = parseFlytoArg(arg)
     if (flyto.value.layer) {
       if (flyto.value.id === zoomed.value && !force) {
@@ -571,6 +887,7 @@
         gotoPriorLoc()
       } else {
         zoomed.value = flyto.value.id
+
         if (flyto.value.layer.feature?.properties) {
           let center = latLng(flyto.value.layer.feature.properties.coords)
           map.value?.flyTo(center, flyto.value.zoom)
@@ -728,4 +1045,8 @@
     margin: 0;
   }
 
+  .leaflet-control-layers-toggle {
+    background-image: url(https://unpkg.com/leaflet@1.9.3/dist/images/layers.png)
+  }
+  
 </style>

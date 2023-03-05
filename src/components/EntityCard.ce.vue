@@ -138,7 +138,7 @@
     height: 100%;
     object-fit: cover;
     background-repeat: no-repeat;
-    background-size: cover;
+    background-size: contain;
     background-position: center;
   }
 

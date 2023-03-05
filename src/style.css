@@ -3,6 +3,7 @@
 .ve-component {
   /* clear: both; */
   z-index: 2;
+  position: relative;
 }
 
 ve-media-card {
@@ -172,6 +173,11 @@ section.no-offset:target:before {
   display: none;
 }
 
+#juncture section.footnote {
+  font-size: 80%;
+  margin-top: 1rem;
+}
+
 .ve-component.sticky + div.footnote, 
 .ve-component.sticky ~ div.footnote {
   width: 100%;
@@ -207,6 +213,10 @@ section.no-offset:target:before {
 
 /* Larger Devices */
 @media (min-width: 481px) {
+
+  body {
+    margin: 0 2rem;
+  }
 
   #juncture {
     font-size: 1.3rem;
