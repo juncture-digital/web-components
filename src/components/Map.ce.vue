@@ -3,7 +3,6 @@
 <div ref="root" :style="{width: '100%', height: '100%'}">
   <div class="content">
     <div id="lat-lng-zoom" v-html="latLngZoom" @click="copyTextToClipboard(`${latLngZoom}`)"></div>
-    <sl-range id="opacity-slider" value="1" min="0" max="1" step="0.01" tooltip="none" :style="{display: tileLayers && tileLayers.length > 0 ? 'block' : 'none'}"></sl-range>
     <div id="map"></div>
     <div v-if="caption" id="caption" v-html="caption"></div>
   </div>
@@ -14,11 +13,11 @@
 <script setup lang="ts">
 
   import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
-  import L, { LatLng, TileLayer } from 'leaflet'
-  import { isQID, getEntity, getManifest, metadataAsObj, isMobile, makeSticky } from '../utils'
+  import L, { LatLng } from 'leaflet'
+  import '../leaflet-opacity.js'
+
+  import { isQID, getEntity, getManifest, kebabToCamel, metadataAsObj, isMobile, makeSticky } from '../utils'
   import '@shoelace-style/shoelace/dist/components/range/range.js'
-  import type SLRange from '@shoelace-style/shoelace/dist/components/range/range.js'
-import { objectToString } from '@vue/shared'
 
   const markerIconTemplate = {
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-icon.png',
@@ -45,6 +44,7 @@ import { objectToString } from '@vue/shared'
     right: { type: Boolean },
     entities: { type: String },
     preferGeojson: { type: Boolean },
+    popupOnHover: { type: Boolean },
     cards: { type: String },
     base: { type: String }
   })
@@ -215,13 +215,12 @@ import { objectToString } from '@vue/shared'
   const content = computed(() => shadowRoot.value?.querySelector('.content') as HTMLElement)
 
   const map = ref<L.Map>() 
-  const opacitySlider = ref<SLRange>() 
   const entities = ref<any[]>([])
   const latLngZoom = ref<String>()
   const layerObjs = ref<any[]>([])
   const layerControl = ref<L.Control.Layers>()
   
-  const tileLayers = ref<L.TileLayer[]>()
+  const tileLayers = ref<any[]>()
   const geoJSONs = ref<any>()
 
   // const geoJsonLayers = ref<L.LayerGroup[]>()
@@ -316,49 +315,55 @@ import { objectToString } from '@vue/shared'
     let geojsonsByLayer: any = {}
     for (let i = 0; i < geojsonUrls.length; i++) {
       if (geojsonUrls[i].item.id && /^Q[0-9]+$/.test(geojsonUrls[i].item.id)) {
-        _geoJSONs[i].properties.qid = geojsonUrls[i].item.id
-      } else {
-        _geoJSONs[i].properties = {..._geoJSONs[i].properties, ...geojsonUrls[i].item}
+        geojsonUrls[i].item.qid = geojsonUrls[i].item.id
+        delete geojsonUrls[i].item.id
       }
-      let layerName = geojsonUrls[i].item.layer || 'Default'
+      _geoJSONs[i].properties = {..._geoJSONs[i].properties, ...geojsonUrls[i].item}
+      let layerName = geojsonUrls[i].item.layer || 'Markers'
       if (!geojsonsByLayer[layerName]) geojsonsByLayer[layerName] = []
       geojsonsByLayer[layerName].push(_geoJSONs[i])
     }
 
     let markersByLayer: any = {}
     _layerObjs
-      .filter(item => !item.geojson || !item.preferGeojson)
+      .filter(item => !item.geojson || !item.preferGeojson )
+      .filter(item => !item.allmaps )
       .forEach(item => {
-        let layerName = item.layer || 'Default'
+        let layerName = item.layer || 'Markers'
         if (!markersByLayer[layerName]) markersByLayer[layerName] = []
         markersByLayer[layerName].push(item)
       })
 
-    _layerObjs.forEach(item => {
-      let layerName = item.layer || 'Default'
-      if (geojsonsByLayer[layerName]) {
-        if (markersByLayer[layerName]) {
-          geojsonsByLayer[layerName].push(toGeoJSON(markersByLayer[layerName]))
+    _layerObjs
+      .filter(item => !item.allmaps )
+      .forEach(item => {
+        let layerName = item.layer || 'Markers'
+        if (geojsonsByLayer[layerName]) {
+          if (markersByLayer[layerName]) {
+            geojsonsByLayer[layerName].push(toGeoJSON(markersByLayer[layerName]))
+            delete markersByLayer[layerName]
+          }
+        } else {
+          geojsonsByLayer[layerName] = [toGeoJSON(markersByLayer[layerName])]
           delete markersByLayer[layerName]
         }
-      } else {
-        geojsonsByLayer[layerName] = [toGeoJSON(markersByLayer[layerName])]
-        delete markersByLayer[layerName]
-      }
-    })
+      })
 
-    // console.log(geojsonsByLayer)
+    console.log(geojsonsByLayer)
 
     geoJSONs.value = geojsonsByLayer
     
     tileLayers.value = _layerObjs
       .filter(ls => ls.allmaps)
-      .map(ls =>  
-        L.tileLayer(`https://allmaps.xyz/maps/${ls.allmaps}/{z}/{x}/{y}.png`, {
-          maxZoom: 19, 
-          attribution: 'Allmaps'
+      .map(ls => ({
+          name: ls.layer || 'Allmaps',
+          layer:  L.tileLayer(`https://allmaps.xyz/maps/${ls.allmaps}/{z}/{x}/{y}.png`, {
+            maxZoom: 19, 
+            attribution: '<a href="https://allmaps.org">Allmaps</a>',
+          })
         })
       )
+
   })
 
   // watch(tileLayers, () => updateMap())
@@ -369,7 +374,6 @@ import { objectToString } from '@vue/shared'
   function init() {
     if (initialized.value) return
     initialized.value = true
-    addOpacitySlider()
 
     entities.value = props.entities ? props.entities.split(/\s+/).filter(qid => qid) : []
     if (props.cards) {
@@ -399,23 +403,6 @@ import { objectToString } from '@vue/shared'
     if (mapEl) resizeObserver.observe(mapEl)
     initMap()
     addInteractionHandlers()
-  }
-
-  function addOpacitySlider() {
-    if (!opacitySlider.value) {
-      opacitySlider.value = shadowRoot.value?.querySelector('sl-range') as SLRange
-      opacitySlider.value.addEventListener('sl-input', (evt) => {
-        evt.stopPropagation()
-        evt.preventDefault()
-        let _map: L.Map = map.value as L.Map
-        _map.eachLayer((layer:any) => {
-          if (layer.options.attribution === 'Allmaps') {
-            // console.log(opacitySlider.value?.value)
-            layer.setOpacity(opacitySlider.value?.value)
-          }
-        })
-      })
-    }
   }
 
   async function initMap() {
@@ -450,7 +437,6 @@ import { objectToString } from '@vue/shared'
         let [url, options] = baseMapsConfigs[name]
         return [name.replace(/_/,' '), L.tileLayer(url, options)]
       })
-      let layers = 
       map.value = L.map(mapEl, {
         preferCanvas: false,
         zoomSnap: 0.1,
@@ -465,7 +451,7 @@ import { objectToString } from '@vue/shared'
       // if (geoJsonLayers.value) overlayMaps['Markers'] = geoJsonLayers.value[0]
 
       layerControl.value = L.control.layers(Object.fromEntries(_basemaps), overlayMaps).addTo(map.value)
-    
+
       map.value.on('click', (e) => {
         getLatLngZoom(e)
         gotoPriorLoc()
@@ -532,23 +518,24 @@ import { objectToString } from '@vue/shared'
           layer.bindPopup(html)
         }
 
-        layer.on('mouseover', () => layer.openPopup())
-        
-        layer.on('mouseout', () => layer.closePopup())
+        if (props.popupOnHover) {
+          layer.on('mouseover', () => layer.openPopup())
+          layer.on('mouseout', () => layer.closePopup())
+        }
       
         layer.on('click', () => {
           if (zoomed.value) {
             layer.closePopup()
+            zoomed.value = undefined
           } else {
-            let fg: L.GeoJSON = layer as L.GeoJSON
             layer.openPopup()
-            flytoLocation(feature.properties.coords)
+            zoomed.value = {}
+            // flytoLocation(feature.properties.coords)
           }
         })
       },
       style: (feature) => {
         const _props = feature?.properties
-        console.log(toRaw(_props))
         const _geometry = feature?.geometry.type
         for (let [prop, value] of Object.entries(_props)) {
           if (value === 'null') _props[prop] = null
@@ -586,21 +573,39 @@ import { objectToString } from '@vue/shared'
 
   function updateMap() {
     if (map.value) {
-      tileLayers.value?.forEach(layer => {
-        map.value?.addLayer(layer)
-        layer.setOpacity(1)
-      })
 
+  
       Object.keys(geoJSONs.value).forEach(layerName => {
-        let layerGroup = new L.LayerGroup()
-        geoJSONs.value[layerName].forEach((data:any) => {   
+        let layerGroup: any = new L.LayerGroup()
+        let isDisabled = false
+        geoJSONs.value[layerName].forEach((data:any) => {
+          console.log(layerName, data)
           let geoJSONLayer = toGeoJSONLayer(data)
           layerGroup.addLayer(geoJSONLayer)
+          if (data.properties?.disabled) isDisabled = true
         })
-        map.value?.addLayer(layerGroup)
+        if (!isDisabled) map.value?.addLayer(layerGroup)
         if (layerControl.value) layerControl.value.addOverlay(layerGroup, layerName)
       })
+
+      let opacityLayers: any = {}
+      console.log(tileLayers.value)
+      tileLayers.value?.forEach(item => {
+        if (layerControl.value) layerControl.value.addOverlay(item.layer, item.name)
+        map.value?.addLayer(item.layer)
+        opacityLayers[item.name] = item.layer
+      })
+       
+      if (Object.keys(opacityLayers).length > 0) {
+        (L.control as any).opacity(opacityLayers, {
+          label: null,
+          collapsed: true,
+          position: 'topright' // topleft or topright or bottomleft or bottomright
+        }).addTo(map.value)
+      }
+  
     }
+
   }
 
   function toGeoJSON(locations:any[]):any {
@@ -727,6 +732,7 @@ import { objectToString } from '@vue/shared'
     let geoJsonRegex = /\.(geo)?json$/i
     let iiifRegex = /^[a-z0-9\-]+:.+/
     let obj:any = {}
+    let booleans = new Set(['disabled', 'prefer-geojson'])
     for (let i = 0; i < tokens.length; i++) {
       let token = tokens[i]
       
@@ -754,8 +760,8 @@ import { objectToString } from '@vue/shared'
         let manifest = await getManifest(token)
         obj = {...manifestToInfoObj(manifest, token), ...obj}
 
-      } else if (token === 'prefer-geojson') {
-        obj.preferGeojson = true
+      } else if (booleans.has(token)) {
+        obj[kebabToCamel(token)] = true
 
       } else {
         let text = token[0] === '"' && token[token.length-1] === '"' ? token.slice(1,-1) : token
@@ -827,15 +833,18 @@ import { objectToString } from '@vue/shared'
             let flytoArg = match?.value
             mark.classList.add(match.name)
             mark.addEventListener('click', () => flytoLocation(flytoArg))
-            mark.addEventListener('mouseover', () => {
-              let layer = parseFlytoArg(flytoArg).layer
-              layer.openPopup()
-              if (isMobile()) setTimeout(() => layer.closePopup(), 2000)
-            })
-            mark.addEventListener('mouseleave', () => {
-              flyto.value = parseFlytoArg(flytoArg)
-              if (flyto.value.id !== zoomed.value) flyto.value.layer?.closePopup()
-            })          
+            
+            if (props.popupOnHover) {
+              mark.addEventListener('mouseover', () => {
+                let layer = parseFlytoArg(flytoArg).layer
+                layer.openPopup()
+                if (isMobile()) setTimeout(() => layer.closePopup(), 2000)
+              })
+              mark.addEventListener('mouseleave', () => {
+                flyto.value = parseFlytoArg(flytoArg)
+                if (flyto.value.id !== zoomed.value) flyto.value.layer?.closePopup()
+              })
+            }      
           }
         }
       })
@@ -914,6 +923,7 @@ import { objectToString } from '@vue/shared'
 <style>
 
   @import 'leaflet/dist/leaflet.css';
+  @import 'leaflet.control.opacity/dist/L.Control.Opacity.css';
 
   * { box-sizing: border-box; }
 
@@ -949,21 +959,6 @@ import { objectToString } from '@vue/shared'
     padding: 4px 6px;
     bottom: 0;
     height: 32px;
-  }
-
-  #opacity-slider {
-    position: absolute;
-    bottom: 15px;
-    left: 15px;
-    width: 33%;
-    z-index: 1000;
-    padding: 3px 6px;
-    border-radius: 6px;
-  }
-
-  #opacity-slider:hover {
-    /* background-color: rgba(255, 255, 255, 0.8); */
-
   }
 
   #lat-lng-zoom {

@@ -15,6 +15,9 @@ export function isMobile() {
   return _isMobile
 }
 
+export function camelToKebab(input:string) { return input.replace(/([a-z])([A-Z])/g, '$1-$2').toLowerCase()}
+export function kebabToCamel(input:string) { return input.replace(/-([a-z])/g, function (g) {return g[1].toUpperCase()})}
+
 export function isTouchEnabled() {
   return ( 'ontouchstart' in window ) ||
          ( navigator.maxTouchPoints > 0 ) ||
