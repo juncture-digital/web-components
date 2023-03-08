@@ -2,7 +2,7 @@
 
   <div ref="root" id="main">
 
-    <sl-details v-if="collapsible" class="custom-icons" :open="props.open" draggable="true" @dragstart="onDrag">
+    <sl-details v-if="collapsible" class="custom-icons" :open="props.open" :draggable="!props.disableDrag" @dragstart="onDrag">
       
       <sl-icon name="plus-square" slot="expand-icon"></sl-icon>
       <sl-icon name="dash-square" slot="collapse-icon"></sl-icon>
@@ -29,7 +29,7 @@
           <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
         </sl-tab-panel>
         <sl-tab-panel name="preview">
-          <div id="juncture" style="position:relative;" v-if="active === 'preview' && html" v-html="html" draggable="true" @dragstart="onDrag"></div>
+          <div id="juncture" style="position:relative;" v-if="active === 'preview' && html" v-html="html" :draggable="!props.disableDrag" @dragstart="onDrag"></div>
         </sl-tab-panel>
       </sl-tab-group>
 
@@ -46,7 +46,7 @@
         <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
       </sl-tab-panel>
       <sl-tab-panel name="preview">
-        <div id="juncture" style="position:relative;" v-if="active === 'preview' && html" v-html="html" :draggable="!disableDrag" @dragstart="onDrag"></div>
+        <div id="juncture" style="position:relative;" v-if="active === 'preview' && html" v-html="html" :draggable="!props.disableDrag" @dragstart="onDrag"></div>
       </sl-tab-panel>
     </sl-tab-group>
 

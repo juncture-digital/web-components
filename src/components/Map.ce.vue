@@ -46,6 +46,7 @@
     preferGeojson: { type: Boolean },
     popupOnHover: { type: Boolean },
     zoomOnClick: { type: Boolean },
+    scrollWheelZoom: { type: Boolean },
     cards: { type: String },
     base: { type: String }
   })
@@ -234,7 +235,7 @@
 
   const flyto = ref()
 
-  watch(host, () => nextTick(() => doLayout()))
+  watch(host, () => doLayout())
 
   onMounted(() => {
     evalProps()
@@ -256,7 +257,7 @@
 
     if (props.sticky) makeSticky(host.value)
 
-    content.value.style.width = props.width || '100%'
+    content.value.style.width = isMobile() ? '100%' : props.width || '100%'
     nextTick(() => {
       let width = parseInt(window.getComputedStyle(content.value).width.slice(0,-2))
       let height = width
@@ -319,7 +320,7 @@
         delete geojsonUrls[i].item.id
       }
       _geoJSONs[i].properties = {..._geoJSONs[i].properties, ...geojsonUrls[i].item}
-      let layerName = geojsonUrls[i].item.layer || 'Markers'
+      let layerName = geojsonUrls[i].item.layer || 'Locations'
       if (!geojsonsByLayer[layerName]) geojsonsByLayer[layerName] = []
       geojsonsByLayer[layerName].push(_geoJSONs[i])
     }
@@ -329,7 +330,7 @@
       .filter(item => !item.geojson || !item.preferGeojson )
       .filter(item => !item.allmaps )
       .forEach(item => {
-        let layerName = item.layer || 'Markers'
+        let layerName = item.layer || 'Locations'
         if (!markersByLayer[layerName]) markersByLayer[layerName] = []
         markersByLayer[layerName].push(item)
       })
@@ -337,7 +338,7 @@
     _layerObjs
       .filter(item => !item.allmaps )
       .forEach(item => {
-        let layerName = item.layer || 'Markers'
+        let layerName = item.layer || 'Locations'
         if (geojsonsByLayer[layerName]) {
           if (markersByLayer[layerName]) {
             geojsonsByLayer[layerName].push(toGeoJSON(markersByLayer[layerName]))
@@ -349,14 +350,13 @@
         }
       })
 
-    // console.log(geojsonsByLayer)
+    console.log(geojsonsByLayer)
 
-    geoJSONs.value = geojsonsByLayer
     
     tileLayers.value = _layerObjs
       .filter(ls => ls.allmaps)
       .map(ls => ({
-          name: ls.layer || 'Allmaps',
+          name: ls.layer || 'Image layer',
           disabled: ls.disabled,
           layer:  L.tileLayer(`https://allmaps.xyz/maps/${ls.allmaps}/{z}/{x}/{y}.png`, {
             maxZoom: 19, 
@@ -365,12 +365,12 @@
         })
       )
 
+      geoJSONs.value = geojsonsByLayer
   })
 
-  // watch(tileLayers, () => updateMap())
-  // watch(geoJsonLayers, () => updateMap())
-  // watch(map, () => updateMap())
+  watch(tileLayers, () => updateMap())
   watch(geoJSONs, () => updateMap())
+  watch(map, () => updateMap())
 
   function init() {
     if (initialized.value) return
@@ -402,7 +402,7 @@
     const resizeObserver = new ResizeObserver(() => initMap())
     let mapEl = shadowRoot.value?.querySelector('#map')
     if (mapEl) resizeObserver.observe(mapEl)
-    initMap()
+    // initMap()
     addInteractionHandlers()
   }
 
@@ -430,11 +430,11 @@
       let mapEl = shadowRoot.value?.querySelector('#map') as HTMLElement
       let newMapEl = document.createElement('div')
       newMapEl.id = 'map'
-      mapEl.replaceWith(newMapEl)
+      mapEl?.replaceWith(newMapEl)
     }
     let mapEl = shadowRoot.value?.querySelector('#map') as HTMLElement
-    mapEl.style.cursor = 'default'
     if (mapEl) {
+      mapEl.style.cursor = 'default'
       let _basemaps = props.basemaps.split(',').map(name => {
         let [url, options] = baseMapsConfigs[name]
         return [name.replace(/_/,' '), L.tileLayer(url, options)]
@@ -445,7 +445,7 @@
         center, 
         zoom: zoom.value,
         zoomAnimation: true,
-        scrollWheelZoom: false,
+        scrollWheelZoom: props.scrollWheelZoom,
         layers: [_basemaps[0][1] as L.Layer]
       })
 
@@ -507,9 +507,11 @@
       onEachFeature: async (feature, layer) => {
         let fg: L.GeoJSON = layer as L.GeoJSON
         if (!feature.properties.coords && fg.feature?.bbox) {
-            let center = fg.getBounds().getCenter()
-            feature.properties.coords = `${center.lat},${center.lng}`
-          }
+          let center = fg.getBounds().getCenter()
+          feature.properties.coords = `${center.lat},${center.lng}`
+        }
+
+        // Bind popup
         if (feature.properties.qid) {
           let entityData = await getEntity(feature.properties.qid)
           feature.properties.entityData = entityData
@@ -575,19 +577,23 @@
     })
   }
 
+  let mapUpdated = false
   function updateMap() {
-    if (map.value) {
-
-      let geosonLayers = Object.keys(geoJSONs.value || {})
+    if (map.value && geoJSONs.value && tileLayers.value && !mapUpdated) {
+      mapUpdated = true
+      let geoJsonLayers = Object.keys(geoJSONs.value || {})
       let numTileLayers = tileLayers.value ? tileLayers.value.length : 0
+
+      // console.log(`updateMap: geoJsonLayers=${geoJsonLayers.length} tileLayers=${numTileLayers}`)
+
       if (!layerControl.value && (
-            (geosonLayers.length > 1 || geosonLayers.length === 1 && geosonLayers[0] !== 'Markers') ||
+            (geoJsonLayers.length > 1 || geoJsonLayers.length === 1 && geoJsonLayers[0] !== 'Locations') ||
             numTileLayers > 0
         )) {
         layerControl.value = L.control.layers(Object.fromEntries([]), {}).addTo(map.value)
       }
 
-      Object.keys(geoJSONs.value).forEach(layerName => {
+      Object.keys(geoJSONs.value || {}).forEach(layerName => {
         let layerGroup: any = new L.LayerGroup()
         let isDisabled = false
         geoJSONs.value[layerName].forEach((data:any) => {
@@ -595,7 +601,9 @@
           layerGroup.addLayer(geoJSONLayer)
           if (data.properties?.disabled) isDisabled = true
         })
-        if (!isDisabled) map.value?.addLayer(layerGroup)
+        if (!isDisabled) {
+          map.value?.addLayer(layerGroup)
+        }
         if (layerControl.value) layerControl.value.addOverlay(layerGroup, layerName)
       })
 
@@ -603,7 +611,7 @@
       tileLayers.value?.forEach(item => {
         if (layerControl.value) layerControl.value.addOverlay(item.layer, item.name)
         if (!item.disabled) map.value?.addLayer(item.layer)
-        opacityLayers[item.name] = item.layer
+       opacityLayers[item.name] = item.layer
       })
        
       if (Object.keys(opacityLayers).length > 0) {
@@ -629,40 +637,6 @@
           geometry: { type: 'Point', coordinates: [lng, lat] }
         })
       })
-
-    /*
-    const geoJSON = L.geoJSON(data, {
-      pointToLayer: (feature, latlng) => {
-        let iconOptions:any = {...markerIconTemplate}
-        if (feature.properties.icon) iconOptions.iconUrl = feature.properties.icon
-        if (feature.properties.shadowUrl)  iconOptions.shadowUrl = feature.properties.shadowUrl
-        if (feature.properties.iconRetinaUrl)  iconOptions.iconRetinaUrl = feature.properties.iconRetinaUrl
-        return L.marker(latlng, { icon: new L.Icon(iconOptions) })
-      },
-      onEachFeature: (feature, layer) => {
-        let data = JSON.stringify(feature.properties).replace(/"/g, '&quot;')
-        let html = `<ve-info-card data="${data}" style="width:100%;"></ve-info-card>`
-        layer.bindPopup(html)
-        layer.on('mouseover', () => layer.openPopup())
-        layer.on('mouseout', () => {
-          let layerId = (layer as any).feature.properties.id    
-          if (zoomed.value !== layerId) layer.closePopup()
-        })
-        
-        layer.on('click', () => {
-          if (zoomed.value) {
-            layer.closePopup()
-          } else {
-            layer.openPopup()
-            flytoLocation(feature.properties.id)
-          }
-        })
-
-      }
-    })
-    
-    return geoJSON
-    */
     return data
   }
   
@@ -745,11 +719,22 @@
     let booleans = new Set(['disabled', 'prefer-geojson'])
     for (let i = 0; i < tokens.length; i++) {
       let token = tokens[i]
+      console.log(token)
       
       if (token.indexOf('=') > 0) {
-        let [key, value] = token.split('=')
+        let [key, ...rest] = token.split('=')
+        let value = rest.join('=')
         value = '"' && value[value.length-1] === '"' ? value.slice(1,-1) : value
-        obj[key] = value
+        console.log(value)
+        if (key === 'qid') {
+          let entity = await getEntity(token)
+          obj = {...entityToInfoObj(entity, token), ...obj}          
+        } else if (key === 'iiif') {
+          let manifest = await getManifest(token)
+          obj = {...manifestToInfoObj(manifest, token), ...obj}
+        } else {
+          obj[key] = value
+        }
       
       } else if (isZoom(token)) {
         obj.zoom = parseInt(token)
@@ -1065,4 +1050,8 @@
     background-image: url(https://unpkg.com/leaflet@1.9.3/dist/images/layers.png)
   }
   
+  .leaflet-retina .leaflet-control-layers-toggle {
+    background-image: url(https://unpkg.com/leaflet@1.9.3/dist/images/layers-2x.png)
+  }
+
 </style>

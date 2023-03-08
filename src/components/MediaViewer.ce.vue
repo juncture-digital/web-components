@@ -206,7 +206,7 @@
     }
     host.value.style.width = window.getComputedStyle(host.value).width
 
-    if (content.value) inner.value.style.width = props.width || '100%'
+    if (content.value) inner.value.style.width = isMobile() ? '100%' : props.width || '100%'
     nextTick(() => {
       width.value = parseInt(window.getComputedStyle(content.value).width.slice(0,-2))
       content.value.style.width = `${width.value}px`
