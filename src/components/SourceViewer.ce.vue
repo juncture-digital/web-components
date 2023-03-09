@@ -79,17 +79,13 @@
     }
   })
 
-  //Prism.languages.juncture = Prism.languages.extend('markdown', {})
-	//Prism.languages.insertBefore('juncture', 'front-matter-block', {
-  
   Prism.languages.juncture = Prism.languages.extend('markdown', {
-
-  'tag': {
+  'juncture-tag': {
 		pattern: /\.ve-[a-z0-9-]+.+/,
 		greedy: true,
 		inside: {
 			
-      'tag': {
+      'juncture-tag': {
 				pattern: /\.ve-[a-z0-9-]+/
 			},
       
@@ -240,6 +236,10 @@
   right: 10px;
   opacity: 0;
   transition: all .3s ease-in;
+}
+
+.juncture-tag {
+  color: #905;
 }
 
 </style>

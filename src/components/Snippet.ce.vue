@@ -16,7 +16,7 @@
               <span v-html="props.label" class="label"></span>
           </div>
         </sl-tooltip>
-    </div>
+      </div>
 
       <sl-tab-group>
         <sl-tab slot="nav" panel="markdown"><sl-icon name="markdown"></sl-icon>Markdown</sl-tab>
@@ -40,7 +40,7 @@
       <sl-tab slot="nav" panel="html"><sl-icon name="code-slash"></sl-icon>HTML</sl-tab>
       <sl-tab slot="nav" panel="preview"><sl-icon name="eye"></sl-icon>Rendered</sl-tab>
       <sl-tab-panel name="markdown">
-        <ve-source-viewer v-if="active === 'markdown'" v-html="markdown"></ve-source-viewer>
+        <ve-source-viewer v-if="active === 'markdown'">{{ markdown }}</ve-source-viewer>
       </sl-tab-panel>
       <sl-tab-panel name="html">
         <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
@@ -93,7 +93,13 @@
   const active = ref<string>()
 
   watch(host, () => {
-    let lines:string[] = host.value.textContent.split('\n')
+    // let lines:string[] = host.value.textContent.split('\n')
+
+    let text = host.value.innerHTML
+      .replace(/<pre v-pre="" data-lang="markup"><code class="lang-markup">/,'')
+      .replace(/<\/code><\/pre>/, '')
+    let lines:string[] = text.split('\n')
+
     let trimmed:string[] = []
     lines.forEach(line => {
       if (line.trim().length > 0 || trimmed.length > 0) trimmed.push(line)
@@ -167,6 +173,8 @@
       let htmlEls = new DOMParser().parseFromString(pageHtml, 'text/html').children[0].children
       let main = htmlEls[1].querySelector('main')
       if (main) {
+        let customStyleBody = htmlEls[1].querySelector('style')
+        if (customStyleBody) main.insertBefore(customStyleBody, main.firstChild)
         html.value = main.innerHTML
         if (active.value === 'preview') nextTick(() => {
           if (props.fill) setFill()

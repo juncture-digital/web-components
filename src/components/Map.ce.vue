@@ -719,7 +719,6 @@
     let booleans = new Set(['disabled', 'prefer-geojson'])
     for (let i = 0; i < tokens.length; i++) {
       let token = tokens[i]
-      console.log(token)
       
       if (token.indexOf('=') > 0) {
         let [key, ...rest] = token.split('=')
@@ -820,14 +819,18 @@
 
   function addInteractionHandlers() {
     let scope = host.value.parentElement
+    let added = new Set()
     while (scope.parentElement && scope.tagName !== 'MAIN') {
-        scope = scope.parentElement
-        Array.from(scope.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
+      scope = scope.parentElement
+      Array.from(scope.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
         let veMap = findVeMap(el)
-        if (veMap) addMutationObserver(el)
+        if (veMap && !added.has(el)) {
+          addMutationObserver(el)
+          added.add(el)
+        }
       })
     }
-
+    
     let el = host.value.parentElement
     while (el?.parentElement && el.tagName !== 'BODY') el = el.parentElement;
   
@@ -869,7 +872,9 @@
             let attr = el.attributes.getNamedItem(currentClassState ? 'enter' : 'exit')
             if (attr) {
               const [action, ...rest] = attr.value.split(':')
-              if (action === 'flyto') flytoLocation(rest.join(':'), true)
+              let arg = rest.join(':')
+              // console.log(`${action}=${arg}`)
+              if (action === 'flyto') flytoLocation(arg, true)
               if (attr.name === 'exit') gotoPriorLoc()
             }
           }
@@ -902,7 +907,6 @@
         gotoPriorLoc()
       } else {
         zoomed.value = flyto.value.id
-
         if (flyto.value.layer.feature?.properties) {
           let center = latLng(flyto.value.layer.feature.properties.coords)
           map.value?.flyTo(center, flyto.value.zoom)
