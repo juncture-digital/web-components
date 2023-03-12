@@ -178,7 +178,7 @@
 
     <sl-dialog id="add-file-dialog" label="Add File">
       <form id="add-file-form" class="input-validation-pattern">
-        <sl-input autocomplete="off" required id="add-file-input" placeholder="Enter file path" pattern="^\/?([A-z0-9-_+]+\/)*([A-z0-9\-]+(\.(css|md|json|yaml|yml))?)$"></sl-input>
+        <sl-input autocomplete="off" required id="add-file-input" placeholder="Enter file path" pattern="^\/?([A-z0-9-_+]+\/)*([A-z0-9\-]+(\.(css|md|json|geojson|yaml|yml))?)$"></sl-input>
         <br />
         <sl-button @click="hideAddFileDialog">Cancel</sl-button>
         <sl-button type="reset" variant="default">Reset</sl-button>

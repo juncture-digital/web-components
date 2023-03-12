@@ -17,6 +17,7 @@
   import '../leaflet-opacity.js'
 
   import { isQID, getEntity, getManifest, kebabToCamel, metadataAsObj, isMobile, makeSticky } from '../utils'
+  import { GithubClient } from '../gh-utils'
   import '@shoelace-style/shoelace/dist/components/range/range.js'
 
   const markerIconTemplate = {
@@ -48,7 +49,7 @@
     zoomOnClick: { type: Boolean },
     scrollWheelZoom: { type: Boolean },
     cards: { type: String },
-    base: { type: String }
+    essayBase: { type: String }
   })
 
   const baseMapsConfigs:any = {
@@ -216,6 +217,8 @@
   const shadowRoot = computed(() => root?.value?.parentNode)
   const content = computed(() => shadowRoot.value?.querySelector('.content') as HTMLElement)
 
+  const githubClient = ref<any>()
+
   const map = ref<L.Map>() 
   const entities = ref<any[]>([])
   const latLngZoom = ref<String>()
@@ -238,6 +241,8 @@
   watch(host, () => doLayout())
 
   onMounted(() => {
+    let authToken = window.localStorage.getItem('gh-auth-token') || window.localStorage.getItem('gh-unscoped-token')
+    if (authToken) githubClient.value = new GithubClient(authToken)
     evalProps()
     doLayout()
   })
@@ -306,7 +311,17 @@
     let geojsonUrls = _layerObjs
       .filter(item => item.geojson && item.preferGeojson)
       .map (item => {
-        if (item.geojson.indexOf('http') === -1) item.geojson = `https://raw.githubusercontent.com/${props.base}/${item.geojson}`
+        if (item.geojson.indexOf('http') !== 0) {
+          if (item.geojson[0] === '/') {
+            let [acct, repo, ...rest] = item.geojson.split('/').filter((pe:string) => pe)
+            let path = rest.join('/')
+            // let ref = githubClient.value ? await githubClient.value.defaultBranch(acct, repo) : 'main'
+            let ref = 'main'
+            item.geojson = `https://raw.githubusercontent.com/${acct}/${repo}/${ref}/${path}`
+          } else {
+            item.geojson = `https://raw.githubusercontent.com/${props.essayBase}/${item.geojson}`
+          }
+        }
         return item
       })
       .map(item => ({url:item.geojson, item}))
@@ -319,7 +334,11 @@
         geojsonUrls[i].item.qid = geojsonUrls[i].item.id
         delete geojsonUrls[i].item.id
       }
-      _geoJSONs[i].properties = {..._geoJSONs[i].properties, ...geojsonUrls[i].item}
+      if (_geoJSONs[i].type === 'FeatureCollection') {
+        _geoJSONs[i].features.forEach((feature:any) => feature.properties = {...feature.properties, ...geojsonUrls[i].item})
+      } else {
+        _geoJSONs[i].properties = {..._geoJSONs[i].properties, ...geojsonUrls[i].item}
+      }
       let layerName = geojsonUrls[i].item.layer || 'Locations'
       if (!geojsonsByLayer[layerName]) geojsonsByLayer[layerName] = []
       geojsonsByLayer[layerName].push(_geoJSONs[i])
@@ -350,7 +369,7 @@
         }
       })
 
-    console.log(geojsonsByLayer)
+    // console.log(geojsonsByLayer)
 
     
     tileLayers.value = _layerObjs
@@ -541,17 +560,17 @@
         })
       },
       style: (feature) => {
-        const _props = feature?.properties
+        const featureProps = feature?.properties
         const _geometry = feature?.geometry.type
-        for (let [prop, value] of Object.entries(_props)) {
-          if (value === 'null') _props[prop] = null
+        for (let [prop, value] of Object.entries(featureProps)) {
+          if (value === 'null') featureProps[prop] = null
         }
         const style = {
-          color: _props.color || '#FB683F',
-          weight: _props.weight || (_geometry === 'Polygon' || _geometry === 'MultiPolygon' ? 0 : 4),
-          opacity: _props.opacity || 1,                  
-          fillColor: _props.fillColor || '#32C125',
-          fillOpacity: _props.fillOpacity || 0.5,
+          color: featureProps.color || '#FB683F',
+          weight: featureProps.weight || (_geometry === 'Polygon' || _geometry === 'MultiPolygon' ? 0 : 4),
+          opacity: featureProps.opacity || 1,                  
+          fillColor: featureProps.fillColor || '#32C125',
+          fillOpacity: featureProps.fillOpacity || 0.5,
         }
         return style
       }
@@ -724,7 +743,6 @@
         let [key, ...rest] = token.split('=')
         let value = rest.join('=')
         value = '"' && value[value.length-1] === '"' ? value.slice(1,-1) : value
-        console.log(value)
         if (key === 'qid') {
           let entity = await getEntity(token)
           obj = {...entityToInfoObj(entity, token), ...obj}          

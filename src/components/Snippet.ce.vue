@@ -23,7 +23,7 @@
         <sl-tab slot="nav" panel="html"><sl-icon name="code-slash"></sl-icon>HTML</sl-tab>
         <sl-tab slot="nav" panel="preview"><sl-icon name="eye"></sl-icon>Rendered</sl-tab>
         <sl-tab-panel name="markdown">
-          <ve-source-viewer v-if="active === 'markdown'" v-html="markdown"></ve-source-viewer>
+          <ve-source-viewer v-if="active === 'markdown'">{{ markdown }}</ve-source-viewer>
         </sl-tab-panel>
         <sl-tab-panel name="html">
           <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
@@ -74,6 +74,7 @@
     collapsible: { type: Boolean, default: false },
     open: { type: Boolean, default: false },
     prefix: { type: String },
+    path: { type: String },
     right: { type: Boolean },
     left: { type: Boolean },
     width: { type: String },
@@ -164,7 +165,7 @@
       method: 'POST',
       body: JSON.stringify({
         prefix: `${props.prefix || ''}`,
-        path: '',
+        path: `${props.path || ''}`,
         markdown: markdown.value
       })
     })

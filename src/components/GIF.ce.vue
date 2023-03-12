@@ -153,7 +153,7 @@
     //Timing is important. Wait for each image to load before generating a still.
     if (gif.value.complete) waitForImage()
     else gif.value.addEventListener('load', () => {
-      console.log(`onLoad gif.complete=${gif.value.complete}`)
+      // console.log(`onLoad gif.complete=${gif.value.complete}`)
       if (!ready.value) nextTick(() => waitForImage())
     })
   }

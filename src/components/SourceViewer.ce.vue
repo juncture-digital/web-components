@@ -75,7 +75,13 @@
     if (props.src) {
       fetch(`https://api.juncture-digital.org/markdown/${props.src}`)
         .then(resp => resp.text())
-        .then(markdown => rawText.value = `\n${markdown.trim()}`)
+        .then(markdown => {
+          markdown = markdown.replace(/>/g,'&gt;').replace(/</g,'&lt;')
+          // rawText.value = `\n${markdown.trim()}`
+          rawText.value = props.language === 'html'
+            ? styleHTML(markdown)
+            : `\n${markdown}`
+        })
     }
   })
 
@@ -191,7 +197,8 @@
 
   function copyTextToClipboard() {
     if (navigator.clipboard) {
-      navigator.clipboard.writeText(rawText.value?.trim() || '')
+      let text = (rawText.value?.trim() || '').replace(/&lt;/g,'<').replace(/&gt;/g,'>')
+      navigator.clipboard.writeText(text)
       const tooltip = shadowRoot.value?.querySelector('sl-tooltip')
       if (tooltip) {
         tooltip.open = true
