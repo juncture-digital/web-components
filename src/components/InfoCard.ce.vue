@@ -58,7 +58,9 @@
     grid-template-rows: auto auto auto 1fr auto;
     /* border: 1px solid #444; */
     border-radius: 6px;
-    /* min-height: 150px; */
+    min-height: 80px;
+    max-height: 100px;
+    overflow-y: hidden;
     background-color: white;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   }
@@ -78,6 +80,7 @@
     grid-area: 2 / 1 / 3 / 2;
     font-size: 110%;
     font-weight: 400;
+    height: 100%;
   }
 
   .summary {
@@ -102,6 +105,7 @@
   .image {
     grid-area: 1 / 2 / 6 / 3;
     height: 100%;
+    max-height: 100px;
     object-fit: cover;
     background-repeat: no-repeat;
     background-size: cover;

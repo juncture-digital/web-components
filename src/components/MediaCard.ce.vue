@@ -62,7 +62,7 @@
 <script setup lang="ts">
 
   import { computed, onUpdated, ref, toRaw, watch } from 'vue'
-  import { getItemInfo, getManifest, getMetadata, label, summary, thumbnail } from '../utils'
+  import { getItemInfo, getManifest, getMetadata, isMobile, label, summary, thumbnail } from '../utils'
 
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
   import '@shoelace-style/shoelace/dist/components/icon-button/icon-button.js'
@@ -134,6 +134,7 @@
   const imageDialog = ref<SLDialog>()
   watch(imageDialog, (_dialog) => {
     _dialog?.addEventListener('sl-show', () => {
+      console.log(imageDialog.value?.parentElement)
       if (imageDialog.value) imageDialog.value.panel.style.width = `${calcDialogWidth()}px`
     })
   })
@@ -159,7 +160,7 @@
   }
 
   function calcDialogWidth() {
-    let width = Math.round(window.innerWidth - 100)
+    let width = Math.round(window.innerWidth - (isMobile() ? 0 : 100))
     let maxHeight = Math.round(window.innerHeight - 150)
     
     let selected = manifest.value

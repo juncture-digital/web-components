@@ -360,7 +360,7 @@
   watch(dialog, (_dialog) => {
     _dialog?.addEventListener('sl-after-hide', () => dialogId.value = null )
     _dialog?.addEventListener('sl-show', () => {
-      if (dialog.value) dialog.value.panel.style.width = `${calcDialogWidth()}px`
+      if (dialog.value) dialog.value.panel.style.width = isMobile() ? '100%' :`${calcDialogWidth()}px`
     })
   })
   const dialogId = ref<String | null>()
