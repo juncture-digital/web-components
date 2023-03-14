@@ -228,7 +228,7 @@
         if (type.value === 'image') content.value.style.height = `${maxStickyHeight}px`
         if (type.value !== 'image-grid') inner.value.classList.add('drop-shadow')
         inner.value.style.width = `${computedWidth}px`
-        content.value.style.width = `${computedWidth}px`
+        // content.value.style.width = `${computedWidth}px`
       }
 
       nextTick(() => {

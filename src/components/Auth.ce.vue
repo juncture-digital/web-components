@@ -49,7 +49,8 @@
     let code = (new URL(window.location.href)).searchParams.get('code')
     if (code) {
       let href = `${location.pathname}${location.hash}`
-      window.history.replaceState({}, '', href)
+      console.log(href)
+      // window.history.replaceState({}, '', href)
       let isDev = window.location.hostname === 'localhost' || window.location.hostname.indexOf('192.168.') === 0
       let url = isDev
         ? `http://${window.location.hostname}:8000/gh-token?code=${code}&hostname=${window.location.hostname}`
