@@ -19,6 +19,8 @@
   import { isQID, getEntity, getManifest, kebabToCamel, metadataAsObj, isMobile, makeSticky } from '../utils'
   import { GithubClient } from '../gh-utils'
   import '@shoelace-style/shoelace/dist/components/range/range.js'
+  import '../turf.min.js'
+  const turf:any = (window as any).turf
 
   const markerIconTemplate = {
     iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/0.7.7/images/marker-icon.png',
@@ -525,9 +527,14 @@
       },
       onEachFeature: async (feature, layer) => {
         let fg: L.GeoJSON = layer as L.GeoJSON
-        if (!feature.properties.coords && fg.feature?.bbox) {
-          let center = fg.getBounds().getCenter()
-          feature.properties.coords = `${center.lat},${center.lng}`
+        if (!feature.properties.coords) {
+          if (fg.feature?.bbox) {
+            let center = fg.getBounds().getCenter()
+            feature.properties.coords = `${center.lat},${center.lng}`
+          } else if (feature.geometry.type === 'Polygon') {
+            let center = turf.centroid(feature)
+            feature.properties.coords = `${center.geometry.coordinates[1]},${center.geometry.coordinates[0]}`
+          }
         }
 
         // Bind popup
@@ -738,11 +745,12 @@
     let booleans = new Set(['disabled', 'prefer-geojson'])
     for (let i = 0; i < tokens.length; i++) {
       let token = tokens[i]
-      
+
       if (token.indexOf('=') > 0) {
         let [key, ...rest] = token.split('=')
         let value = rest.join('=')
         value = '"' && value[value.length-1] === '"' ? value.slice(1,-1) : value
+
         if (key === 'qid') {
           let entity = await getEntity(token)
           obj = {...entityToInfoObj(entity, token), ...obj}          
@@ -780,7 +788,7 @@
         else obj.label = text
       }
     }
-    obj.preferGeojson = ((obj.preferGeojson || props.preferGeojson) && obj.geojson ) || (obj.geojson && !obj.coords)
+    obj.preferGeojson = (obj.preferGeojson || (props.preferGeojson) && obj.geojson ) || (obj.geojson && !obj.coords)
     return obj
   }
 
@@ -813,6 +821,8 @@
     let split = arg.split(',')
     if (split.length === 1) {
       id = split[0]
+      let geoJSON = findGeoJSON(id)
+      zoom = geoJSON?.properties?.zoom || zoom
     } else if (split.length === 2) {
       if (/^[+-]?\d+(.\d*|\d*)$/.test(split[0])) {
         id = split.join(',')

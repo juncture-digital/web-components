@@ -736,12 +736,14 @@
     while (el.parentElement && el.tagName !== 'BODY') el = el.parentElement;
 
     (Array.from(el.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
+      console.log(mark)
       let match = Array.from(mark.attributes).find(attr => actionKeys.has(attr.name))
       if (match) {
         let veMedia = findVeMedia(mark.parentElement)
         if (veMedia) {
           mark.classList.add(match.name)
           mark.addEventListener('click', () => {
+            console.log('click')
             if (match?.name === 'anno') showAnnotation(match.value)
             else if (match?.name === 'zoomto') zoomto(match.value)
             else if (match?.name === 'play') playMedia(match.value)

@@ -6,3 +6,4 @@ declare module '@openseadragon-imaging/openseadragon-viewerinputhook';
 declare module 'youtube-player'
 declare module 'tippy.js'
 declare module 'prismjs'
+declare module 'turf.min.js'

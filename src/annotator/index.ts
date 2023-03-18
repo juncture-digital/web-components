@@ -37,6 +37,7 @@ export class Annotator {
     let resp:any = await fetch(url)
     if (resp.ok) {
       resp = await resp.json()
+      console.log(imageId, resp)
       annotations = resp.annotations
       if (resp.annotations.length > 0) {
         annotations = resp.annotations.map((anno:any) => {
