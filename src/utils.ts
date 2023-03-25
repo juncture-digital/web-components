@@ -26,12 +26,13 @@ export function isTouchEnabled() {
 
 let tippyEntities:any
 export function initTippy(el:any=null, force=false) {
+  let validAttrs = new Set('qid label description image'.split(/\s/))
   if (force) tippyEntities = null
   el = el || document
   let _entities = Array.from(el.querySelectorAll('mark')).filter(el =>
     Array.from((el as HTMLElement).attributes).find(attr => {
       let attrName = attr.name.toLowerCase()
-      return attrName === 'qid' || (isQID(attr.value) && attrName !== 'flyto')
+      return validAttrs.has(attrName) || (isQID(attr.value) && attrName !== 'flyto')
     })
   )
   if (!tippyEntities && _entities.length > 0) {
@@ -43,12 +44,10 @@ export function initTippy(el:any=null, force=false) {
       allowHTML: true,
       delay: [null, null],
       onShow: (instance:any) => {
-        let qid = Array.from(instance.reference.attributes)
-          .filter((attr:any) => attr.name.toLowerCase() === 'qid' || isQID(attr.value))
-          .map((attr:any) => attr.value)
-          .flat().join()
-        if (qid)
-          instance.setContent(`<ve-entity-card qid="${qid}" style="width:600px;max-width:90vw;"></ve-entity-card>`)
+        let attrs = Array.from(instance.reference.attributes)
+          .filter((attr:any) => validAttrs.has(attr.name))
+          .map((attr:any) => `${attr.name}="${attr.value}"`)
+        instance.setContent(`<ve-entity-card ${attrs} style="max-width:90vw;"></ve-entity-card>`)
       }
     })
   }

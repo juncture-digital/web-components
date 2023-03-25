@@ -2,27 +2,27 @@
 
     <div v-bind="$attrs"></div>
     
-    <ve-hero v-if="backgroundIsImage"
-      :background="props.background"
+    <ve-hero v-if="backgroundImage"
+      :background="backgroundImage"
       :options="props.options"
       :position="props.position"
       :sticky="props.sticky ? '' : null"
       :height="height"
-      :top="sticky ? height - navbarHeight : 0"
+      :top="props.sticky ? height - navbarHeight : 0"
     ></ve-hero>
 
     <ve-navbar ref="navbar"
-      :label="props.label"
+      :label="label"
       :subtitle="props.subtitle"
       :logo="props.logo"
       :url="props.url"
       :sticky="props.sticky ? '' : null"
       :search-domain="props.searchDomain"
       :contact="props.contact"
-      :height="backgroundIsImage ? navbarHeight : height"
-      :background="backgroundIsImage ? null : (props.background || '#444')"
-      :alpha="backgroundIsImage ? 0.2 : 0"
-      :offset="backgroundIsImage ? navbarHeight : 0"
+      :height="height"
+      :background="backgroundColor"
+      :alpha="0.2"
+      :offset="backgroundImage ? navbarHeight : 0"
     >
 
       <ul v-if="navEl" v-html="navEl"></ul>
@@ -59,33 +59,40 @@
   const navbar = ref<HTMLElement | null>(null)
   const host = computed(() => (navbar.value?.getRootNode() as any)?.host)
 
-  const backgroundIsImage = ref(false)
+  const label = ref<string>()
   const navEl = ref<string>()
   const entities = ref<string[]>([])
   const entity = ref<any>()
-  const background = ref<string>()
+  const backgroundColor = ref<string>()
+  const backgroundImage = ref<string>()
 
-  const height = computed(() => props.height || (backgroundIsImage.value ? heroHeight : navbarHeight))
+  const height = ref(props.height || navbarHeight)
 
   onMounted(() => applyProps() )
   onUpdated(() => applyProps() )
 
   function applyProps() {
     entities.value = props.entities ? props.entities.split(/\s+/).filter(qid => qid) : []
-    backgroundIsImage.value = props.background !== undefined && (isURL(props.background) || isManifestShorthand(props.background))
+    if (props.background !== undefined && (isURL(props.background) || isManifestShorthand(props.background))) {
+      backgroundImage.value = props.background
+      height.value = props.height || heroHeight
+    } else {
+      backgroundColor.value = props.background || '#444'
+    }
+    if (props.label && props.label !== 'static') label.value = props.label
     if (navbar.value) navbar.value.style.height = `${props.height || navbarHeight}px`
     if (props.sticky) host.value.classList.add('sticky')
     navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML
   }
 
-  // watch(navEl, () => console.log('header.navEl', navEl.value))
-
   watch(entities, async () => {
-    if (entities.value.length > 0) {
+    if (entities.value.length > 0 && !entity.value) {
       entity.value = await getEntity(entities.value[0])
       if (entity.value) {
+        label.value = entity.value.label
         if (entity.value.pageBanner) {
-          background.value = `https://iiif.juncture-digital.org/wc:${decodeURIComponent(entity.value.pageBanner.split('/Special:FilePath/').pop()).replace(/\s/,'_')}/manifest.json`
+          backgroundImage.value = `https://iiif.juncture-digital.org/wc:${decodeURIComponent(entity.value.pageBanner.split('/Special:FilePath/').pop()).replace(/\s/,'_')}/manifest.json`
+          height.value = heroHeight
         }
       }
     }

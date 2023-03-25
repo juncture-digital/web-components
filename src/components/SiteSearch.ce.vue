@@ -9,7 +9,7 @@
             type="text"
             id="search-input"
             class="search-input"
-            @onKeyUp="inputHandler"
+            @keyup="inputHandler"
             autocomplete="off"
             role="textbox"
             placeholder="Search site"
@@ -63,6 +63,7 @@
   // onUpdated(() => init())
 
   function init() {
+    console.log('SiteSearch.init')
     searchInput.value = shadowRoot.value?.querySelector('#search-input') as HTMLInputElement
     searchInput.value.value = ''
     checkbox.value = shadowRoot.value?.querySelector('#search-btn') as HTMLInputElement
@@ -93,6 +94,7 @@
   }
 
   function inputHandler(evt:KeyboardEvent) {
+    console.log(evt)
     if (evt.key === 'Enter') doSearch()
   }
   
@@ -243,7 +245,7 @@
   .cancel {
     position: absolute;
     right: 0;
-    top: 4px;
+    /* top: 4px; */
     font-size: 16px;
     cursor: pointer;
   }

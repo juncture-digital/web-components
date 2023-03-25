@@ -33,11 +33,10 @@ export class Annotator {
     this.setVisible(false)
     let annotations = []
     let url = `${annotationsEndpoint}/annotations/${this.base}/${imageId}/`
-    console.log(`Annotator.loadAnnotations: ${url}`)
+    // console.log(`Annotator.loadAnnotations: ${url}`)
     let resp:any = await fetch(url)
     if (resp.ok) {
       resp = await resp.json()
-      console.log(imageId, resp)
       annotations = resp.annotations
       if (resp.annotations.length > 0) {
         annotations = resp.annotations.map((anno:any) => {

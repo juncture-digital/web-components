@@ -1,66 +1,77 @@
 <template>
 
-<div ref="root" id="card" class="card">
-  <div class="label" v-html="entity?.label"></div>
-    <div class="description" v-html="entity?.description"></div>
-      <div v-if="backgroundImage" class="image" :style="{backgroundImage:backgroundImage, width: thumbnailWidth}"></div>
-      <div class="links">
-        <span v-if="entity?.wikipedia" class="logo" title="Wikipedia">
-          <a target="_blank" :href="entity.wikipedia">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/Wikipedia_svg_logo.svg"/>
-          </a>
-        </span>
-        <!--
-        <span class="logo" title="Wikidata">
-          <a target="_blank" :href="`https://www.wikidata.org/entity/${entity?.id}`">
-            <img src="https://upload.wikimedia.org/wikipedia/commons/f/ff/Wikidata-logo.svg"/>
-          </a>
-        </span>
-        -->
-      </div>
-      <p v-if="entity?.summaryText" class="summary" v-html="unwrap(entity.summaryText)"></p>
+  <div ref="root" id="card" class="card">
+    <div class="label" v-html="label"></div>
+    <div class="description" v-html="description"></div>
+    <div v-if="backgroundImage" class="image" :style="{backgroundImage:backgroundImage, width: thumbnailWidth}"></div>
+    <div class="links">
+      <span v-if="wikipediaLink" class="logo" title="Wikipedia">
+        <a target="_blank" :href="wikipediaLink">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/7/77/Wikipedia_svg_logo.svg"/>
+        </a>
+      </span>
     </div>
+    <p v-if="summaryText" class="summary" v-html="summaryText"></p>
+  </div>
 
 </template>
   
 <script setup lang="ts">
 
-  import { computed, ref, toRaw, watch } from 'vue'
+  import { computed, onMounted, ref, toRaw, watch } from 'vue'
   import { getEntity, getSummaryText } from '../utils'
 
   const props = defineProps({
-    qid: { type: String, required: true }
+    qid: { type: String },
+    label: { type: String },
+    description: { type: String },
+    image: { type: String }
   })
 
   const root = ref<HTMLElement | null>(null)
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
 
-  const qid = ref<string>(props.qid)
+  const qid = ref<string>()
   const entity = ref<any>()
 
-  const backgroundImage = computed(() => entity.value?.thumbnail && `url('${encodeUrl(entity.value.thumbnail)}')`)
+  const label = ref<string>()
+  const description = ref<string>()
+  const summaryText = ref<string>()
+  const backgroundImage = ref<string>()
+  const wikipediaLink = ref<string>()
+
   const thumbnailWidth = computed(() => `${host.value.clientWidth * .33}px`)
 
-  watch(host, () => init())
-  
-  watch(props, () => {
-    if (qid.value !== props.qid) qid.value = props.qid
-  })
+  watch(backgroundImage, () => host.value.style.width = '600px')
 
-  function init() {
-    _getEntity()
+
+  onMounted(() =>  applyProps())
+
+  function applyProps() {
+    if (props.qid && qid.value !== props.qid) qid.value = props.qid
+    if (props.label) label.value = props.label
+    if (props.description) description.value = props.description
+    if (props.image) backgroundImage.value = props.image
   }
+
+  watch(entity, () => { 
+    label.value = entity.value.label
+    description.value = entity.value.description
+    backgroundImage.value = entity.value?.thumbnail && `url('${encodeUrl(entity.value.thumbnail)}')`
+    wikipediaLink.value = entity.value.wikipedia
+    summaryText.value = entity.value.summaryText
+  })
 
   watch(qid, () => _getEntity())
 
   async function _getEntity() {
-    // console.log(entity.value?.id, props.qid)
-    if (!entity.value || entity.value.id !== props.qid) {
-      let _entity:any = await getEntity(qid.value)
-      let summaryText = await getSummaryText(qid.value)
-      if (summaryText) _entity = {..._entity, summaryText}
-      entity.value = _entity
-      // console.log(toRaw(entity.value))
+    if (qid.value) {
+      if (!entity.value || entity.value.id !== props.qid) {
+        let _entity:any = await getEntity(qid.value)
+        let summaryText = await getSummaryText(qid.value)
+        if (summaryText) _entity = {..._entity, ...{summaryText:unwrap(summaryText)}}
+        entity.value = _entity
+      }
     }
   }
 
@@ -92,7 +103,7 @@
     grid-template-rows: auto auto auto 1fr auto;
     border: 1px solid #444;
     border-radius: 6px;
-    min-height: 150px;
+    /* min-height: 150px; */
     background-color: white;
     box-shadow: rgba(50, 50, 93, 0.25) 0px 6px 12px -2px, rgba(0, 0, 0, 0.3) 0px 3px 7px -3px;
   }
@@ -112,7 +123,7 @@
     grid-area: 2 / 1 / 3 / 2;
     font-size: 110%;
     font-weight: 400;
-  }
+ }
 
   .summary {
     grid-area: 3 / 1 / 4 / 2;

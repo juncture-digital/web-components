@@ -179,6 +179,9 @@
   const outer = computed(() => shadowRoot.value?.querySelector('#outer') as HTMLElement)
   const inner = computed(() => shadowRoot.value?.querySelector('#inner') as HTMLElement)
 
+  const entities = ref<string[]>([])
+  const entity = ref<any>()
+
   // watch(host, () => init())
   onMounted(() => init())
 
@@ -240,7 +243,19 @@
 
   }
 
+  /*
+  watch(entities, async () => {
+    if (entities.value.length > 0 && !entity.value) {
+      entity.value = await getEntity(entities.value[0])
+      if (entity.value) {
+        console.log(toRaw(entity.value))
+      }
+    }
+  })
+  */
+
   function init() {
+    entities.value = props.entities ? props.entities.split(/\s+/).filter(qid => qid) : []
     if (props.src) {
       if (props.src?.indexOf('http') === 0) {
         let srcUrl = new URL(props.src)
@@ -502,7 +517,8 @@
   function builditemsList() {
     let itemsList = []
     let src = props.manifest || props.src
-    
+    let listItems = Array.from(host.value.querySelectorAll('li') as HTMLUListElement[])
+    if (!src && listItems.length === 0 && entities.value.length > 0) src = `wd:${entities.value[0]}`
     if (src) {
       let obj:any = {}
       obj.src = src
@@ -526,7 +542,7 @@
       obj.fit = props.fit
       itemsList.push(obj)
     } else {
-      itemsList = Array.from(host.value.querySelectorAll('li') as HTMLUListElement[])
+      itemsList = listItems
         .filter(li => li.innerHTML)
         .map(li => {
         let tokens:string[] = []
