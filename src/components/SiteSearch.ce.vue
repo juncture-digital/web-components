@@ -63,7 +63,6 @@
   // onUpdated(() => init())
 
   function init() {
-    console.log('SiteSearch.init')
     searchInput.value = shadowRoot.value?.querySelector('#search-input') as HTMLInputElement
     searchInput.value.value = ''
     checkbox.value = shadowRoot.value?.querySelector('#search-btn') as HTMLInputElement
@@ -94,7 +93,6 @@
   }
 
   function inputHandler(evt:KeyboardEvent) {
-    console.log(evt)
     if (evt.key === 'Enter') doSearch()
   }
   

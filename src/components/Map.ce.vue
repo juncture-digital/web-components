@@ -1086,4 +1086,10 @@
     background-image: url(https://unpkg.com/leaflet@1.9.3/dist/images/layers-2x.png)
   }
 
+  @media only screen and (max-width:1000px) {    
+    .leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+      pointer-events: none !important;
+    }
+} 
+
 </style>
