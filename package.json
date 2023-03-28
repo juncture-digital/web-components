@@ -1,6 +1,6 @@
 {
   "name": "juncture-digital",
-  "version": "2.0.0-beta.26",
+  "version": "2.0.0-beta.27",
   "private": false,
   "type": "module",
   "scripts": {
@@ -20,6 +20,7 @@
     "js-sha256": "^0.9.0",
     "js-yaml": "^4.1.0",
     "leaflet": "^1.9.3",
+    "leaflet-gesture-handling": "^1.2.2",
     "leaflet.control.opacity": "^1.6.0",
     "mermaid": "^9.3.0",
     "openseadragon": "2.4.2",

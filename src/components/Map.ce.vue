@@ -14,6 +14,7 @@
 
   import { computed, nextTick, onMounted, ref, toRaw, watch } from 'vue'
   import L, { LatLng } from 'leaflet'
+  import { GestureHandling } from 'leaflet-gesture-handling'
   import '../leaflet-opacity.js'
 
   import { isQID, getEntity, getManifest, kebabToCamel, metadataAsObj, isMobile, makeSticky } from '../utils'
@@ -455,20 +456,23 @@
     }
     let mapEl = shadowRoot.value?.querySelector('#map') as HTMLElement
     if (mapEl) {
+      if (isMobile()) L.Map.addInitHook('addHandler', 'gestureHandling', GestureHandling)
       mapEl.style.cursor = 'default'
       let _basemaps = props.basemaps.split(',').map(name => {
         let [url, options] = baseMapsConfigs[name]
         return [name.replace(/_/,' '), L.tileLayer(url, options)]
       })
-      map.value = L.map(mapEl, {
+      let mapOptions: any = {
         preferCanvas: false,
         zoomSnap: 0.1,
         center, 
         zoom: zoom.value,
         zoomAnimation: true,
-        scrollWheelZoom: props.scrollWheelZoom,
+        // scrollWheelZoom: props.scrollWheelZoom,
+        gestureHandling: isMobile(),
         layers: [_basemaps[0][1] as L.Layer]
-      })
+      }
+      map.value = L.map(mapEl, mapOptions)
 
       if (_basemaps.length > 1 || Object.keys(geoJSONs.value || {}).length > 1)
       layerControl.value = L.control.layers(Object.fromEntries(_basemaps), {}).addTo(map.value)
@@ -962,6 +966,7 @@
 
   @import 'leaflet/dist/leaflet.css';
   @import 'leaflet.control.opacity/dist/L.Control.Opacity.css';
+  @import 'leaflet-gesture-handling/dist/leaflet-gesture-handling.css';
 
   * { box-sizing: border-box; }
 
@@ -1085,11 +1090,5 @@
   .leaflet-retina .leaflet-control-layers-toggle {
     background-image: url(https://unpkg.com/leaflet@1.9.3/dist/images/layers-2x.png)
   }
-
-  @media only screen and (max-width:1000px) {    
-    .leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
-      pointer-events: none !important;
-    }
-} 
 
 </style>
