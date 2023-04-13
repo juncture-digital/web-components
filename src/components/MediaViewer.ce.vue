@@ -458,11 +458,10 @@
   })
 
   watch(itemInfo, () => {
-    type.value = type.value || itemInfo.value?.type?.toLowerCase()
-    tileSource.value = type.value &&
-      type.value=== 'image'
+    type.value = type.value || itemInfo.value?.type?.split(':').pop().toLowerCase()
+    tileSource.value = type.value && type.value === 'image'
       ? itemInfo.value.service
-        ? `${itemInfo.value.service[0].id || itemInfo.value.service[0]['@id']}/info.json`
+        ? `${(itemInfo.value.service[0].id || itemInfo.value.service[0]['@id']).replace(/iiif-image\.juncture-digital.org/)}/info.json`
         : { url: itemInfo.value.id, type: 'image', buildPyramid: true }
       : null
     viewer.value && viewer.value.open(tileSource.value)
@@ -647,6 +646,7 @@
   function loadImage() {
     viewer.value = initOsdViewer()
     configureImageViewerBehavior()
+    console.log(tileSource.value)
     tileSource.value && viewer.value.open(tileSource.value)
   }
 
