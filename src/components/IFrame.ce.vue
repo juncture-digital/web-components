@@ -69,14 +69,14 @@
       host.value.style.width = window.getComputedStyle(host.value).width
       host.value.style.height = props.height || window.getComputedStyle(host.value).width
 
-      console.log(`host: width=${host.value.style.width} height=${host.value.style.height}`)
+      // console.log(`host: width=${host.value.style.width} height=${host.value.style.height}`)
 
       content.value.style.width = props.width || window.getComputedStyle(host.value).width
       content.value.style.height = props.height || window.getComputedStyle(host.value).width
       nextTick(() => {
         width.value = parseInt(window.getComputedStyle(content.value).width.slice(0,-2))
         height.value = parseInt(window.getComputedStyle(content.value).height.slice(0,-2))
-        console.log(`content: width=${width.value} height=${height.value}`)
+        // console.log(`content: width=${width.value} height=${height.value}`)
       })
     })
   }

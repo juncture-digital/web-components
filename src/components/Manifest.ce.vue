@@ -40,7 +40,7 @@
         <a class="value" :href="parsed.rights" v-html="parsed.rights"></a>
       </div>
 
-      <!--
+      
       <div v-if="parsed?.metadata" class="metadata">
         <span class="label">metadata</span>
         <ul>
@@ -53,7 +53,7 @@
           </li>
         </ul>
       </div>
-      -->
+      
       
       <div v-if="parsed?.navDate" class="navDate">
         <span class="label">navDate</span>

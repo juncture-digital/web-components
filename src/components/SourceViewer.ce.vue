@@ -72,6 +72,7 @@
   })
 
   onMounted(() => {
+    console.log('sourceViewer', props)
     if (props.src) {
       fetch(`https://api.juncture-digital.org/markdown/${props.src}`)
         .then(resp => resp.text())

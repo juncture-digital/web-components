@@ -21,7 +21,7 @@
 
             <div v-else>
               <div class="media-item" :draggable="type === 'image'" @dragstart="onDrag(manifestsById[item.id], $event)">
-                <img v-if="item.iiif" :src="thumbnail(manifestsById[item.id])" @click="toggleDialogId(item)"/>
+                <img v-if="item.iiif" :data-id="item.id" :src="thumbnail(manifestsById[item.id], 400, item.seq || 1)" @click="toggleDialogId(item)"/>
                 <img v-else-if="item.youtube" :src="`https://img.youtube.com/vi/${item.videoid}/0.jpg`" @click="toggleDialogId(item)"/>
                 <ve-manifest-popup v-if="item.iiif" :manifest="item.src"></ve-manifest-popup>
               </div>
@@ -119,9 +119,7 @@
 
   function onDrag(manifest:any, evt:DragEvent) {
     evt.stopPropagation()
-    console.log(manifest, evt)
     let url = `https://iiif.juncture-digital.org/?manifest=${manifest.id}`
-    console.log('onDrag', url)
     evt.dataTransfer?.setData('text/uri-list', url)
   }
 
@@ -180,7 +178,6 @@
   const inner = computed(() => shadowRoot.value?.querySelector('#inner') as HTMLElement)
 
   const entities = ref<string[]>([])
-  const entity = ref<any>()
 
   // watch(host, () => init())
   onMounted(() => init())
@@ -421,9 +418,9 @@
   const type:any = ref(null)
   const tileSource:any = ref(null)
 
-  const manifestsById = computed(() => 
-    Object.fromEntries(manifests.value.map((_manifest:any) => [sha256(decodeURIComponent(_manifest.id)).slice(0,8), _manifest])) 
-  )
+  const manifestsById = computed(() => {
+    return Object.fromEntries(manifests.value.map((_manifest:any) => [sha256(decodeURIComponent(_manifest.id)).slice(0,8), _manifest]))
+  })
 
   watch(itemsList, () => {
     // console.log(toRaw(itemsList.value))
@@ -459,9 +456,10 @@
 
   watch(itemInfo, () => {
     type.value = type.value || itemInfo.value?.type?.split(':').pop().toLowerCase()
-    tileSource.value = type.value && type.value === 'image'
+    tileSource.value = type?.value.indexOf('image') === 0
       ? itemInfo.value.service
-        ? `${(itemInfo.value.service[0].id || itemInfo.value.service[0]['@id']).replace(/iiif-image\.juncture-digital.org/)}/info.json`
+        // ? `${(itemInfo.value.service[0].id || itemInfo.value.service[0]['@id']).replace(/iiif-image\.juncture-digital.org/)}/info.json`
+        ? `${(itemInfo.value.service[0].id || itemInfo.value.service[0]['@id'])}/info.json`
         : { url: itemInfo.value.id, type: 'image', buildPyramid: true }
       : null
     viewer.value && viewer.value.open(tileSource.value)
@@ -523,7 +521,6 @@
       obj.src = src
       obj.src = obj.src.indexOf('http') === 0 ? obj.src : `https://iiif.juncture-digital.org/${obj.src}/manifest.json`
       obj.id = sha256(obj.src).slice(0,8)
-    
       let parsedUrl = new URL(obj.src)
       let domain = parsedUrl.hostname.replace(/^www\./, '')
       obj.iiif = !youtubeDomains.has(domain) && !vimeoDomains.has(domain)
@@ -542,51 +539,57 @@
       itemsList.push(obj)
     } else {
       itemsList = listItems
-        .filter(li => li.innerHTML)
+        // .filter(li => li.innerHTML)
         .map(li => {
-        let tokens:string[] = []
-        let s = li.textContent?.replace(/“/,'"').replace(/”/,'"').replace(/’/,"'").trim()
-        s?.match(/[^\s"]+|"([^"]*)"/gmi)?.forEach(token => {
-          if (tokens.length > 0 && tokens[tokens.length-1].indexOf('=') === tokens[tokens.length-1].length-1) tokens[tokens.length-1] = `${tokens[tokens.length-1]}${token}`
-          else tokens.push(token)
-        })
-        let obj:any = {}
-        obj.src = tokens[0].indexOf('http') === 0 ? tokens[0] : `https://iiif.juncture-digital.org/${tokens[0]}/manifest.json`
-        obj.id = sha256(decodeURIComponent(obj.src)).slice(0,8)
-        let parsedUrl = new URL(tokens[0])
-        let domain = parsedUrl.hostname.replace(/^www\./, '')
-        if (youtubeDomains.has(domain)) {
-          obj.youtube = true
-          obj.videoid = parsedUrl.searchParams.get('v')
-        } else if (vimeoDomains.has(domain)) {
-          obj.vimeo = true
-        } else {
-          obj.iiif = true
-        }
-        obj.iiif = !youtubeDomains.has(domain) && !vimeoDomains.has(domain)
-        for (let i = 1; i < tokens.length; i++) {
-          let token = tokens[i]
-          if (token.indexOf('=') > 0) {
-            let split = token.split('=')
-            obj[split[0]] = split[1]
-          } else if (isInt(token)) {
-            obj.seq = token
-          } else if (isIiifArg(token)) {
-            let match = token.match(iiifRegex)
-            if (match) obj = {...obj, ...match.groups}
-          } else if (token === 'cover' || token === 'contain') {
-            obj.fit = token
-          } else if (isRotation(token)) {
-            let match = token.match(rotationRegex)
-            if (match) obj = {...obj, ...match.groups}
-          } else if (token === 'mirror') {
-            obj.mirror = true
-          } else {
-            obj.caption = token[0] === '"' && token[token.length-1] === '"' ? token.slice(1,-1) : token
+          let tokens:string[] = []
+          let s = li.textContent?.replace(/“/,'"').replace(/”/,'"').replace(/’/,"'").trim()
+          s?.match(/[^\s"]+|"([^"]*)"/gmi)?.forEach(token => {
+            if (tokens.length > 0 && tokens[tokens.length-1].indexOf('=') === tokens[tokens.length-1].length-1) tokens[tokens.length-1] = `${tokens[tokens.length-1]}${token}`
+            else tokens.push(token)
+          })
+          let obj:any = {}
+          if (tokens.length > 0) {
+            obj.src = tokens[0].indexOf('http') === 0
+              ? tokens[0]
+              : tokens[0].indexOf('manifest') === 0
+                ? `https://iiif.juncture-digital.org/${tokens[0]}`
+                : `https://iiif.juncture-digital.org/${tokens[0]}/manifest.json`
           }
-        }
-        return obj
-      })
+          obj.id = sha256(decodeURIComponent(obj.src)).slice(0,8)
+          let parsedUrl = new URL(obj.src)
+          let domain = parsedUrl.hostname.replace(/^www\./, '')
+          if (youtubeDomains.has(domain)) {
+            obj.youtube = true
+            obj.videoid = parsedUrl.searchParams.get('v')
+          } else if (vimeoDomains.has(domain)) {
+            obj.vimeo = true
+          } else {
+            obj.iiif = true
+          }
+          obj.iiif = !youtubeDomains.has(domain) && !vimeoDomains.has(domain)
+          for (let i = 1; i < tokens.length; i++) {
+            let token = tokens[i]
+            if (token.indexOf('=') > 0) {
+              let split = token.split('=')
+              obj[split[0]] = split[1]
+            } else if (isInt(token)) {
+              obj.seq = token
+            } else if (isIiifArg(token)) {
+              let match = token.match(iiifRegex)
+              if (match) obj = {...obj, ...match.groups}
+            } else if (token === 'cover' || token === 'contain') {
+              obj.fit = token
+            } else if (isRotation(token)) {
+              let match = token.match(rotationRegex)
+              if (match) obj = {...obj, ...match.groups}
+            } else if (token === 'mirror') {
+              obj.mirror = true
+            } else {
+              obj.caption = token[0] === '"' && token[token.length-1] === '"' ? token.slice(1,-1) : token
+            }
+          }
+          return obj
+        })
       //Array.from(host.value.querySelectorAll('li') as HTMLUListElement[]).forEach(li => li.parentElement?.removeChild(li))
     }
     return itemsList
@@ -646,7 +649,6 @@
   function loadImage() {
     viewer.value = initOsdViewer()
     configureImageViewerBehavior()
-    console.log(tileSource.value)
     tileSource.value && viewer.value.open(tileSource.value)
   }
 
@@ -752,14 +754,12 @@
     while (el.parentElement && el.tagName !== 'BODY') el = el.parentElement;
 
     (Array.from(el.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
-      console.log(mark)
       let match = Array.from(mark.attributes).find(attr => actionKeys.has(attr.name))
       if (match) {
         let veMedia = findVeMedia(mark.parentElement)
         if (veMedia) {
           mark.classList.add(match.name)
           mark.addEventListener('click', () => {
-            console.log('click')
             if (match?.name === 'anno') showAnnotation(match.value)
             else if (match?.name === 'zoomto') zoomto(match.value)
             else if (match?.name === 'play') playMedia(match.value)
@@ -1386,7 +1386,6 @@
     width: calc(100% - 60px);
     max-width: 50vh;
   }
-
 
   .buttons {
     display: flex;

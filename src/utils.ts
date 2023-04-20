@@ -147,7 +147,7 @@ export async function loadManifests(manifestUrls: string[], refresh: boolean=fal
       : `${iiifServer}/${manifestId}/manifest.json`
   )
   let toGet = _manifestUrls.filter(url => !_manifestCache[url])
-  // console.log(`loadManifests: toGet=${toGet.length}`)
+  // console.log('loadManifests', toGet)
 
   if (toGet.length > 0) {
     let requests: any = toGet
@@ -176,7 +176,8 @@ export async function loadManifests(manifestUrls: string[], refresh: boolean=fal
       responses = await Promise.all(requests)
       let convertedManifests = await Promise.all(responses.map((resp:any) => resp.json()))
       for (let i = 0; i < manifests.length; i++) {
-        let found = convertedManifests.find(manifest => manifest['@id'] === manifests[i].id)
+        let mid =  manifests[i].id ||manifests[i]['@id']
+        let found = convertedManifests.find(manifest => (manifest.id || manifest['@id']) === mid)
         if (found) manifests[i] = found
       }
     }
@@ -222,9 +223,9 @@ export function staticImage(manifest: any, options:any, width:number=0, height:n
   return url
 }
 
-export function thumbnail(manifest: any, width:number=400) {
+export function thumbnail(manifest:any, width:number=400, seq:number=1) {
   if (!manifest) return null
-    let _imageInfo = getItemInfo(manifest)
+    let _imageInfo = getItemInfo(manifest, seq)
     return _imageInfo.service
       ? `${_imageInfo.service[0].id || _imageInfo.service[0]['@id']}/full/${width},/0/default.jpg`
       : _imageInfo.type === 'Video'

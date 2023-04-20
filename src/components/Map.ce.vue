@@ -275,6 +275,7 @@
       } 
       content.value.style.width = `${width}px`
       content.value.style.height = `${height}px`
+      host.value.style.height = `${props.caption ? height + 32 : height}px`
       init()
     })
   }
@@ -309,7 +310,7 @@
 
   watch(layerObjs, async () => {
     let _layerObjs = await Promise.all(layerObjs.value)
-    console.log(toRaw(_layerObjs))
+    // console.log(toRaw(_layerObjs))
 
     let geojsonUrls = _layerObjs
       .filter(item => item.geojson && item.preferGeojson)
@@ -992,16 +993,21 @@
   }
   
   #caption {
+    /*
     display: flex;
     align-items: center;
+    */
     font-family: sans-serif;
     width: 100%;
     /* background: rgba(0, 0, 0, 0.7); */
+    white-space: nowrap;
     background-color: #555;
     color: white;
     padding: 4px 6px;
     bottom: 0;
     height: 32px;
+    text-overflow: ellipsis;
+    overflow: hidden;
   }
 
   #lat-lng-zoom {

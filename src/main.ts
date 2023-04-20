@@ -32,6 +32,7 @@ import Mermaid from './components/Mermaid.ce.vue'
 import Modal from './components/Modal.ce.vue'
 import Navbar from './components/Navbar.ce.vue'
 import Pager from './components/Pager.ce.vue'
+import PlantSpecimen from './components/PlantSpecimen.ce.vue'
 import SiteSearch from './components/SiteSearch.ce.vue'
 import Snippet from './components/Snippet.ce.vue'
 import SourceViewer from './components/SourceViewer.ce.vue'
@@ -70,6 +71,7 @@ function init() {
 	customElements.define('ve-modal', defineCustomElement(Modal))
 	customElements.define('ve-navbar', defineCustomElement(Navbar))
 	customElements.define('ve-pager', defineCustomElement(Pager))
+	customElements.define('ve-plant-specimen', defineCustomElement(PlantSpecimen))
 	customElements.define('ve-snippet', defineCustomElement(Snippet))
 	customElements.define('ve-source-viewer', defineCustomElement(SourceViewer))
 	customElements.define('ve-site-search', defineCustomElement(SiteSearch))
