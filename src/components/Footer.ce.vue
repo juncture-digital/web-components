@@ -95,7 +95,7 @@
     sourcePath.value = prefix && path.indexOf(prefix) !== 0
       ? `${prefix}/${path}`
       : location.pathname.split('/').filter(pe => pe).filter(pe => pe !== 'editor').join('/')
-    console.log('showSource', toRaw(sourcePath.value))
+    // console.log('showSource', toRaw(sourcePath.value))
     showPageSourceDialog.value = true
   }
 

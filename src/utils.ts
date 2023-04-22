@@ -155,13 +155,6 @@ export async function loadManifests(manifestUrls: string[], refresh: boolean=fal
         if (refresh && ['localhost', 'iiif.juncture-digital.org'].includes(new URL(manifestUrl).hostname)) {
           manifestUrl += '?refresh'
         }
-        /*
-        return fetch(manifestUrl,
-          ['localhost', 'iiif.juncture-digital.org'].includes(new URL(manifestUrl).hostname)
-            ? {headers: {'X-Requested-From': window.location.href}}
-            : {}
-        )
-        */
         return fetch(manifestUrl)
       })
     let responses = await Promise.all(requests)

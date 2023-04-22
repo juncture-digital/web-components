@@ -67,8 +67,6 @@
   import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js'
   import type SlTab from '@shoelace-style/shoelace/dist/components/tab/tab.js'
 
-  const apiEndpoint = location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://api.juncture-digital.org'
-
   const props = defineProps({
     label: { type: String },
     collapsible: { type: Boolean, default: false },
@@ -160,7 +158,7 @@
   
   function getHTML() {
     html.value = ''
-    let url = `${apiEndpoint}/html/?inline=true`
+    let url = '/html/?inline=true'
     fetch(url, {
       method: 'POST',
       body: JSON.stringify({

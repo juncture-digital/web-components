@@ -72,7 +72,6 @@
   })
 
   onMounted(() => {
-    console.log('sourceViewer', props)
     if (props.src) {
       fetch(`https://api.juncture-digital.org/markdown/${props.src}`)
         .then(resp => resp.text())
@@ -210,7 +209,6 @@
 
   function onDrag(evt:DragEvent) {
     let text = rawText.value
-    console.log(text)
     if (text) evt.dataTransfer?.setData('text/plain', text)
   }
 

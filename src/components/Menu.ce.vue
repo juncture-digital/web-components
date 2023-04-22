@@ -102,12 +102,7 @@
     let code = (new URL(window.location.href)).searchParams.get('code')
     if (code) {
       window.history.replaceState({}, '', window.location.pathname)
-      let isDev = window.location.hostname === 'localhost' || window.location.hostname.indexOf('192.168.') === 0
-      let url = isDev
-        ? `http://${window.location.hostname}:8000/gh-token?code=${code}&hostname=${window.location.hostname}`
-        : `https://api.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
-      console.log('token url:', url)
-      fetch(url)
+      fetch(`/gh-token?code=${code}&hostname=${window.location.hostname}`)
         .then(resp => resp.text())
         .then(authToken => {
           if (authToken) {
@@ -164,13 +159,8 @@
 
   function showHelpWindow() {
     if (helpWindow) { helpWindow.close() }
-    let isDev = window.location.hostname === 'localhost' || window.location.hostname.indexOf('192.168.') === 0
-    let url = isDev
-      ? `http://${window.location.hostname}:8080/help`
-      : 'https://beta.juncture-digital.org/help'
-
     let options = 'toolbar=yes,location=yes,left=0,top=0,width=1040,height=1200,scrollbars=yes,status=yes'
-    helpWindow = window.open(url, '_blank', options)
+    helpWindow = window.open('/help', '_blank', options)
   }
 
   function showMarkdownDialog() {
@@ -182,7 +172,7 @@
     let hostname = (new URL(window.location.href)).hostname
     let isDev = hostname === 'localhost' || hostname.indexOf('192.168.') === 0
     let href = isDev
-      ? `${window.location.origin}${window.location.pathname}?code=testing`
+      ? `${window.location.pathname}?code=testing`
       : clientIds[location.hostname] !== undefined
         ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${location.href}`
         : null
@@ -207,7 +197,7 @@
   }
 
   function menuItemSelected(item: any) {
-    console.log('menuItemSelected', item)
+    // console.log('menuItemSelected', item)
     let action = item.href ? item.href.split('/').pop().toLowerCase() : ''
     if ((action.indexOf('contact') === 0 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
       showContactForm()

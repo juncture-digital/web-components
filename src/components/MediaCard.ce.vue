@@ -127,14 +127,14 @@
   getManifest(props.manifest).then(resp => manifest.value = resp)
 
   function copyTextToClipboard(text: string) {
-    console.log('copyTextToClipboard', text)
+    // console.log('copyTextToClipboard', text)
     if (navigator.clipboard) navigator.clipboard.writeText(text)
   }
 
   const imageDialog = ref<SLDialog>()
   watch(imageDialog, (_dialog) => {
     _dialog?.addEventListener('sl-show', () => {
-      console.log(imageDialog.value?.parentElement)
+      // console.log(imageDialog.value?.parentElement)
       if (imageDialog.value) imageDialog.value.panel.style.width = `${calcDialogWidth()}px`
     })
   })

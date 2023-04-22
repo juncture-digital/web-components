@@ -86,25 +86,4 @@ function init() {
 	document.body.style.opacity = '1'
 };
 
-// (window as any).previewInit = function(){ console.log('TODO: previewInit')}
-
-// Dynamically load css if needed
-/*
-let cssSrc = 'https://cdn.jsdelivr.net/npm/juncture-digital/dist/assets/css/index.css'
-let junctureStyleEls = Array.from(document.querySelectorAll(`link[href="${cssSrc}"], style[data-vite-dev-id$="/src/style.css"]`))
-if (junctureStyleEls.length === 0) {
-	let linkEl = document.createElement('link')
-	linkEl.href = cssSrc
-	linkEl.rel = 'stylesheet'
-	linkEl.type = 'text/css'
-	console.log('adding juncture css', linkEl)
-	linkEl.addEventListener('load', () => {init()})
-	let head = document.getElementsByTagName('head')[0]
-	let styleEls = Array.from(document.querySelectorAll('style, link[rel="stylesheet"]'))
-	if (styleEls.length > 0) head.insertBefore(linkEl, styleEls[0])
-	else head.appendChild(linkEl)
-} else {
-	init()
-}
-*/
 init()

@@ -48,7 +48,7 @@
   const manifests = ref<any[]>([])
 
   watch(specimens, async () => {
-    console.log('specimens', toRaw(specimens.value))
+    // console.log('specimens', toRaw(specimens.value))
     manifests.value = await Promise.all(
       ((specimens.value?.length === 1 ? [specimens.value[0]] : specimens.value || [])).map((specimen:any) => {
         return fetch(`${iiifService}/manifest/`, {

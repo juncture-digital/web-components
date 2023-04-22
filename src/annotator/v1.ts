@@ -1,18 +1,15 @@
 import { default as Annotorious } from '@recogito/annotorious-openseadragon'
 import { sha256 } from '../utils'
-import { GithubClient } from '../gh-utils'
+
+const ENV = location.hostname === 'localhost' ? 'DEV' : 'PROD'
+// const annotationsEndpoint = ENV === 'DEV' ? 'http://localhost:8000' : 'https://api.juncture-digital.org'
+const annotationsEndpoint = 'https://api.juncture-digital.org'
 
 export class Annotator {
 
-  ghClient: any
   osd: any
   base: string
-  acct: string
-  repo: string
-  ref:string = 'main'
-  basePath: string
-  imageId: string = ''
-  sha: string = ''
+  imageId:string = ''
   annotorious: any
   visible = false
   ghAuthToken = ''
@@ -21,10 +18,6 @@ export class Annotator {
   constructor(osd:any, base:string='', editable:boolean=true) {
     this.osd = osd
     this.base = base
-    let [acct, repo, ...pathElems] = this.base.split('/')
-    this.acct = acct
-    this.repo = repo
-    this.basePath = pathElems.join('/')
     this.annotorious = Annotorious(osd, {readOnly: !editable})
     this.annotorious.on('createAnnotation', async (anno:any) => this.createAnnotation(anno))
     this.annotorious.on('updateAnnotation', async (anno:any) => this.updateAnnotation(anno))
@@ -32,9 +25,6 @@ export class Annotator {
     this.annotorious.on('selectAnnotation', async (anno:any) => this.onSelect(anno))
     this.setVisible(true)
     this.ghAuthToken = localStorage.getItem('gh-auth-token') || ''
-    if (this.ghAuthToken) {
-      this.ghClient = new GithubClient(this.ghAuthToken)
-    }
     // console.log(`Annotator: base=${base} readOnly=${this.annotorious.readOnly} authenticated=${this.ghAuthToken !== ''}`)
   }
 
@@ -42,13 +32,20 @@ export class Annotator {
     this.imageId = imageId
     this.setVisible(false)
     let annotations = []
-
-    // console.log(`Annotator.loadAnnotations: acct=${this.acct} repo=${this.repo} ref=${this.ref} basePath=${this.basePath} imageId=${imageId}`)
-    let ghFile = await this.ghClient.getFile(this.acct, this.repo, `${this.basePath}/${this.imageId}.json`, this.ref)
-    this.sha = ghFile.sha
-    annotations = JSON.parse(ghFile.content)
-  
-    console.log(`Adding ${annotations.length} annotations`)
+    let url = `${annotationsEndpoint}/annotations/${this.base}/${imageId}/`
+    // console.log(`Annotator.loadAnnotations: ${url}`)
+    let resp:any = await fetch(url)
+    if (resp.ok) {
+      resp = await resp.json()
+      annotations = resp.annotations
+      if (resp.annotations.length > 0) {
+        annotations = resp.annotations.map((anno:any) => {
+          anno.id = anno.id.split('/').filter((pe:string) => pe).pop()
+          return anno
+        })
+        console.log(`Adding ${resp.annotations.length} annotations`)
+      }
+    }
     this.annotorious.setAnnotations(annotations)
     if (this.annotorious.readOnly) {
       annotations.forEach((anno: any) => {
@@ -77,7 +74,7 @@ export class Annotator {
   }
 
   toggleVisibility(evt:MouseEvent) {
-    // console.log('toggleVisibility')
+    console.log('toggleVisibility')
     if (evt) evt.stopPropagation()
     this.setVisible(!this.visible)
   }
@@ -113,25 +110,54 @@ export class Annotator {
     this.selected = undefined
   }
 
-  async saveAnnotations() {
-    let content = JSON.stringify(this.annotorious.getAnnotations(), null, 2)
-    // console.log(`saveAnnotations: acct=${this.acct} repo=${this.repo} ref=${this.ref} basePath=${this.basePath} imageId=${this.imageId}`, content)
-    let resp = await this.ghClient.putFile(this.acct, this.repo, `${this.basePath}/${this.imageId}.json`, content, this.ref, false, this.sha)
-    console.log(resp)
-  }
-
   async createAnnotation(anno:any) {
     anno.id = sha256(anno.id).slice(0,8)
     anno.target.id = this.imageId
+    console.log('createAnnotation', anno)
+    let resp = await fetch(`${annotationsEndpoint}/annotation/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/ld+json;profile="http://www.w3.org/ns/anno.jsonld',
+        // Accept: 'application/ld+json;profile="http://www.w3.org/ns/anno.jsonld',
+        Authorization: `Token: ${this.ghAuthToken}`
+      },
+      body: JSON.stringify({annotation: anno, path: `${this.base}/${this.imageId}`})
+    })
+    if (resp.ok && resp.status === 201) {
+      let annotation = await resp.json()
+      this.annotorious.addAnnotation(annotation)
+    } else {
+      console.log(`createAnnotation: unexpected resp_code=${resp.status}`)
+    }
   }
 
   async updateAnnotation(anno:any) {
     anno.target.id = this.imageId
-    this.saveAnnotations()
+    let url = `${annotationsEndpoint}/annotation/${this.base}/${this.imageId}/${anno.id.split('/').pop()}/`
+    console.log(`updateAnnotation: url=${url}`)
+    let resp = await fetch(url, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/ld+json;profile="http://www.w3.org/ns/anno.jsonld',
+        // Accept: 'application/ld+json;profile="http://www.w3.org/ns/anno.jsonld',
+        Authorization: `Bearer: ${this.ghAuthToken}`
+      },
+      body: JSON.stringify(anno)
+    })
+    if (resp.status !== 202) {
+      console.log(`updateAnnotation: unexpected resp_code=${resp.status}`)
+    }
   }
 
   async deleteAnnotation(anno:any) {
-    this.saveAnnotations()
+    let resp = await fetch(`${annotationsEndpoint}/annotation/${this.base}/${this.imageId}/${anno.id.split('/').pop()}/`, {
+      method: 'DELETE',
+      headers: {Authorization: `Bearer: ${this.ghAuthToken}`}
+    })
+    if (resp.status !== 204) {
+      console.log(`deleteAnnotation: unexpected resp_code=${resp.status}`)
+    }
   }
 
 }
+

@@ -159,7 +159,7 @@
   }
 
   function onClick(from:string, evt:MouseEvent) {
-    console.log(`onClick from=${from} isPlaying=${isPlaying.value} restartOnPlay=${options.value.restartOnPlay}`, evt)
+    // console.log(`onClick from=${from} isPlaying=${isPlaying.value} restartOnPlay=${options.value.restartOnPlay}`, evt)
     isPlaying.value = !isPlaying.value
 
     const canvas = gif.value.nextElementSibling as HTMLCanvasElement

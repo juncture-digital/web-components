@@ -129,11 +129,12 @@ export class GithubClient {
       let resp:any = await fetch(url, { method: 'PUT', body: JSON.stringify(payload), headers: {Authorization: `Token ${this.authToken}`} })
       if (resp.ok) {
         let body = await resp.json()
-        this._shas[shaKey] = body.content.sha
+        sha = body.content.sha
+        this._shas[shaKey] = sha
       } else {
         console.log(resp)
       }
-      return {status:resp.status, statusText:resp.statusText}
+      return {status:resp.status, statusText:resp.statusText, sha}
     }
   
     async deleteFile(acct:string, repo:string, path:string, ref:string, sha:string=''): Promise<any> {

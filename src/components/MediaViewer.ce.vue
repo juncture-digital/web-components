@@ -142,6 +142,7 @@
     zoomOnScroll: { type: Boolean },
     noCaption: { type: Boolean },
     noInfoIcon: { type: Boolean },
+    editable: { type: Boolean },
 
     static: { type: Boolean },
 
@@ -329,7 +330,7 @@
   const annotator = ref<any>()
   const annotations = ref<any[]>([])
   const annotationsVisible = ref(false)
-  const annotationsEditable = ref(window.location.pathname.split('/')[1] === 'editor')
+  const annotationsEditable = ref(window.location.pathname.split('/')[1] === 'editor' || props.editable)
 
   function toggleAnnotations() {
     annotationsVisible.value = !annotationsVisible.value
@@ -1025,7 +1026,7 @@
   }
 
   function seekTo(start:string, end:string='') {
-    console.log(`seekTo: start=${start} end=${end}`)
+    // console.log(`seekTo: start=${start} end=${end}`)
     let startSecs = hmsToSeconds(start)
     let endSecs = end ? hmsToSeconds(end) + 1 : -1
     // console.log(`seekTo: start=${startSecs} startElem=${startTimes.value[startSecs] !== undefined} end=${endSecs} isMuted=${isMuted.value} forceMuteOnPlay=${forceMuteOnPlay}`)

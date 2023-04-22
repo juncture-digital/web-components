@@ -49,13 +49,8 @@
     let code = (new URL(window.location.href)).searchParams.get('code')
     if (code) {
       let href = `${location.pathname}${location.hash}`
-      console.log(href)
       window.history.replaceState({}, '', href)
-      let isDev = window.location.hostname === 'localhost' || window.location.hostname.indexOf('192.168.') === 0
-      let url = isDev
-        ? `http://${window.location.hostname}:8000/gh-token?code=${code}&hostname=${window.location.hostname}`
-        : `https://api.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
-      fetch(url)
+      fetch(`/gh-token?code=${code}&hostname=${window.location.hostname}`)
         .then(resp => resp.text())
         .then(token => {
           if (token) {
@@ -74,7 +69,7 @@
     let isDev = hostname === 'localhost' || hostname.indexOf('192.168.') === 0
     let redirectTo  = `${window.location.href}`
     let href = isDev
-      ? `${window.location.origin}${window.location.pathname}?code=testing&redirect_uri=${location.pathname}${location.hash}`
+      ? `${window.location.pathname}?code=testing&redirect_uri=${location.pathname}${location.hash}`
       : clientIds[location.hostname] !== undefined
         ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${redirectTo}`
         : null

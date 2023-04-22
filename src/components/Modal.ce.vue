@@ -25,8 +25,6 @@
   import '@shoelace-style/shoelace/dist/components/dialog/dialog.js'
   import '@shoelace-style/shoelace/dist/components/icon/icon.js'
 
-  const apiEndpoint = location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://api.juncture-digital.org'
-
   const props = defineProps({
     src: { type: String },
     prefix: { type: String },
@@ -81,7 +79,7 @@
   function getHTML() {
     html.value = ''
     if (props.src) {
-      let url = `${apiEndpoint}/html/${props.src}`
+      let url = `/html/${props.src}`
       let [acct, repo, ...path] = props.src.split('/')
       if (acct === 'juncture-digital' && repo === 'juncture' && 
          (location.hostname === 'dev.juncture-digital.org' || location.hostname === 'localhost')) {
@@ -96,7 +94,7 @@
         nextTick(() => initTippy(shadowRoot.value, true))
       })
     } else {
-      fetch(`${apiEndpoint}/html/?inline=true`, {
+      fetch(`/html/?inline=true`, {
         method: 'POST',
         body: JSON.stringify({
           prefix: `${props.prefix}`,

@@ -8,10 +8,8 @@
   
 <script setup lang="ts">
 
-  import { computed, onMounted, nextTick, ref, toRaw, watch } from 'vue'
-  import { initTippy, observeActive } from '../utils'
-
-  const apiEndpoint = location.hostname === 'localhost' ? 'http://localhost:8000' : 'https://api.juncture-digital.org'
+  import { computed, nextTick, ref, watch } from 'vue'
+  import { observeActive } from '../utils'
 
   const props = defineProps({
     src: { type: String },
@@ -64,7 +62,7 @@
 
   function getHTML() {
     html.value = ''
-    let url = `${apiEndpoint}/html/?inline=true`
+    let url = '/html/?inline=true'
     fetch(url, {
       method: 'POST',
       body: JSON.stringify({
