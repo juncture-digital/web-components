@@ -79,7 +79,7 @@
   function getHTML() {
     html.value = ''
     if (props.src) {
-      let url = `/html/${props.src}`
+      let url = `/${props.src}`
       let [acct, repo, ...path] = props.src.split('/')
       if (acct === 'juncture-digital' && repo === 'juncture' && 
          (location.hostname === 'dev.juncture-digital.org' || location.hostname === 'localhost')) {

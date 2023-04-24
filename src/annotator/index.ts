@@ -45,8 +45,10 @@ export class Annotator {
 
     // console.log(`Annotator.loadAnnotations: acct=${this.acct} repo=${this.repo} ref=${this.ref} basePath=${this.basePath} imageId=${imageId}`)
     let ghFile = await this.ghClient.getFile(this.acct, this.repo, `${this.basePath}/${this.imageId}.json`, this.ref)
-    this.sha = ghFile.sha
-    annotations = JSON.parse(ghFile.content)
+    if (ghFile.content) {
+      annotations = JSON.parse(ghFile.content)
+      this.sha = ghFile.sha
+    }
   
     console.log(`Adding ${annotations.length} annotations`)
     this.annotorious.setAnnotations(annotations)

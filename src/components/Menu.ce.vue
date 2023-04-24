@@ -6,8 +6,8 @@
         <div v-if="navItems" class="wrapper">
           <label class="menu-icon" htmlFor="menu-btn"><span class="navicon"></span></label>
           <ul class="menu" :style="{backgroundColor: props.background || '#444'}">
-            <li v-for="item, idx in navItems" :key="`nav-${idx}`" @click="menuItemSelected(item)">
-              <sl-icon slot="prefix" :name="navIcon(item)" label="item.label"></sl-icon>
+            <li v-for="item, idx in navItems" :data-item="JSON.stringify(item)" :key="`nav-${idx}`" @click="menuItemSelected(item)">
+              <sl-icon slot="prefix" :name="navIcon(item)" :label="item.label"></sl-icon>
               {{item.label}}
             </li>
           </ul>
@@ -37,9 +37,9 @@
 
   const clientIds:any = {
     'www.juncture-digital.org': 'f7247e1e4769ba7c61e4',
-  'beta.juncture-digital.org': 'f30ce4168a0bb95ecaa3',
-  'dev.juncture-digital.org': 'bb290b5a738cb6fe31c7',
-  'tools.juncture-digital.org': '0b40086fe912d97c03e6'
+    'beta.juncture-digital.org': 'f30ce4168a0bb95ecaa3',
+    'dev.juncture-digital.org': 'bb290b5a738cb6fe31c7',
+    'tools.juncture-digital.org': '0b40086fe912d97c03e6'
   }
 
   const nav:any = {
@@ -69,7 +69,7 @@
   const originalNavItems = ref<any[]>([])
 
   const navItems = ref<any[]>()
-  // watch(navItems, () => console.log('menu.navItems', toRaw(navItems.value)) )
+  watch(navItems, () => console.log('menu.navItems', toRaw(navItems.value)) )
 
   let helpWindow:any
   let externalWindow:any

@@ -42,8 +42,7 @@
   const shadow = computed(() => root?.value?.parentNode?.querySelector('.ve-navbar') as HTMLElement)
 
   const navEl = ref<string>()
-  
-  const navItems = ref<string[]>([])
+  // watch(navEl, () => console.log('Navbar.navEl', toRaw(navEl.value)) )
 
   onMounted(() => {
     applyProps()
