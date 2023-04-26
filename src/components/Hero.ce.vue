@@ -28,7 +28,7 @@
   const imageInfo = ref<any>()
   const imgUrl = ref<string>()
 
-  watch(props, () => { 
+  watch(props, () => {
     if (props.sticky) {
       host.value.style.position = 'sticky'
       host.value.style.top = '-320px'
@@ -62,8 +62,15 @@
   })
 
   function iiifUrl(serviceUrl: string, options: any) {
-    let size = `${host.value.clientWidth},`
+    let _imageInfo = imageInfo.value
+    console.log(_imageInfo)
+    let _imageAspect = Number((_imageInfo.width/_imageInfo.height).toFixed(4))
+    let width = Math.min(800, host.value.clientWidth)
+    let height =  Number(width / _imageAspect).toFixed(0)
+    let size = `${width},${height}`
+    console.log(size)
     let url = `${serviceUrl.replace(/\/info.json$/,'')}/${options.region}/${size}/${options.rotation}/${options.quality}.${options.format}`
+    console.log(url)
     return url
   }
 

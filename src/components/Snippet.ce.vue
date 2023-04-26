@@ -21,13 +21,17 @@
       <sl-tab-group>
         <sl-tab slot="nav" panel="markdown"><sl-icon name="markdown"></sl-icon>Markdown</sl-tab>
         <sl-tab slot="nav" panel="html"><sl-icon name="code-slash"></sl-icon>HTML</sl-tab>
+        <sl-tab slot="nav" panel="wordpress"><sl-icon name="wordpress"></sl-icon>Wordpress</sl-tab>
         <sl-tab slot="nav" panel="preview"><sl-icon name="eye"></sl-icon>Rendered</sl-tab>
         <sl-tab-panel name="markdown">
-          <ve-source-viewer v-if="active === 'markdown'">{{ markdown }}</ve-source-viewer>
+          <ve-source-viewer v-if="markdown && active === 'markdown'" :draggable="!props.disableDrag">{{ markdown }}</ve-source-viewer>
         </sl-tab-panel>
         <sl-tab-panel name="html">
-          <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
+          <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html" :draggable="!props.disableDrag"></ve-source-viewer>    
         </sl-tab-panel>
+        <sl-tab-pane name="wordpress">
+          <ve-source-viewer v-if="active === 'wordpress' && wxr" language="wxr" :draggable="!props.disableDrag">{{ wxr }}</ve-source-viewer>    
+        </sl-tab-pane>
         <sl-tab-panel name="preview">
           <div id="juncture" style="position:relative;" v-if="active === 'preview' && html" v-html="html" :draggable="!props.disableDrag" @dragstart="onDrag"></div>
         </sl-tab-panel>
@@ -38,13 +42,17 @@
     <sl-tab-group v-else>
       <sl-tab slot="nav" panel="markdown"><sl-icon name="markdown"></sl-icon>Markdown</sl-tab>
       <sl-tab slot="nav" panel="html"><sl-icon name="code-slash"></sl-icon>HTML</sl-tab>
+      <sl-tab slot="nav" panel="wordpress"><sl-icon name="wordpress"></sl-icon>Wordpress</sl-tab>
       <sl-tab slot="nav" panel="preview"><sl-icon name="eye"></sl-icon>Rendered</sl-tab>
       <sl-tab-panel name="markdown">
-        <ve-source-viewer v-if="active === 'markdown'">{{ markdown }}</ve-source-viewer>
+        <ve-source-viewer v-if="markdown && active === 'markdown'" :draggable="!props.disableDrag">{{ markdown }}</ve-source-viewer>
       </sl-tab-panel>
-      <sl-tab-panel name="html">
-        <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html"></ve-source-viewer>    
-      </sl-tab-panel>
+      <sl-tab-pane name="html">
+        <ve-source-viewer v-if="active === 'html' && html" v-html="html" language="html" :draggable="!props.disableDrag"></ve-source-viewer>    
+      </sl-tab-pane>
+      <sl-tab-pane name="wordpress">
+        <ve-source-viewer v-if="active === 'wordpress' && wxr" language="wxr" :draggable="!props.disableDrag">{{ wxr }}</ve-source-viewer>    
+      </sl-tab-pane>
       <sl-tab-panel name="preview">
         <div id="juncture" style="position:relative;" v-if="active === 'preview' && html" v-html="html" :draggable="!props.disableDrag" @dragstart="onDrag"></div>
       </sl-tab-panel>
@@ -69,6 +77,7 @@
 
   const props = defineProps({
     label: { type: String },
+    tabs: { type: String, default: 'markdown,html,preview' },
     collapsible: { type: Boolean, default: false },
     open: { type: Boolean, default: false },
     prefix: { type: String },
@@ -79,21 +88,37 @@
     height: { type: String },
     fill: { type: Boolean },
     showActive: { type: Boolean },
-    disableDrag: { type: Boolean }
+    disableDrag: { type: Boolean },
+    src: { type: String }
   })
 
   const root = ref<HTMLElement | null>(null)
   const shadowRoot = computed(() => root?.value?.parentNode as HTMLElement)
   const host = computed(() => (root.value?.getRootNode() as any)?.host)
-  const content = computed(() => shadowRoot.value?.querySelector('sl-tab-group') as HTMLElement)
   
   const markdown = ref<string>()
   const html = ref<string>()
+  const wxr = ref<string>()
   const active = ref<string>()
+  const tabs = ref<string[]>()
+
+  // watch(markdown, () => console.log('markdown', markdown.value))
+
+  watch(html, () => getWxr())
+
+  onMounted(() => {
+    if (props.src) {
+      fetch(`https://dev.juncture-digital.org/${props.src}?fmt=md`)
+        .then(resp => resp.text())
+        .then(md => {
+          markdown.value = md.replace(/>/g,'&gt;').replace(/</g,'&lt;')
+        })
+    }
+  })
 
   watch(host, () => {
-    // let lines:string[] = host.value.textContent.split('\n')
-
+    if (props.tabs) tabs.value = props.tabs.split(',')
+    else tabs.value = ['markdown', 'html', 'preview']
     let text = host.value.innerHTML
       .replace(/<pre v-pre="" data-lang="markup"><code class="lang-markup">/,'')
       .replace(/<\/code><\/pre>/, '')
@@ -124,15 +149,19 @@
     if (props.height) nextTick(() => setHeight())
   })
   
-  watch(content, () => {
+  function addObserver() {
     shadowRoot.value?.querySelectorAll('sl-tab').forEach(el => {
       const observer = new MutationObserver((mutations) => {
         let slTab = mutations[0].target as SlTab
-        if (slTab.getAttribute('aria-selected') === 'true') active.value = slTab.getAttribute('panel')?.valueOf()
+        slTab.disabled = !tabs.value?.includes(slTab.panel)
+        slTab.style.visibility = slTab.disabled ? 'hidden' : 'visible'
+        if (slTab.active) active.value = slTab.panel
       })
-      observer.observe(el, { attributes: true })
+      observer.observe(el, { childList: true, subtree: true, attributes: true })
     })
-  })
+  }
+
+  watch(tabs, () => addObserver())
 
   function setHeight() {
     let container = shadowRoot.value?.querySelector('sl-tab-panel[name="preview"]') as HTMLElement
@@ -158,8 +187,7 @@
   
   function getHTML() {
     html.value = ''
-    let url = '/html/?inline=true'
-    fetch(url, {
+    fetch('https://dev.juncture-digital.org/html/', {
       method: 'POST',
       body: JSON.stringify({
         prefix: `${props.prefix || ''}`,
@@ -182,6 +210,24 @@
         })
       }
     })
+  }
+
+  function getWxr() {
+    if (html.value) {
+      wxr.value = ''
+      fetch('https://dev.juncture-digital.org/wxr/', {
+        method: 'POST',
+        body: JSON.stringify({
+          prefix: `${props.prefix || ''}`,
+          path: `${props.path || ''}`,
+          html: html.value
+        })
+      })
+      .then(resp => {
+        return resp.text()
+      })
+      .then(text => wxr.value = text)
+    }
   }
 
   function onDrag(evt:DragEvent) {

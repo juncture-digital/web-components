@@ -20,6 +20,8 @@
   >
     <code>{{rawText}}</code></pre>
 
+  <pre v-if="language === 'wxr'" id="wxr" class="language-xml"><code>{{rawText}}</code></pre>
+
   <sl-tooltip content="Text copied to clipboard" placement="top" hoist trigger="manual" style="--sl-tooltip-arrow-size: 0;" >
     <sl-button class="copy-button" @click="copyTextToClipboard">Copy Text</sl-button>
   </sl-tooltip>
@@ -39,6 +41,7 @@
 
   import 'prismjs/components/prism-markup'
   import 'prismjs/components/prism-markdown'
+  import 'prismjs/components/prism-xml-doc'
   import 'prismjs/themes/prism.css'
 
   const root = ref<HTMLElement | null>(null)
@@ -64,6 +67,7 @@
   })
 
   watch(rawText, () => {
+    rawText.value = rawText.value?.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&amp;/g, '&')
     let el = shadowRoot.value?.querySelector(`#${props.language}`)
     if (el && rawText.value) nextTick(() => {
       Prism.highlightElement(el)
@@ -73,7 +77,7 @@
 
   onMounted(() => {
     if (props.src) {
-      fetch(`/${props.src}?fmt=md`)
+      fetch(`https://dev.juncture-digital.org/${props.src}?fmt=md`)
         .then(resp => resp.text())
         .then(markdown => {
           markdown = markdown.replace(/>/g,'&gt;').replace(/</g,'&lt;')

@@ -21,7 +21,8 @@
     </template>
 
     <sl-dialog label="Page Source" class="page-source-dialog" :style="{'--width': isMobile() ? '100vw' : '80vw'}">
-      <ve-source-viewer v-if="sourcePath" :src="sourcePath"></ve-source-viewer>
+      <ve-snippet v-if="sourcePath" :src="sourcePath" tabs="markdown,html,wordpress" disable-drag></ve-snippet>
+      <!--<ve-source-viewer v-if="sourcePath" :src="sourcePath"></ve-source-viewer>-->
       <sl-button slot="footer" variant="primary" @click="showPageSourceDialog = false">Close</sl-button>
     </sl-dialog>
 
