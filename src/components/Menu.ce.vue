@@ -69,7 +69,7 @@
   const originalNavItems = ref<any[]>([])
 
   const navItems = ref<any[]>()
-  watch(navItems, () => console.log('menu.navItems', toRaw(navItems.value)) )
+  // watch(navItems, () => console.log('menu.navItems', toRaw(navItems.value)) )
 
   let helpWindow:any
   let externalWindow:any
@@ -176,12 +176,12 @@
       : clientIds[location.hostname] !== undefined
         ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${location.href}`
         : null
-    console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
+    // console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
     if (href) window.location.href = href
   }
 
   function logout() {
-    console.log('logout')
+    // console.log('logout')
     Object.keys(localStorage).forEach(key => localStorage.removeItem(key))
     window.dispatchEvent(new Event("storage"))
     isLoggedIn.value = false

@@ -61,7 +61,7 @@
       host.value.style.top = '0'
       if (props.alpha) host.value.style.background = `rgba(0, 0, 0, ${props.alpha})`
       host.value.style.marginTop = `-${props.offset}px`
-    } 
+    }
     if (props.label) {
       let titleEl = document.querySelector('title')
       if (!titleEl) {

@@ -16,7 +16,7 @@
     options: { type: String },
     position: { type: String, default: 'center' },
     sticky: { type: Boolean, default: false },
-    height: { type: Number, default: 300 },
+    height: { type: Number, default: 350 },
     top: { type: Number, default: 0 },
   })
   
@@ -63,14 +63,11 @@
 
   function iiifUrl(serviceUrl: string, options: any) {
     let _imageInfo = imageInfo.value
-    console.log(_imageInfo)
     let _imageAspect = Number((_imageInfo.width/_imageInfo.height).toFixed(4))
     let width = Math.min(800, host.value.clientWidth)
     let height =  Number(width / _imageAspect).toFixed(0)
     let size = `${width},${height}`
-    console.log(size)
     let url = `${serviceUrl.replace(/\/info.json$/,'')}/${options.region}/${size}/${options.rotation}/${options.quality}.${options.format}`
-    console.log(url)
     return url
   }
 

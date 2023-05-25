@@ -108,7 +108,7 @@
 
   onMounted(() => {
     if (props.src) {
-      fetch(`https://dev.juncture-digital.org/${props.src}?fmt=md`)
+      fetch(`/${props.src}?fmt=md`)
         .then(resp => resp.text())
         .then(md => {
           markdown.value = md.replace(/>/g,'&gt;').replace(/</g,'&lt;')
@@ -187,7 +187,7 @@
   
   function getHTML() {
     html.value = ''
-    fetch('https://dev.juncture-digital.org/html/', {
+    fetch('https://www.juncture-digital.org/html/', {
       method: 'POST',
       body: JSON.stringify({
         prefix: `${props.prefix || ''}`,
@@ -215,7 +215,7 @@
   function getWxr() {
     if (html.value) {
       wxr.value = ''
-      fetch('https://dev.juncture-digital.org/wxr/', {
+      fetch('https://www.juncture-digital.org/wxr/', {
         method: 'POST',
         body: JSON.stringify({
           prefix: `${props.prefix || ''}`,
