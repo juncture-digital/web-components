@@ -11,7 +11,8 @@
     </div>
     <div class="controls">
       <ve-site-search v-if="props.searchDomain" :search-domain="props.searchDomain"></ve-site-search>
-      <ve-menu v-if="navEl" :background="props.background" position="right" :contact="props.contact">
+      <ve-menu v-if="navEl" :background="props.background" position="right" 
+        :contact="props.contact" :contact-form-title="props.contactFormTitle" :contact-subject="props.contactSubject">
         <ul v-html="navEl"></ul>
       </ve-menu>
     </div>
@@ -31,6 +32,8 @@
     url: { type: String },
     alpha: { type: Number },
     contact: { type: String },
+    contactFormTitle: { type: String },
+    contactSubject: { type: String },
     sticky: { type: Boolean, default: false },
     height: { type: Number, default: 80 },
     offset: { type: Number, default: 0 },

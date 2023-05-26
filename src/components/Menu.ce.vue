@@ -14,7 +14,7 @@
         </div>
       </div>
 
-      <ve-contact :contact="props.contact"></ve-contact>
+      <ve-contact :contact="props.contact" :title="props.contactFormTitle" :subject="props.contactSubject"></ve-contact>
       <!--
       <ve-content-viewer id="help" path="/juncture-digital/essays/help" format="html"></ve-content-viewer>
       <ve-content-viewer id="markdown" :path="props.contentPath" format="markdown"></ve-content-viewer>
@@ -32,7 +32,9 @@
   const props = defineProps({
     background: { type: String },
     position: { type: String, default: 'left' },
-    contact: { type: String }
+    contact: { type: String },
+    contactFormTitle: { type: String },
+    contactSubject: { type: String }
   })
 
   const clientIds:any = {

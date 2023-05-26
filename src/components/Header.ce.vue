@@ -19,6 +19,8 @@
       :sticky="props.sticky ? '' : null"
       :search-domain="props.searchDomain"
       :contact="props.contact"
+      :contact-form-title="props.contactFormTitle"
+      :contact-subject="props.contactSubject"
       :height="backgroundImage ? navbarHeight : height"
       :background="backgroundColor"
       :alpha="backgroundImage ? 0.2 : 0"
@@ -43,6 +45,8 @@
     logo: { type: String },
     url: { type: String },
     contact: { type: String },
+    contactFormTitle: { type: String },
+    contactSubject: { type: String },
     searchDomain: { type: String },
     entities: { type: String },
     sticky: { type: Boolean },
