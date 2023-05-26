@@ -34,6 +34,11 @@ main > p:first-of-type {
   line-height: 1.2;
 }
 
+main > section,
+main > p {
+  padding: 0 1rem;
+}
+
 .right {
   float: right;
   top: 0;
@@ -419,6 +424,9 @@ section.no-offset:target:before {
   row-gap: 2rem;
   column-gap: 2rem;
   /* margin-bottom: 48px; */
+}
+#juncture .cards.wrapper {
+  padding: 2rem;
 }
 
 #juncture .cards.wrapper > section {

@@ -187,7 +187,7 @@
   
   function getHTML() {
     html.value = ''
-    fetch('https://www.juncture-digital.org/html/', {
+    fetch('/html/', {
       method: 'POST',
       body: JSON.stringify({
         prefix: `${props.prefix || ''}`,
@@ -215,7 +215,7 @@
   function getWxr() {
     if (html.value) {
       wxr.value = ''
-      fetch('https://www.juncture-digital.org/wxr/', {
+      fetch('/wxr/', {
         method: 'POST',
         body: JSON.stringify({
           prefix: `${props.prefix || ''}`,
