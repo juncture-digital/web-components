@@ -1140,7 +1140,7 @@
     position: relative;
     /* overflow: hidden; */
     width: 100%;
-    background-color: white;
+    background-color: inherit;
     display: flex;
     justify-items: center;
   }

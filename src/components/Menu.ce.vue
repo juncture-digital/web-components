@@ -199,9 +199,10 @@
   }
 
   function menuItemSelected(item: any) {
-    // console.log('menuItemSelected', item)
+    console.log('menuItemSelected', item)
     let action = item.href ? item.href.split('/').pop().toLowerCase() : ''
-    if ((action.indexOf('contact') === 0 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
+    console.log(`action=${action}`)
+    if ((action.indexOf('contact') > -1 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
       showContactForm()
     } else if (action === 'login') {
       login()
