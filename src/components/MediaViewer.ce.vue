@@ -1309,7 +1309,7 @@
     display: inline-block;
     min-height: unset !important;
     line-height: 1.4;
-    padding: 9px;
+    padding: 0px;
     border-bottom: none;
   }
 

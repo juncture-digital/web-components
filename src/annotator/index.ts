@@ -125,6 +125,7 @@ export class Annotator {
   async createAnnotation(anno:any) {
     anno.id = sha256(anno.id).slice(0,8)
     anno.target.id = this.imageId
+    this.saveAnnotations()
   }
 
   async updateAnnotation(anno:any) {
