@@ -824,7 +824,7 @@
       let region = match?.groups?.region
       let annoid = match?.groups?.annoid
       // console.log(`ve-media.zoomto: region=${region} annoid=${annoid}`)
-      if (annoid && annotator.value.selected && annotator.value.selected.id === annoid) {
+      if (annoid && annotator.value.selected && annotator.value.selected?.id === annoid) {
         viewer.value?.viewport.goHome()
       } else {
         if (region) viewer.value?.viewport.fitBounds(parseRegionString(region, viewer.value), false)
@@ -837,7 +837,8 @@
     const match = arg?.match(/^(?<annoid>[0-9a-f]{8})$/)
     if (match) {
       let annoid = match?.groups?.annoid
-      if (annoid && annotator.value.selected && annotator.value.selected.id === annoid) {
+      if (annoid && annotator.value.selected?.id === annoid) {
+        annotator.value.deselect()
         viewer.value?.viewport.goHome()
       } else {
         annotator.value.select(annoid)
@@ -1319,6 +1320,11 @@
   }
   .edit .r6o-editor {
     width: 216px;
+  }
+
+  .r6o-widget.comment {
+    padding: 6px 6px 4px 6px;
+    border-radius: 4px;
   }
 
 
