@@ -817,6 +817,7 @@
     pause()
   }
 
+  let zoomedToRegion:string = ''
   function zoomto(arg: string) {
     arg = arg.replace(/^zoomto\|/i,'')
     const match = arg?.match(/^(?<region>(pct:|pixel:|px:)?[\d.]+,[\d.]+,[\d.]+,[\d.]+)?,?(?<annoid>[0-9a-f]{8})?$/)
@@ -824,12 +825,24 @@
       let region = match?.groups?.region
       let annoid = match?.groups?.annoid
       // console.log(`ve-media.zoomto: region=${region} annoid=${annoid}`)
-      if (annoid && annotator.value.selected && annotator.value.selected?.id === annoid) {
-        viewer.value?.viewport.goHome()
-      } else {
-        if (region) viewer.value?.viewport.fitBounds(parseRegionString(region, viewer.value), false)
+      if (region) {
+        if (zoomedToRegion === region) {
+          viewer.value?.viewport.goHome()
+          zoomedToRegion = ''
+        } else {
+          zoomedToRegion = region
+          annotator.value.deselect()
+          viewer.value?.viewport.fitBounds(parseRegionString(region, viewer.value), false)
+        }
+        if (annoid) annotator.value.select(annoid)
+      } else if (annoid) {
+        if (annotator.value.selected?.id === annoid) {
+          annotator.value.deselect()
+        } else {
+          viewer.value?.viewport.goHome()
+          if (annoid) annotator.value.select(annoid)
+        }
       }
-      if (annoid) annotator.value.select(annoid)
     }
   }
 
@@ -841,6 +854,7 @@
         annotator.value.deselect()
         viewer.value?.viewport.goHome()
       } else {
+        viewer.value?.viewport.goHome()
         annotator.value.select(annoid)
       }
     }
