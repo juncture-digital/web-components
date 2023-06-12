@@ -171,7 +171,7 @@ Source - https://www.wikitechy.com/tutorials/javascript/offsetting-an-html-ancho
   content: "";
   display: block;
   height: 80px; /* fixed header height*/
-  margin: -32px 0 0; /* negative fixed header height */
+  margin: 32px 0 0; /* negative fixed header height */
 }
 
 section.no-offset:target:before {
