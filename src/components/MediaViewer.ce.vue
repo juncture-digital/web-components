@@ -1121,6 +1121,7 @@
   :host {
     display: block;
     padding-bottom: 6px;
+    background-color: inherit;
   }
 
   .info-icon {
