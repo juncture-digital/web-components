@@ -427,6 +427,7 @@ section.no-offset:target:before {
 }
 #juncture .cards.wrapper {
   /* padding: 2rem; */
+  margin-top: 0;
 }
 
 #juncture .cards.wrapper > section {

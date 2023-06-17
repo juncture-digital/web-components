@@ -105,7 +105,7 @@
 
   .logo {
     margin-left: 20px;
-    background-color: white;
+    background-color: inherit;
   }
   img.logo {
     max-height: 50px;

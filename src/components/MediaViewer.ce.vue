@@ -515,7 +515,7 @@
   function builditemsList() {
     let itemsList = []
     let src = props.manifest || props.src
-    let listItems = Array.from(host.value.querySelectorAll('li') as HTMLUListElement[])
+    let listItems = Array.from(host.value.querySelectorAll('li') as HTMLUListElement[]).filter(li => li.innerText.trim() !== '')
     if (!src && listItems.length === 0 && entities.value.length > 0) src = `wd:${entities.value[0]}`
     if (src) {
       let obj:any = {}
@@ -557,6 +557,7 @@
                 : `https://iiif.juncture-digital.org/${tokens[0]}/manifest.json`
           }
           obj.id = sha256(decodeURIComponent(obj.src)).slice(0,8)
+
           let parsedUrl = new URL(obj.src)
           let domain = parsedUrl.hostname.replace(/^www\./, '')
           if (youtubeDomains.has(domain)) {
@@ -1316,8 +1317,9 @@
   .view .r6o-footer {
     display: none;
   }
-  .r6o-readonly-comment {
+  .r6o-widget.comment .r6o-readonly-comment {
     display: inline;
+    padding: 0;
   }
   .view .r6o-editor, 
   .view .r6o-editor-inner, 

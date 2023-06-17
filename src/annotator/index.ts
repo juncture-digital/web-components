@@ -101,7 +101,8 @@ export class Annotator {
       if (this.selected) {
         let annoEl = this.annoEl(annoId)
         if (annoEl) annoEl.style.visibility = 'visible'
-        return (this.osd.element.querySelector('.a9s-annotation.selected') as HTMLElement).style.visibility = 'visible'
+        let annoLayer = this.osd.element.querySelector('.a9s-annotation.selected') as HTMLElement
+        if (annoLayer) annoLayer.style.visibility = 'visible'
       }
     } else {
       this.deselect() 
