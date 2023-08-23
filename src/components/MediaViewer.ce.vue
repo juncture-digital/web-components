@@ -755,7 +755,7 @@
     let el = host.value.parentElement
     while (el.parentElement && el.tagName !== 'BODY') el = el.parentElement;
 
-    (Array.from(el.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
+    (Array.from(el.querySelectorAll('mark, ve-trigger')) as HTMLElement[]).forEach(mark => {
       let match = Array.from(mark.attributes).find(attr => actionKeys.has(attr.name))
       if (match) {
         let veMedia = findVeMedia(mark.parentElement)
