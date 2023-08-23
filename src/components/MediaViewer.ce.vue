@@ -747,7 +747,6 @@
 
   const actionKeys = new Set(['anno', 'play', 'start', 'zoomto'])
   function addInteractionHandlers() {
-    console.log('addInteractionHandlers')
     Array.from(host.value.querySelectorAll('[enter],[exit]') as HTMLElement[]).forEach(el => {
       let veMedia = findVeMedia(el)
       if (veMedia) addMutationObserver(el)
@@ -755,11 +754,8 @@
 
     let el = host.value.parentElement
     while (el.parentElement && el.tagName !== 'BODY') el = el.parentElement;
-    console.log(el);
     (Array.from(el.querySelectorAll('mark, ve-trigger')) as HTMLElement[]).forEach(mark => {
-      console.log(mark)
       let match = Array.from(mark.attributes).find(attr => actionKeys.has(attr.name))
-      console.log(match)
       if (match) {
         let veMedia = findVeMedia(mark.parentElement)
         if (veMedia) {
@@ -835,7 +831,7 @@
           zoomedToRegion = ''
         } else {
           zoomedToRegion = region
-          annotator.value.deselect()
+          annotator.value?.deselect()
           viewer.value?.viewport.fitBounds(parseRegionString(region, viewer.value), false)
         }
         if (annoid) annotator.value.select(annoid)
@@ -855,7 +851,7 @@
     if (match) {
       let annoid = match?.groups?.annoid
       if (annoid && annotator.value.selected?.id === annoid) {
-        annotator.value.deselect()
+        annotator.value?.deselect()
         viewer.value?.viewport.goHome()
       } else {
         viewer.value?.viewport.goHome()
