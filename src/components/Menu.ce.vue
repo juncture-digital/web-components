@@ -1,17 +1,20 @@
 <template>
 
   <div ref="root">
+
     <div class="nav" :style="{backgroundColor: props.background}">
-      <input class="menu-btn" type="checkbox" id="menu-btn"/>
-        <div v-if="navItems" class="wrapper">
-          <label class="menu-icon" htmlFor="menu-btn"><span class="navicon"></span></label>
-          <ul class="menu" :style="{backgroundColor: props.background || '#444'}">
-            <li v-for="item, idx in navItems" :data-item="JSON.stringify(item)" :key="`nav-${idx}`" @click="menuItemSelected(item)">
-              <sl-icon slot="prefix" :name="navIcon(item)" :label="item.label"></sl-icon>
-              {{item.label}}
-            </li>
-          </ul>
-        </div>
+      <div v-if="navItems" class="wrapper">
+      <div class="dropdown-selection-alt">
+        <sl-dropdown>
+          <sl-icon-button name="list" slot="trigger" style="font-size: 2.5rem;"></sl-icon-button>
+          <sl-menu>
+            <div v-for="item, idx in navItems" :data-item="JSON.stringify(item)" :key="`nav-${idx}`">
+              <sl-menu-item :name="navIcon(item)" :label="item.label">{{item.label}}</sl-menu-item>
+            </div>
+          </sl-menu>
+        </sl-dropdown>
+      </div>
+      </div>
       </div>
 
       <ve-contact :contact="props.contact" :title="props.contactFormTitle" :subject="props.contactSubject"></ve-contact>
@@ -91,7 +94,7 @@
             if (text.toLowerCase() === 'auth') {
               return {label:  isLoggedIn.value ? 'Logout' : 'Login', href:  isLoggedIn.value ? 'logout' : 'login'}
             } else {
-              return {label: text}
+              return {label: navItem.textContent}
             }
           }
         })
