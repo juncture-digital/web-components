@@ -34,6 +34,11 @@ main > p:first-of-type {
   line-height: 1.2;
 }
 
+main > section,
+main > p {
+  padding: 0 1rem;
+}
+
 .right {
   float: right;
   top: 0;
@@ -166,7 +171,7 @@ Source - https://www.wikitechy.com/tutorials/javascript/offsetting-an-html-ancho
   content: "";
   display: block;
   height: 80px; /* fixed header height*/
-  margin: -32px 0 0; /* negative fixed header height */
+  margin: 32px 0 0; /* negative fixed header height */
 }
 
 section.no-offset:target:before {
@@ -419,6 +424,10 @@ section.no-offset:target:before {
   row-gap: 2rem;
   column-gap: 2rem;
   /* margin-bottom: 48px; */
+}
+#juncture .cards.wrapper {
+  /* padding: 2rem; */
+  margin-top: 0;
 }
 
 #juncture .cards.wrapper > section {

@@ -515,7 +515,7 @@
   function builditemsList() {
     let itemsList = []
     let src = props.manifest || props.src
-    let listItems = Array.from(host.value.querySelectorAll('li') as HTMLUListElement[])
+    let listItems = Array.from(host.value.querySelectorAll('li') as HTMLUListElement[]).filter(li => li.innerText.trim() !== '')
     if (!src && listItems.length === 0 && entities.value.length > 0) src = `wd:${entities.value[0]}`
     if (src) {
       let obj:any = {}
@@ -557,6 +557,7 @@
                 : `https://iiif.juncture-digital.org/${tokens[0]}/manifest.json`
           }
           obj.id = sha256(decodeURIComponent(obj.src)).slice(0,8)
+
           let parsedUrl = new URL(obj.src)
           let domain = parsedUrl.hostname.replace(/^www\./, '')
           if (youtubeDomains.has(domain)) {
@@ -753,8 +754,7 @@
 
     let el = host.value.parentElement
     while (el.parentElement && el.tagName !== 'BODY') el = el.parentElement;
-
-    (Array.from(el.querySelectorAll('mark')) as HTMLElement[]).forEach(mark => {
+    (Array.from(el.querySelectorAll('mark, ve-trigger')) as HTMLElement[]).forEach(mark => {
       let match = Array.from(mark.attributes).find(attr => actionKeys.has(attr.name))
       if (match) {
         let veMedia = findVeMedia(mark.parentElement)
@@ -817,6 +817,7 @@
     pause()
   }
 
+  let zoomedToRegion:string = ''
   function zoomto(arg: string) {
     arg = arg.replace(/^zoomto\|/i,'')
     const match = arg?.match(/^(?<region>(pct:|pixel:|px:)?[\d.]+,[\d.]+,[\d.]+,[\d.]+)?,?(?<annoid>[0-9a-f]{8})?$/)
@@ -824,12 +825,24 @@
       let region = match?.groups?.region
       let annoid = match?.groups?.annoid
       // console.log(`ve-media.zoomto: region=${region} annoid=${annoid}`)
-      if (annoid && annotator.value.selected && annotator.value.selected.id === annoid) {
-        viewer.value?.viewport.goHome()
-      } else {
-        if (region) viewer.value?.viewport.fitBounds(parseRegionString(region, viewer.value), false)
+      if (region) {
+        if (zoomedToRegion === region) {
+          viewer.value?.viewport.goHome()
+          zoomedToRegion = ''
+        } else {
+          zoomedToRegion = region
+          annotator.value?.deselect()
+          viewer.value?.viewport.fitBounds(parseRegionString(region, viewer.value), false)
+        }
+        if (annoid) annotator.value.select(annoid)
+      } else if (annoid) {
+        if (annotator.value.selected?.id === annoid) {
+          annotator.value.deselect()
+        } else {
+          viewer.value?.viewport.goHome()
+          if (annoid) annotator.value.select(annoid)
+        }
       }
-      if (annoid) annotator.value.select(annoid)
     }
   }
 
@@ -837,9 +850,11 @@
     const match = arg?.match(/^(?<annoid>[0-9a-f]{8})$/)
     if (match) {
       let annoid = match?.groups?.annoid
-      if (annoid && annotator.value.selected && annotator.value.selected.id === annoid) {
+      if (annoid && annotator.value.selected?.id === annoid) {
+        annotator.value?.deselect()
         viewer.value?.viewport.goHome()
       } else {
+        viewer.value?.viewport.goHome()
         annotator.value.select(annoid)
       }
     }
@@ -1106,6 +1121,7 @@
   :host {
     display: block;
     padding-bottom: 6px;
+    background-color: inherit;
   }
 
   .info-icon {
@@ -1140,7 +1156,7 @@
     position: relative;
     /* overflow: hidden; */
     width: 100%;
-    background-color: white;
+    background-color: inherit;
     display: flex;
     justify-items: center;
   }
@@ -1300,8 +1316,9 @@
   .view .r6o-footer {
     display: none;
   }
-  .r6o-readonly-comment {
+  .r6o-widget.comment .r6o-readonly-comment {
     display: inline;
+    padding: 0;
   }
   .view .r6o-editor, 
   .view .r6o-editor-inner, 
@@ -1309,7 +1326,7 @@
     display: inline-block;
     min-height: unset !important;
     line-height: 1.4;
-    padding: 9px;
+    padding: 0px;
     border-bottom: none;
   }
 
@@ -1319,6 +1336,11 @@
   }
   .edit .r6o-editor {
     width: 216px;
+  }
+
+  .r6o-widget.comment {
+    padding: 6px 6px 4px 6px;
+    border-radius: 4px;
   }
 
 

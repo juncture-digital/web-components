@@ -39,7 +39,7 @@
   })
   
   const emailAddressRegex = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
-  const emailEndpoint = 'https://dev.juncture-digital.org/sendmail/'
+  const emailEndpoint = '/sendmail/'
   // const emailEndpoint = '/sendmail/'
 
   const root = ref<HTMLElement | null>(null)
@@ -101,12 +101,12 @@
         subject: props.subject || 'Contact Us',
         message: message.value
       }
-      console.log(emailEndpoint, body)
+      // console.log(emailEndpoint, body)
       hideContactForm()
       let resp: any = await fetch(emailEndpoint, {
         method: 'POST', body: JSON.stringify(body)
       })
-      console.log(await resp.json())
+      // console.log(await resp.json())
     }
   }
 

@@ -17,7 +17,7 @@
       </div>
       </div>
 
-      <ve-contact :contact="props.contact"></ve-contact>
+      <ve-contact :contact="props.contact" :title="props.contactFormTitle" :subject="props.contactSubject"></ve-contact>
       <!--
       <ve-content-viewer id="help" path="/juncture-digital/essays/help" format="html"></ve-content-viewer>
       <ve-content-viewer id="markdown" :path="props.contentPath" format="markdown"></ve-content-viewer>
@@ -35,7 +35,9 @@
   const props = defineProps({
     background: { type: String },
     position: { type: String, default: 'left' },
-    contact: { type: String }
+    contact: { type: String },
+    contactFormTitle: { type: String },
+    contactSubject: { type: String }
   })
 
   const clientIds:any = {
@@ -72,7 +74,7 @@
   const originalNavItems = ref<any[]>([])
 
   const navItems = ref<any[]>()
-  watch(navItems, () => console.log('menu.navItems here', toRaw(navItems.value)) )
+  // watch(navItems, () => console.log('menu.navItems', toRaw(navItems.value)) )
 
   let helpWindow:any
   let externalWindow:any
@@ -179,12 +181,12 @@
       : clientIds[location.hostname] !== undefined
         ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${location.href}`
         : null
-    console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
+    // console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
     if (href) window.location.href = href
   }
 
   function logout() {
-    console.log('logout')
+    // console.log('logout')
     Object.keys(localStorage).forEach(key => localStorage.removeItem(key))
     window.dispatchEvent(new Event("storage"))
     isLoggedIn.value = false
@@ -200,9 +202,10 @@
   }
 
   function menuItemSelected(item: any) {
-    // console.log('menuItemSelected', item)
+    console.log('menuItemSelected', item)
     let action = item.href ? item.href.split('/').pop().toLowerCase() : ''
-    if ((action.indexOf('contact') === 0 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
+    console.log(`action=${action}`)
+    if ((action.indexOf('contact') > -1 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
       showContactForm()
     } else if (action === 'login') {
       login()

@@ -134,7 +134,6 @@
   const imageDialog = ref<SLDialog>()
   watch(imageDialog, (_dialog) => {
     _dialog?.addEventListener('sl-show', () => {
-      // console.log(imageDialog.value?.parentElement)
       if (imageDialog.value) imageDialog.value.panel.style.width = `${calcDialogWidth()}px`
     })
   })

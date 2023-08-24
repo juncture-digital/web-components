@@ -92,10 +92,11 @@
 
   function showSource() {
     let prefix = (window as any).PREFIX
-    let path = location.pathname.split('/').filter(pe => pe).filter(pe => pe !== 'editor').join('/')
+    let isGHP = location.hostname.indexOf('github.io') !== -1
+    let path = location.pathname.split('/').filter(pe => pe).filter(pe => pe !== 'editor').slice(isGHP ? 1 : 0).join('/')
     sourcePath.value = prefix && path.indexOf(prefix) !== 0
       ? `${prefix}/${path}`
-      : location.pathname.split('/').filter(pe => pe).filter(pe => pe !== 'editor').join('/')
+      : path
     // console.log('showSource', toRaw(sourcePath.value))
     showPageSourceDialog.value = true
   }

@@ -19,9 +19,11 @@
       :sticky="props.sticky ? '' : null"
       :search-domain="props.searchDomain"
       :contact="props.contact"
-      :height="height"
+      :contact-form-title="props.contactFormTitle"
+      :contact-subject="props.contactSubject"
+      :height="backgroundImage ? navbarHeight : height"
       :background="backgroundColor"
-      :alpha="0.2"
+      :alpha="backgroundImage ? 0.2 : 0"
       :offset="backgroundImage ? navbarHeight : 0"
     >
 
@@ -43,6 +45,8 @@
     logo: { type: String },
     url: { type: String },
     contact: { type: String },
+    contactFormTitle: { type: String },
+    contactSubject: { type: String },
     searchDomain: { type: String },
     entities: { type: String },
     sticky: { type: Boolean },
@@ -80,7 +84,7 @@
       backgroundColor.value = props.background || '#444'
     }
     if (props.label && props.label !== 'static') label.value = props.label
-    if (navbar.value) navbar.value.style.height = `${props.height || navbarHeight}px`
+    // if (navbar.value) navbar.value.style.height = `${props.height || navbarHeight}px`
     if (props.sticky) host.value.classList.add('sticky')
     navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML
   }

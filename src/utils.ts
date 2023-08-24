@@ -72,10 +72,9 @@ export async function prezi2to3(manifest: any) {
 
 function observeNavbar(navbar:HTMLElement, target:HTMLElement) {
   const setTop = () => {
-    let top = parseInt(navbar.style.top.replace(/^-/,'').replace(/px$/,''))
-    let height = parseInt(navbar.style.height.replace(/px$/,''))
+    let top = parseInt(navbar.style.top.replace(/^-/,'').replace(/px$/,'')) || 0
+    let height = parseInt(navbar.style.height.replace(/px$/,'')) || navbar.clientHeight
     let topOffset = height - top
-    // if (target.style.top) topOffset += parseInt(target.style.marginTop.slice(0,-2))
     target.style.top = `${topOffset}px`
   }
   setTop()
@@ -86,7 +85,7 @@ function observeNavbar(navbar:HTMLElement, target:HTMLElement) {
 export function makeSticky(el:HTMLElement) {
   el.classList.add('sticky')
   el.style.position = 'sticky'
-  el.style.marginTop = '6px'
+  // el.style.marginTop = '6px'
   let stickyNavbar:any = document.querySelector('ve-navbar[sticky="true"]') as HTMLElement
   if (stickyNavbar) {
     observeNavbar(stickyNavbar, el)
