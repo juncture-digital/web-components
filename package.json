@@ -7,7 +7,7 @@
     "dev": "vite",
     "build": "tailwindcss -i ./src/input.css -o ./src/tailwind.css && run-p type-check build-only",
     "preview": "vite preview",
-    "build-only": "vite build",
+    "build-only": "vite build --base=/web-components/",
     "type-check": "vue-tsc --noEmit",
     "tailwind": "tailwindcss -i ./src/input.css -o ./src/tailwind.css"
   },
