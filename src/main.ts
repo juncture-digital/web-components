@@ -14,6 +14,7 @@ import Contact from './components/Contact.ce.vue'
 import ContentSelector from './components/ContentSelector.ce.vue'
 import Entities from './components/Entities.ce.vue'
 import EntityCard from './components/EntityCard.ce.vue'
+import EntityInfobox from './components/EntityInfobox.ce.vue'
 import Essay from './components/Essay.ce.vue'
 import FAB from './components/FAB.ce.vue'
 import Footer from './components/Footer.ce.vue'
@@ -40,6 +41,7 @@ import Snippet from './components/Snippet.ce.vue'
 import SourceViewer from './components/SourceViewer.ce.vue'
 import Spacer from './components/Spacer.ce.vue'
 import Starter from './components/Starter.ce.vue'
+import Trigger from './components/Trigger.ce.vue'
 import Version from './components/Version.ce.vue'
 import WikidataSearch from './components/WikidataSearch.ce.vue'
 import Window from './components/Window.ce.vue'
@@ -54,6 +56,7 @@ function init() {
 	customElements.define('ve-content-selector', defineCustomElement(ContentSelector))
 	customElements.define('ve-entities', defineCustomElement(Entities))
 	customElements.define('ve-entity-card', defineCustomElement(EntityCard))
+	customElements.define('ve-entity-infobox', defineCustomElement(EntityInfobox))
 	customElements.define('ve-essay', defineCustomElement(Essay))
 	customElements.define('ve-fab', defineCustomElement(FAB))
 	customElements.define('ve-footer', defineCustomElement(Footer))
@@ -80,6 +83,7 @@ function init() {
 	customElements.define('ve-site-search', defineCustomElement(SiteSearch))
 	customElements.define('ve-spacer', defineCustomElement(Spacer))
 	customElements.define('ve-starter', defineCustomElement(Starter))
+	customElements.define('ve-trigger', defineCustomElement(Trigger))
 	customElements.define('ve-version', defineCustomElement(Version))
 	customElements.define('ve-wikidata-search', defineCustomElement(WikidataSearch))
 	customElements.define('ve-window', defineCustomElement(Window))
