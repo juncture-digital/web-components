@@ -37,12 +37,12 @@ export default defineConfig(({mode})=> {
             if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType || '')) extType = 'img';
             // return `assets/${extType}/[name]-[hash][extname]`;
             // return `assets/${extType}/[name]-${version}[extname]`;
-            return `${extType}/[name][extname]`;
+            return `web-components/${extType}/[name][extname]`;
           },
           // entryFileNames: 'assets/js/[name]-[hash].js'
           // entryFileNames: `assets/js/[name]-${version}.js`,
-          entryFileNames: `js/[name].js`,
-          chunkFileNames: 'js/[name]-[hash].js'
+          entryFileNames: `web-components/js/[name].js`,
+          chunkFileNames: 'web-components/js/[name]-[hash].js'
         }
       }
     }
