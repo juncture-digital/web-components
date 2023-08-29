@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "build-only": "vite build --base=/web-components/",
     "type-check": "vue-tsc --noEmit",
-    "tailwind": "tailwindcss -i ./src/input.css -o ./src/tailwind.css"
+    "tailwind": "tailwindcss -i ./src/input.css -o ./src/tailwind.css --watch"
   },
   "dependencies": {
     "@openseadragon-imaging/openseadragon-viewerinputhook": "^2.2.1",
