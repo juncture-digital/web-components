@@ -27,8 +27,20 @@
         <ul>
           <li><a href="">Home</a></li>
           <li><a href="about">About</a></li>
+          <li><a href="auth">Auth</a></li>
         </ul>
-      </twp-menu>
+      </ve-menu-twp>
+    </section>
+
+    <h2 class="font-bold text-2xl mt-4">New Tailwind Menu Component with Auth</h2>
+    <section class="bg-slate-100 rounded m-2 p-2">
+      <ve-new-menu>
+        <ul>
+          <li><a href="">Home</a></li>
+          <li><a href="about">About</a></li>
+          <li><a href="auth">Auth</a></li>
+        </ul>
+      </ve-new-menu>
     </section>
 
     <h1 class="font-bold text-3xl mt-16">Custom Popover</h1>
@@ -45,6 +57,20 @@
       <ve-media src="wc:Ingushetia%2C_Russia%2C_Armkhi%2C_Ingush_tower.jpg" right></ve-media>
       <p>Typical Vainakh towers were built on a <ve-trigger zoomto="3295,2741,751,500">square base</ve-trigger>, ranging from 6 to 12 m wide and 10 to 25 m high, depending on the function. The walls were built of stone blocks, possibly with lime, clay-lime, or lime-sand mortar. The walls were inclined inwards and their thickness decreased on higher floors. The towers were built on hard rock.</p>
     </section>
+
+    <ve-header background="wc:Sunflower.jpg" label="Essay Title" options="pct:10,25,80,60" position="center" sticky subtitle="Essay subtitle">
+      <ul>
+        <li>
+           <a href>Home</a> 
+        </li>
+        <li>
+           <a href="about">About</a> 
+        </li>
+        <li>
+          <a href="auth">Auth</a> 
+       </li>
+      </ul>
+    </ve-header>
 
   </main>
   <script src="src/main.ts" type="module"></script>
