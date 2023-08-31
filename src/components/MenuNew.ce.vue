@@ -14,6 +14,7 @@ const isLoggedIn = ref(false)
 watch(host, () => { getMenuItems() })
 
 const menuItems = ref<any[]>([])
+const originalNavItems = ref<any[]>([])
 const navItems = ref<any[]>()
 
 const props = defineProps({
@@ -58,15 +59,15 @@ onMounted(() => {
     nextTick(() => {
       let listItems = Array.from(host.value.children[0]?.children || [])
       if (listItems.length > 0)
-      menuItems.value = listItems
+      originalNavItems.value = listItems
         .map((navItem:any) => {
            let text = navItem.firstChild.textContent
             if (text.toLowerCase() === 'auth') {
+               console.log('isLoggedIn.value',isLoggedIn.value)
               return {label:  isLoggedIn.value ? 'Logout' : 'Login', href:  isLoggedIn.value ? 'logout' : 'login'}
             } else {
               return {label: navItem.textContent}
             }
-          
         })
         .filter(item => item.label.toLowerCase().indexOf('contact') !== 0 || props.contact)
     })
@@ -83,6 +84,7 @@ function init() {
           if (authToken) {
             isLoggedIn.value = true
             localStorage.setItem('gh-auth-token', authToken)
+            console.log('logged in',window.location.hostname )
             window.dispatchEvent(new Event('storage'))
           }
         })
@@ -96,7 +98,7 @@ function getMenuItems() {
   let slot = host.value.parentElement.querySelector('ve-new-menu')
 
   function parseSlot() {
-    menuItems.value = Array.from(slot.querySelectorAll('li'))
+    originalNavItems.value = Array.from(slot.querySelectorAll('li'))
       .map((li: any) => {
         const a = li.querySelector('a')
         return { label: a.innerText, href: a.href }
@@ -136,10 +138,12 @@ function  ghAuthToken() {
   }
 
 
-  watch(menuItems, () => {
-    navItems.value = menuItems.value
+  watch(originalNavItems, () => {
+     console.log('in watch menuItems')
+    navItems.value = originalNavItems.value
       .filter(item => {
         let action = item.href ? item.href.split('/').filter((pe:string) => pe).pop().toLowerCase() : 'link'
+          //   let action = item.href ? item.href.split('/').pop().toLowerCase() : ''
         return !nav[action] || !nav[action]?.loginRequired || isLoggedIn.value
       })
       .map((item:any) => {
@@ -151,7 +155,7 @@ function  ghAuthToken() {
   })
 
   watch(isLoggedIn, () => {
-    navItems.value = menuItems.value
+    navItems.value = originalNavItems.value
       .filter(item => {
         let action = item.href ? item.href.split('/').filter((pe:string) => pe).pop().toLowerCase() : 'link'
         return !nav[action] || !nav[action]?.loginRequired || isLoggedIn.value
@@ -162,6 +166,29 @@ function  ghAuthToken() {
           : item
       )
   })
+
+    function menuItemSelected(item: any) {
+    console.log('menuItemSelected', item)
+    let action = item.href ? item.href.split('/').pop().toLowerCase() : ''
+    console.log(`action=${action}`)
+    if ((action.indexOf('contact') > -1 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
+      //showContactForm()
+    } else if (action === 'login') {
+      login()
+    } else if (action === 'logout') {
+      logout()
+    } else if (action === 'help') {
+      // this.showHelpDialog()
+      //showHelpWindow()
+    } else if (action === 'markdown') {
+      //showMarkdownDialog()
+    } else if (item.href) {
+       location.href = item.href
+      
+    } else {
+    }
+    (shadowRoot.value?.querySelector('#menu-btn') as HTMLInputElement).checked = false
+  }
 
 </script>
 
@@ -183,9 +210,10 @@ function  ghAuthToken() {
     <div
       class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-[15rem] bg-white shadow-md rounded-lg p-2 mt-2 dark:bg-gray-800 dark:border dark:border-gray-700" 
       aria-labelledby="hs-dropdown-custom-icon-trigger">
-      <a v-for="item in menuItems" :key="item.href" 
+      <a v-for="item in originalNavItems" :key="item.href" 
         class="flex items-center gap-x-3.5 py-2 px-3 rounded-md text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
         :href="item.href"
+        @click="menuItemSelected(item)"
       >
         {{ item.label }}
       </a>
