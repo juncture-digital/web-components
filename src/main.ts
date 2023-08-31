@@ -45,6 +45,7 @@ import Trigger from './components/Trigger.ce.vue'
 import Version from './components/Version.ce.vue'
 import WikidataSearch from './components/WikidataSearch.ce.vue'
 import Window from './components/Window.ce.vue'
+import NewMenu from './components/MenuNew.ce.vue'
 
 console.log(`juncture.web-components: version=${process.env.version}`)
 
@@ -87,6 +88,7 @@ function init() {
 	customElements.define('ve-version', defineCustomElement(Version))
 	customElements.define('ve-wikidata-search', defineCustomElement(WikidataSearch))
 	customElements.define('ve-window', defineCustomElement(Window))
+	customElements.define('ve-new-menu', defineCustomElement(NewMenu))
 
 	document.body.style.transition = 'opacity 0.3s linear'
 	document.body.style.visibility = 'visible'
