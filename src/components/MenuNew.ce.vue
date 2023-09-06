@@ -78,8 +78,14 @@ function init() {
     let code = (new URL(window.location.href)).searchParams.get('code')
     if (code) {
       window.history.replaceState({}, '', window.location.pathname)
-      fetch(`/gh-token?code=${code}&hostname=${window.location.hostname}`)
-        .then(resp => resp.text())
+      console.log('code', `${code}`)
+      let url = `https://dev.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
+      console.log(url)
+      fetch(url)
+        .then(resp => {
+           console.log('resp', resp)
+           return resp.text()
+           })
         .then(authToken => {
           if (authToken) {
             isLoggedIn.value = true
@@ -115,6 +121,7 @@ function getMenuItems() {
 
 
 function login() {
+   /*
     let hostname = (new URL(window.location.href)).hostname
     let isDev = hostname === 'localhost' || hostname.indexOf('192.168.') === 0
     let href = isDev
@@ -124,6 +131,11 @@ function login() {
         : null
     console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
     if (href) window.location.href = href
+    */
+   
+    let href = `https://github.com/login/oauth/authorize?client_id=${clientIds['dev.juncture-digital.org']}&scope=repo&state=juncture&redirect_uri=${location.href}`
+    console.log(`login: href=${href}`)
+    //if (href) window.location.href = href
   }
 
 function logout() {
@@ -174,6 +186,7 @@ function  ghAuthToken() {
     if ((action.indexOf('contact') > -1 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
       //showContactForm()
     } else if (action === 'login') {
+       console.log('login')
       login()
     } else if (action === 'logout') {
       logout()
