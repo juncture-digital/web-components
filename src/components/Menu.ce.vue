@@ -9,7 +9,7 @@
           <sl-icon-button name="list" slot="trigger" style="font-size: 2.5rem;"></sl-icon-button>
           <sl-menu>
             <div v-for="item, idx in navItems" :data-item="JSON.stringify(item)" :key="`nav-${idx}`">
-              <sl-menu-item :name="navIcon(item)" :label="item.label">{{item.label}}</sl-menu-item>
+              <sl-menu-item :name="navIcon(item)" :label="item.label"  @click="menuItemSelected(item)">{{item.label}}</sl-menu-item>
             </div>
           </sl-menu>
         </sl-dropdown>
@@ -107,7 +107,11 @@
     let code = (new URL(window.location.href)).searchParams.get('code')
     if (code) {
       window.history.replaceState({}, '', window.location.pathname)
-      fetch(`/gh-token?code=${code}&hostname=${window.location.hostname}`)
+      let url = window.location.hostname === 'localhost'
+        ? `https://dev.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
+        : `/gh-token?code=${code}&hostname=${window.location.hostname}`
+      console.log(url)
+      fetch(url)
         .then(resp => resp.text())
         .then(authToken => {
           if (authToken) {
@@ -181,12 +185,12 @@
       : clientIds[location.hostname] !== undefined
         ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${location.href}`
         : null
-    // console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
+    console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
     if (href) window.location.href = href
   }
 
   function logout() {
-    // console.log('logout')
+    console.log('logout')
     Object.keys(localStorage).forEach(key => localStorage.removeItem(key))
     window.dispatchEvent(new Event("storage"))
     isLoggedIn.value = false
@@ -228,7 +232,6 @@
       }
     } else {
     }
-    (shadowRoot.value?.querySelector('#menu-btn') as HTMLInputElement).checked = false
   }
 </script>
 
