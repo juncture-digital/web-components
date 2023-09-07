@@ -1,32 +1,16 @@
 <script setup lang="ts">
 
-import { computed, ref, toRaw, watch, onMounted, nextTick } from 'vue'
+   import { computed, ref, toRaw, watch, onMounted, nextTick } from 'vue'
+  //import '@shoelace-style/shoelace/dist/components/icon/icon.js'
+  import { HSDropdown } from '../lib/preline/components/hs-dropdown'
 
-// @ts-ignore
-import { HSDropdown } from '../lib/preline/components/hs-dropdown'
-
-const root = ref<HTMLElement | null>(null)
-const host = computed(() => (root.value?.getRootNode() as any)?.host)
-const shadowRoot = computed(() => root?.value?.parentNode as HTMLElement)
-watch(shadowRoot, () => { new HSDropdown(shadowRoot.value).init() })
-
-const isLoggedIn = ref(false)
-watch(host, () => { getMenuItems() })
-
-const menuItems = ref<any[]>([])
-const originalNavItems = ref<any[]>([])
-const navItems = ref<any[]>()
-
-const props = defineProps({
-  logo: { type: String },
-  title: { type: String },
-  background: { type: String },
-  position: { type: String, default: 'left' },
-  contact: { type: String },
-  contactFormTitle: { type: String },
-  contactSubject: { type: String }
-})
-
+  const props = defineProps({
+    background: { type: String },
+    position: { type: String, default: 'left' },
+    contact: { type: String },
+    contactFormTitle: { type: String },
+    contactSubject: { type: String }
+  })
 
   const clientIds:any = {
     'www.juncture-digital.org': 'f7247e1e4769ba7c61e4',
@@ -54,43 +38,60 @@ const props = defineProps({
     tools: {icon: 'tools', loginRequired: true}
   }
 
-onMounted(() => {
+  const root = ref<HTMLElement | null>(null)
+  const host = computed(() => (root.value?.getRootNode() as any)?.host)
+  const shadowRoot = computed(() => root?.value?.parentNode)
+  watch(shadowRoot, () => { new HSDropdown(shadowRoot.value).init() })
+
+  const isLoggedIn = ref(false)
+  const originalNavItems = ref<any[]>([])
+
+  const navItems = ref<any[]>()
+  // watch(navItems, () => console.log('menu.navItems', toRaw(navItems.value)) )
+
+  let helpWindow:any
+  let externalWindow:any
+
+  onMounted(() => {
     init()
     nextTick(() => {
       let listItems = Array.from(host.value.children[0]?.children || [])
       if (listItems.length > 0)
       originalNavItems.value = listItems
         .map((navItem:any) => {
-           let text = navItem.firstChild.textContent
+          if (navItem.firstChild.nodeName === 'A') {
+            let linkEl = navItem.firstChild as HTMLLinkElement
+            return {label: linkEl.textContent, href:linkEl.href, newWindow: linkEl.getAttribute('target') === '_blank' }
+          } else {
+            let text = navItem.firstChild.textContent
             if (text.toLowerCase() === 'auth') {
-               console.log('isLoggedIn.value',isLoggedIn.value)
               return {label:  isLoggedIn.value ? 'Logout' : 'Login', href:  isLoggedIn.value ? 'logout' : 'login'}
             } else {
+               console.log('returning textContent', navItem.textContent)
               return {label: navItem.textContent}
             }
+          }
         })
         .filter(item => item.label.toLowerCase().indexOf('contact') !== 0 || props.contact)
     })
   })
-  
-function init() {    
+
+  function init() {    
     isLoggedIn.value = ghAuthToken() !== null
     let code = (new URL(window.location.href)).searchParams.get('code')
+    console.log('code', code);
     if (code) {
       window.history.replaceState({}, '', window.location.pathname)
-      console.log('code', `${code}`)
-      let url = `https://dev.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
+      let url = window.location.hostname === 'localhost'
+        ? `https://dev.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
+        : `/gh-token?code=${code}&hostname=${window.location.hostname}`
       console.log(url)
       fetch(url)
-        .then(resp => {
-           console.log('resp', resp)
-           return resp.text()
-           })
+        .then(resp => resp.text())
         .then(authToken => {
           if (authToken) {
             isLoggedIn.value = true
             localStorage.setItem('gh-auth-token', authToken)
-            console.log('logged in',window.location.hostname )
             window.dispatchEvent(new Event('storage'))
           }
         })
@@ -99,63 +100,10 @@ function init() {
     host.value.classList.add(props.position)
   }
 
-function getMenuItems() {
-  
-  let slot = host.value.parentElement.querySelector('ve-new-menu')
-
-  function parseSlot() {
-    originalNavItems.value = Array.from(slot.querySelectorAll('li'))
-      .map((li: any) => {
-        const a = li.querySelector('a')
-        return { label: a.innerText, href: a.href }
-      })
-    }
-    
-    parseSlot()
-    new MutationObserver(
-      (mutationsList:any) => {
-        for (let mutation of mutationsList) { if (mutation.type === 'childList') parseSlot() }      
-      }
-    ).observe(slot, { childList: true, subtree: true })
-  }
-
-
-function login() {
-   /*
-    let hostname = (new URL(window.location.href)).hostname
-    let isDev = hostname === 'localhost' || hostname.indexOf('192.168.') === 0
-    let href = isDev
-      ? `${window.location.pathname}?code=testing`
-      : clientIds[location.hostname] !== undefined
-        ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${location.href}`
-        : null
-    console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
-    if (href) window.location.href = href
-    */
-   
-    let href = `https://github.com/login/oauth/authorize?client_id=${clientIds['dev.juncture-digital.org']}&scope=repo&state=juncture&redirect_uri=${location.href}`
-    console.log(`login: href=${href}`)
-    //if (href) window.location.href = href
-  }
-
-function logout() {
-    console.log('logout')
-    Object.keys(localStorage).forEach(key => localStorage.removeItem(key))
-    window.dispatchEvent(new Event("storage"))
-    isLoggedIn.value = false
-  }
-   
-function  ghAuthToken() {
-    return localStorage.getItem('gh-auth-token')
-  }
-
-
   watch(originalNavItems, () => {
-     console.log('in watch menuItems')
     navItems.value = originalNavItems.value
       .filter(item => {
         let action = item.href ? item.href.split('/').filter((pe:string) => pe).pop().toLowerCase() : 'link'
-          //   let action = item.href ? item.href.split('/').pop().toLowerCase() : ''
         return !nav[action] || !nav[action]?.loginRequired || isLoggedIn.value
       })
       .map((item:any) => {
@@ -179,32 +127,88 @@ function  ghAuthToken() {
       )
   })
 
-    function menuItemSelected(item: any) {
+  function  ghAuthToken() {
+    return localStorage.getItem('gh-auth-token')
+  }
+
+  function showContactForm() {
+    let contactDialog = shadowRoot.value?.querySelector('ve-contact') as any
+    contactDialog._instance.exposed.show.value = true
+  }
+
+  function showHelpDialog() {
+    let helpDialog = shadowRoot.value?.querySelector('#help') as any
+    helpDialog.show = !helpDialog.show
+  }
+
+  function showHelpWindow() {
+    if (helpWindow) { helpWindow.close() }
+    let options = 'toolbar=yes,location=yes,left=0,top=0,width=1040,height=1200,scrollbars=yes,status=yes'
+    helpWindow = window.open('/help', '_blank', options)
+  }
+
+  function showMarkdownDialog() {
+    let markdownDialog = shadowRoot.value?.querySelector('#markdown') as any
+    markdownDialog.show = !markdownDialog.show
+  }
+
+  function login() {
+    let hostname = (new URL(window.location.href)).hostname
+    let isDev = hostname === 'localhost' || hostname.indexOf('192.168.') === 0
+    let href = isDev
+      ? `${window.location.pathname}?code=testing`
+      : clientIds[location.hostname] !== undefined
+        ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${location.href}`
+        : null
+    console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
+    if (href) window.location.href = href
+  }
+
+  function logout() {
+    console.log('logout')
+    Object.keys(localStorage).forEach(key => localStorage.removeItem(key))
+    window.dispatchEvent(new Event("storage"))
+    isLoggedIn.value = false
+  }
+
+  function navIcon(item: any) {
+    let iconName = ''
+    let menuLabel = item.label.toLowerCase()
+    Object.keys(nav).forEach(key => {
+      if (menuLabel.indexOf(key) >= 0) iconName = nav[key].icon
+    })
+    return iconName ? iconName : 'link'
+  }
+
+  function menuItemSelected(item: any) {
     console.log('menuItemSelected', item)
     let action = item.href ? item.href.split('/').pop().toLowerCase() : ''
     console.log(`action=${action}`)
     if ((action.indexOf('contact') > -1 || item.label.toLowerCase().indexOf('contact') === 0) && props.contact) {
-      //showContactForm()
+      showContactForm()
     } else if (action === 'login') {
-       console.log('login')
       login()
     } else if (action === 'logout') {
       logout()
     } else if (action === 'help') {
       // this.showHelpDialog()
-      //showHelpWindow()
+      showHelpWindow()
     } else if (action === 'markdown') {
-      //showMarkdownDialog()
+      showMarkdownDialog()
     } else if (item.href) {
-       location.href = item.href
-      
+      if (item.newWindow) {
+        if (externalWindow) { externalWindow.close() }
+        externalWindow = window.open(item.href, '_blank', 'toolbar=yes,location=yes,left=0,top=0,width=1024,height=1200,scrollbars=yes,status=yes')
+      } else if (item.href.indexOf('/window.') > 0) {
+        let funcName = item.href.split('/window.').pop();
+        (window as any)[funcName]()
+      } else {
+        location.href = item.href
+      }
     } else {
     }
-    (shadowRoot.value?.querySelector('#menu-btn') as HTMLInputElement).checked = false
   }
-
 </script>
-
 <template>
 
   <nav class="hs-dropdown relative inline-flex" ref="root" >
@@ -235,6 +239,7 @@ function  ghAuthToken() {
   </nav>
 
 </template>
+  
 
 <style>
   @import '../tailwind.css';

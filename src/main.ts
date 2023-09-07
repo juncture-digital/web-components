@@ -45,7 +45,7 @@ import Trigger from './components/Trigger.ce.vue'
 import Version from './components/Version.ce.vue'
 import WikidataSearch from './components/WikidataSearch.ce.vue'
 import Window from './components/Window.ce.vue'
-import NewMenu from './components/MenuNew.ce.vue'
+import NewMenu from './components/MenuAuth.ce.vue'
 
 console.log(`juncture.web-components: version=${process.env.version}`)
 

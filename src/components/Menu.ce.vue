@@ -105,6 +105,7 @@
   function init() {    
     isLoggedIn.value = ghAuthToken() !== null
     let code = (new URL(window.location.href)).searchParams.get('code')
+    console.log('code', code);
     if (code) {
       window.history.replaceState({}, '', window.location.pathname)
       let url = window.location.hostname === 'localhost'
