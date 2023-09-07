@@ -1,8 +1,8 @@
 <script setup lang="ts">
 
    import { computed, ref, toRaw, watch, onMounted, nextTick } from 'vue'
-  //import '@shoelace-style/shoelace/dist/components/icon/icon.js'
-  import { HSDropdown } from '../lib/preline/components/hs-dropdown'
+   // @ts-ignore
+   import { HSDropdown } from '../lib/preline/components/hs-dropdown'
 
   const props = defineProps({
     background: { type: String },
