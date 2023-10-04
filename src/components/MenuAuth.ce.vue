@@ -5,25 +5,18 @@ import { computed, onMounted, ref, toRaw, watch } from 'vue'
 // @ts-ignore
 import { HSDropdown } from '../lib/preline/components/hs-dropdown'
 import netlifyIdentity from 'netlify-identity-widget'
-//import jwt_decode from 'jwt-decode'
-//import { useEntitiesStore } from '../store/entities'
-
-//import { storeToRefs } from 'pinia'
 
 const root = ref<HTMLElement | null>(null)
 const host = computed(() => (root.value?.getRootNode() as any)?.host)
 const shadowRoot = computed(() => root?.value?.parentNode as HTMLElement)
 watch(shadowRoot, (shadowRoot) => new HSDropdown(shadowRoot).init() )
 
-//const store = useEntitiesStore()
-
 watch(host, () => { getMenuItems() })
 
 const menuItems = ref<any[]>([])
 
-//const { isLoggedIn, user } = storeToRefs(store)
-let isLoggedIn = ref(false)
-let user = <any|null>null
+const isLoggedIn = ref(false)
+let user = ref<any>(null)
 
 const props = defineProps({
   logo: { type: String },
@@ -51,9 +44,12 @@ function getMenuItems() {
   }
 
   onMounted(async () => {
-    //if (props.auth === 'netlify') setupNetlifyAuth()
     if (props.auth === 'github') setupGithubAuth()
-    console.log('isLoggedIn mounted',isLoggedIn.value)
+    let _user: any = localStorage.getItem('user') && JSON.parse(localStorage.getItem('user') || '{}' )
+    if (_user !== null && _user !== '{}') {
+      isLoggedIn.value = true
+      user.value = _user
+    }
   })
 
   watch(user, () => {
@@ -63,18 +59,15 @@ function getMenuItems() {
 
   function login(evt:Event) {
     evt.preventDefault()
-    //if (props.auth === 'netlify') netlifyIdentity.open('login')
     isLoggedIn.value = true;
     if (props.auth === 'github') ghLogin()
   }
 
   function logout(evt:Event) {
     evt.preventDefault()
-    //store.setUser(null)
     user.value = null
     localStorage.setItem('user', JSON.stringify(user.value))
     isLoggedIn.value = false
-    //if (props.auth === 'netlify') netlifyIdentity.logout()
     if (props.auth === 'github') ghLogout()
   }
 
@@ -86,50 +79,10 @@ function getMenuItems() {
     menu.classList.add('hidden')
   }
 
-
-  /***************** Netlify auth *****************/
-  /*
-  let netlifyIdentityEndpoint = 'https://juncture-search.netlify.app/.netlify/identity'
-
-  function setupNetlifyAuth() {
-    if (location.hostname === 'search.plant-humanities.org') netlifyIdentityEndpoint = 'https://search.plant-humanities.org/.netlify/identity'
-    let _user: any = localStorage.getItem('auth-user') && JSON.parse(localStorage.getItem('auth-user') || '{}' )
-    if (_user?.provider === 'netlify') store.setUser(_user)
-    else store.setUser(null)
-    netlifyIdentity.on('init', _user => {
-      if (_user) store.setUser({provider: 'netlify', name: _user.user_metadata.full_name, email: _user.email, token: _user.token})
-    })
-    netlifyIdentity.on('error', err => console.error('Error', err))
-    netlifyIdentity.on('login', _user => {
-      store.setUser({provider: 'netlify', name: _user.user_metadata.full_name, email: _user.email, token: _user.token})
-      netlifyIdentity.close()
-    })
-    netlifyIdentity.init({ APIUrl: netlifyIdentityEndpoint})
-    validateNetlifyUser()
+  function tokenIsValid(expiration:number) {
+    let isExpired = expiration <= Date.now()
+    return !isExpired
   }
-
-  function validateNetlifyUser() {
-    let _user: any = localStorage.getItem('auth-user') && JSON.parse(localStorage.getItem('auth-user') || '{}' )
-    if (_user && !isLoggedIn.value) {
-      // keep users logged in
-      const formData = new FormData()
-      formData.append('grant_type', 'refresh_token')
-      formData.append('refresh_token', _user.token.refresh_token)
-      fetch(`${netlifyIdentityEndpoint}/token`, {
-        method : 'POST',
-        body : formData
-      }).then(x=>x.json()).then((newToken: any) => {
-        console.log('validateNetlifyUser: newToken', newToken)
-        _user.token.access_token = newToken.access_token
-        _user.token.refresh_token = newToken.refresh_token
-        _user.token.expires_at = (jwt_decode(newToken.access_token) as any).exp * 1000
-        store.setUser({provider: 'netlify', name: _user.user_metadata.full_name, email: _user.email, token: _user.token})
-      })
-      return null
-    }
-    return null
-  }
-  */
 
   /***************** Github auth *****************/
   
@@ -143,12 +96,10 @@ function getMenuItems() {
   }
 
   function setupGithubAuth() {
-    let _user: any = localStorage.getItem('auth-user') && JSON.parse(localStorage.getItem('auth-user') || '{}' )
+    let _user: any = localStorage.getItem('user') && JSON.parse(localStorage.getItem('user') || '{}' )
     if (_user?.provider === 'github') user.value=(_user)
-    //else user.value={}
     let code = (new URL(window.location.href)).searchParams.get('code')
     if (code) {
-      console.log('code', code)
       let href = `${location.pathname}${location.hash}`
       window.history.replaceState({}, '', href)
       let url = window.location.hostname === 'localhost'
@@ -178,8 +129,6 @@ function getMenuItems() {
 
   function ghLogout() {
     Object.keys(localStorage).forEach(key => localStorage.removeItem(key))
-    //store.setUser(null)
-    user.value={}
     location.href = ''
   }
 
@@ -191,8 +140,7 @@ function getMenuItems() {
       }
     }).then(resp => resp.json())
     .then(info => user.value={provider: 'github', username: info.login, 'name': info.name, email: info.email, 'gh-token': token})
-    .then(info => localStorage.setItem('user', token))
-    //.then(info => localStorage.setItems({'provider': 'github', 'username': info.login, 'name': info.name, 'email': info.email, 'gh-token':token}))
+    .then(info => localStorage.setItem('user', JSON.stringify({'provider': 'github', 'username': info.login, 'name': info.name, 'email': info.email, 'gh-token':token})))
 }
 
   /*
@@ -236,7 +184,7 @@ function getMenuItems() {
         <span v-html="item.label" class="font-medium"></span>
       </a>
 
-      <a v-if="props.auth && isLoggedIn.value"
+      <a v-if="props.auth && isLoggedIn"
         class="flex items-center gap-x-2 py-2 rounded-md text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
         href="javascript;;" 
         @click="logout"
@@ -244,7 +192,7 @@ function getMenuItems() {
         <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg>
         <span class="font-medium">({{user.name || user.email}})</span> <span class="font-medium">Logout</span>
       </a>
-      <a v-if="props.auth && !isLoggedIn.value"
+      <a v-if="props.auth && !isLoggedIn"
         class="flex items-center gap-x-2 py-2 rounded-md text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
         href="javascript;;" 
         @click="login"
