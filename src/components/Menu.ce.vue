@@ -2,7 +2,6 @@
 
 import { computed, onMounted, ref, toRaw, watch } from 'vue'
 
-// @ts-ignore
 import { HSDropdown } from '../lib/preline/components/hs-dropdown'
 import netlifyIdentity from 'netlify-identity-widget'
 
@@ -77,11 +76,6 @@ function getMenuItems() {
     let menu = shadowRoot.value.querySelector('.hs-dropdown.open')?.querySelector('.hs-dropdown-menu') as HTMLElement
     menu.classList.remove('block')
     menu.classList.add('hidden')
-  }
-
-  function tokenIsValid(expiration:number) {
-    let isExpired = expiration <= Date.now()
-    return !isExpired
   }
 
   /***************** Github auth *****************/
