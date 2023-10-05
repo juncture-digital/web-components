@@ -13,10 +13,14 @@
     </div>
     <div class="controls">
       <ve-site-search v-if="props.searchDomain" :search-domain="props.searchDomain"></ve-site-search>
+      <!--
       <ve-menu v-if="navEl" :background="props.background" position="right" 
         :contact="props.contact" :contact-form-title="props.contactFormTitle" :contact-subject="props.contactSubject">
         <ul v-html="navEl"></ul>
       </ve-menu>
+      -->
+      <!-- <ve-menu1 v-if="navEl" auth="github" v-html="navEl"></ve-menu1> -->
+
     </div>
   </section>
 
@@ -47,10 +51,10 @@
   const shadow = computed(() => root?.value?.parentNode?.querySelector('.ve-navbar') as HTMLElement)
 
   const navEl = ref<string>()
-  // watch(navEl, () => console.log('Navbar.navEl', toRaw(navEl.value)) )
+  watch(navEl, () => console.log('Navbar.navEl', toRaw(navEl.value)) )
 
   onMounted(() => {
-    console.log('Navbar.onMounted', toRaw(props))
+    // console.log('Navbar.onMounted', toRaw(props))
     applyProps()
     nextTick(() => navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML)
   })
@@ -140,7 +144,7 @@
 
   .title {
     font-family: 'Playfair Display', serif;
-    font-size: 3rem;
+    font-size: 2.5rem;
     line-height: 2rem;
     margin-top: 0.2rem;
   }

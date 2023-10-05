@@ -4,7 +4,9 @@ import { computed, onMounted, ref, toRaw, watch } from 'vue'
 
 // @ts-ignore
 import { HSDropdown } from '../lib/preline/components/hs-dropdown'
-// import netlifyIdentity from 'netlify-identity-widget'
+// @ts-ignore
+import netlifyIdentity from 'netlify-identity-widget'
+import jwt_decode from 'jwt-decode'
 
 const root = ref<HTMLElement | null>(null)
 const host = computed(() => (root.value?.getRootNode() as any)?.host)
@@ -15,14 +17,19 @@ watch(host, () => { getMenuItems() })
 
 const menuItems = ref<any[]>([])
 
-const isLoggedIn = ref(false)
-let user = ref<any>(null)
-
 const props = defineProps({
   logo: { type: String },
   title: { type: String },
   auth: { type: String },
 })
+
+const user = ref<any>(null)
+const isLoggedIn = computed(() => user.value?.token && user.value?.provider === 'github' || tokenIsValid(user.value?.tokenExpiration))
+
+function tokenIsValid(expiration:number) {
+  let isExpired = expiration <= Date.now()
+  return !isExpired
+}
 
 function getMenuItems() {
   function parseSlot() {
@@ -44,40 +51,71 @@ function getMenuItems() {
   }
 
   onMounted(async () => {
-    if (props.auth === 'github') setupGithubAuth()
-    let _user: any = localStorage.getItem('user') && JSON.parse(localStorage.getItem('user') || '{}' )
-    if (_user !== null && _user !== '{}') {
-      isLoggedIn.value = true
-      user.value = _user
-    }
+    if (props.auth === 'netlify') setupNetlifyAuth()
+    else if (props.auth === 'github') setupGithubAuth()
   })
 
   watch(user, () => {
-    if (user.value) localStorage.setItem('user', JSON.stringify(user.value))
-    else if (localStorage.getItem('user')) localStorage.removeItem('user')
+    if (user.value) localStorage.setItem('auth-user', JSON.stringify(user.value))
+    else if (localStorage.getItem('auth-user')) localStorage.removeItem('auth-user')
   })
 
   function login(evt:Event) {
     evt.preventDefault()
-    isLoggedIn.value = true;
-    if (props.auth === 'github') ghLogin()
+    if (props.auth === 'netlify') netlifyIdentity.open('login')
+    else if (props.auth === 'github') ghLogin()
   }
 
   function logout(evt:Event) {
     evt.preventDefault()
     user.value = null
-    localStorage.setItem('user', JSON.stringify(user.value))
-    isLoggedIn.value = false
-    if (props.auth === 'github') ghLogout()
+    if (props.auth === 'netlify') netlifyIdentity.logout()
+    else if (props.auth === 'github') ghLogout()
   }
 
-  function toggleLogin(evt:Event) {
-    evt.preventDefault()
-    isLoggedIn.value = !isLoggedIn.value
-    let menu = shadowRoot.value.querySelector('.hs-dropdown.open')?.querySelector('.hs-dropdown-menu') as HTMLElement
-    menu.classList.remove('block')
-    menu.classList.add('hidden')
+  /***************** Netlify auth *****************/
+
+  let netlifyIdentityEndpoint = 'https://juncture-search.netlify.app/.netlify/identity'
+
+  function setupNetlifyAuth() {
+    if (location.hostname === 'search.plant-humanities.org') netlifyIdentityEndpoint = 'https://search.plant-humanities.org/.netlify/identity'
+    let _user: any = localStorage.getItem('auth-user') && JSON.parse(localStorage.getItem('auth-user') || '{}' )
+    if (_user?.provider === 'netlify') user.value = _user
+    else user.value = null
+    netlifyIdentity.on('init', (_user: any) => {
+      if (_user) user.value = {provider: 'netlify', name: _user.user_metadata.full_name, email: _user.email, token: _user.token}
+    })
+    netlifyIdentity.on('error', (err: any) => console.error('Error', err))
+    netlifyIdentity.on('login', (_user: any) => {
+      user.value = {provider: 'netlify', name: _user.user_metadata.full_name, email: _user.email, token: _user.token}
+      netlifyIdentity.close()
+    })
+    netlifyIdentity.init({ APIUrl: netlifyIdentityEndpoint})
+    validateNetlifyUser()
   }
+
+  function validateNetlifyUser() {
+    let _user: any = localStorage.getItem('auth-user') && JSON.parse(localStorage.getItem('auth-user') || '{}' )
+    if (_user && !isLoggedIn.value) {
+      // keep users logged in
+      const formData = new FormData()
+      formData.append('grant_type', 'refresh_token')
+      formData.append('refresh_token', _user.token.refresh_token)
+      fetch(`${netlifyIdentityEndpoint}/token`, {
+        method : 'POST',
+        body : formData
+      }).then(x=>x.json()).then((newToken: any) => {
+        console.log('validateNetlifyUser: newToken', newToken)
+        _user.token.access_token = newToken.access_token
+        _user.token.refresh_token = newToken.refresh_token
+        _user.token.expires_at = (jwt_decode(newToken.access_token) as any).exp * 1000
+        user.value = {provider: 'netlify', name: _user.user_metadata.full_name, email: _user.email, token: _user.token}
+      })
+      return null
+    }
+    return null
+  }
+
 
   /***************** Github auth *****************/
   
@@ -91,18 +129,19 @@ function getMenuItems() {
   }
 
   function setupGithubAuth() {
-    let _user: any = localStorage.getItem('user') && JSON.parse(localStorage.getItem('user') || '{}' )
-    if (_user?.provider === 'github') user.value=(_user)
+    let _user: any = localStorage.getItem('auth-user') && JSON.parse(localStorage.getItem('auth-user') || '{}' )
+    if (_user?.provider === 'github') user.value = _user
+    else user.value = null
     let code = (new URL(window.location.href)).searchParams.get('code')
     if (code) {
       let href = `${location.pathname}${location.hash}`
       window.history.replaceState({}, '', href)
       let url = window.location.hostname === 'localhost'
-        ? `https://dev.juncture-digital.org/gh-token?code=testing&hostname=${window.location.hostname}`
+        ? `https://dev.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
         : `/gh-token?code=${code}&hostname=${window.location.hostname}`
       fetch(url)
         .then(resp => resp.text())
-        .then(token => { if (token) {getGhUserInfo(token); isLoggedIn.value = true;} })
+        .then(token => { if (token) getGhUserInfo(token) })
         .catch(err => console.log('err', err))
     }
   }
@@ -116,14 +155,12 @@ function getMenuItems() {
       : clientIds[location.hostname] !== undefined
         ? `https://github.com/login/oauth/authorize?client_id=${clientIds[location.hostname]}&scope=repo&state=juncture&redirect_uri=${redirectTo}`
         : null
-    console.log(`login: hostname=${hostname} isDev=${isDev} href=${href}`)
-    isLoggedIn.value = true
     if (href) window.location.href = href
-  
   }
 
   function ghLogout() {
     Object.keys(localStorage).forEach(key => localStorage.removeItem(key))
+    user.value = null
     location.href = ''
   }
 
@@ -134,21 +171,8 @@ function getMenuItems() {
         Authorization: `token ${token}`
       }
     }).then(resp => resp.json())
-    .then(info => user.value={provider: 'github', username: info.login, 'name': info.name, email: info.email, 'gh-token': token})
-    .then(info => localStorage.setItem('user', JSON.stringify({'provider': 'github', 'username': info.email, 'name': info.name, 'email': info.email, 'gh-token':token})))
-}
-
-  /*
-  watch(githubClient, async () => {
-    if (isLoggedIn.value) {
-      let username = await githubClient.value?.user().then((userData:any) => userData.login)
-      await githubClient.value?.repos(username).then((repos:any[]) => {
-        if (!repos.find(repo => repo.name === 'essays')) githubClient.value?.createRepository({name:'essays', description:'Juncture visual essays'})
-        if (!repos.find(repo => repo.name === 'media')) githubClient.value?.createRepository({name:'media', description:'Juncture media'})
-      })
-    }
-  })
-  */
+    .then(info => user.value = {provider: 'github', username: info.login, name: info.name, email: info.email, token})
+  }
 
 </script>
 

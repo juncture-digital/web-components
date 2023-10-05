@@ -27,7 +27,7 @@
       :offset="backgroundImage ? navbarHeight : 0"
     >
 
-      <ul v-if="navEl" v-html="navEl"></ul>
+      <ul v-if="navEl" v-html="navEl.outerHTML"></ul>
 
     </ve-navbar>
 
@@ -62,13 +62,17 @@
 
   const navbar = ref<HTMLElement | null>(null)
   const host = computed(() => (navbar.value?.getRootNode() as any)?.host)
+  watch(host, () => { navEl.value = host.value.querySelector('ul') })
 
   const label = ref<string>()
-  const navEl = ref<string>()
+  // const navEl = ref<string>()
   const entities = ref<string[]>([])
   const entity = ref<any>()
   const backgroundColor = ref<string>()
   const backgroundImage = ref<string>()
+
+  const navEl = ref<HTMLUListElement>()
+  // watch(navEl, () => { console.log(toRaw(navEl.value)) })
 
   const height = ref(props.height || navbarHeight)
 
@@ -86,7 +90,7 @@
     if (props.label && props.label !== 'static') label.value = props.label
     // if (navbar.value) navbar.value.style.height = `${props.height || navbarHeight}px`
     if (props.sticky) host.value.classList.add('sticky')
-    navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML
+    // navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML
   }
 
   watch(entities, async () => {
