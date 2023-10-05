@@ -56,7 +56,7 @@
     position: { type: String }
   })
 
-  const navbarHeight = 80
+  const navbarHeight = 100
   const heroHeight = 400
   const manifestShorthandRegex = /^\w+:/
 

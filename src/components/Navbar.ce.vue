@@ -2,7 +2,9 @@
 
   <section ref="root" class="ve-navbar" :style="{height: `${props.height}px`}">
     <template v-if="props.logo">
-      <a v-if="props.url" :href="props.url"><img :src="props.logo" alt="logo" class="logo"/></a>
+      <a v-if="props.url" :href="props.url">
+        <img :src="props.logo" alt="logo" class="logo"/>
+      </a>
       <img v-else :src="props.logo" alt="logo" class="logo"/>
     </template>
     <div class="title-panel">
@@ -48,6 +50,7 @@
   // watch(navEl, () => console.log('Navbar.navEl', toRaw(navEl.value)) )
 
   onMounted(() => {
+    console.log('Navbar.onMounted', toRaw(props))
     applyProps()
     nextTick(() => navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML)
   })
@@ -62,7 +65,9 @@
       host.value.classList.add('sticky')
       host.value.style.position = 'sticky'
       host.value.style.top = '0'
-      if (props.alpha) host.value.style.background = `rgba(0, 0, 0, ${props.alpha})`
+      // if (props.alpha) host.value.style.background = `rgba(0, 0, 0, ${props.alpha})`
+      host.value.style.background = '#444A1E'
+      host.value.style.opacity = '100'
       host.value.style.marginTop = `-${props.offset}px`
     }
     if (props.label) {
@@ -103,12 +108,17 @@
   }
   */
 
+  a {
+    height: 100%;
+  }
+
   .logo {
     margin-left: 20px;
     background-color: inherit;
   }
   img.logo {
-    max-height: 50px;
+    max-height: 100%;
+    padding: 0.2rem 0.3rem 0.2rem 0.3rem;
   }
 
   .controls {
@@ -129,14 +139,17 @@
   }
 
   .title {
-    font-size: 2rem;
-    line-height: 1.8rem;
-    padding-top: 0;
-    font-weight: bold;
+    font-family: 'Playfair Display', serif;
+    font-size: 3rem;
+    line-height: 2rem;
+    margin-top: 0.2rem;
   }
 
   .subtitle {
+    font-family: Roboto;
     font-size: 1.4rem;
+    font-weight: 300;
+    margin-top: 0.5rem;
   }
 
   /* Mobile Devices */
