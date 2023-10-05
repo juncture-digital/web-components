@@ -744,11 +744,6 @@ video {
   gap: 0.5rem;
 }
 
-.gap-x-2 {
-  -moz-column-gap: 0.5rem;
-       column-gap: 0.5rem;
-}
-
 .gap-x-3 {
   -moz-column-gap: 0.75rem;
        column-gap: 0.75rem;
@@ -757,6 +752,11 @@ video {
 .gap-x-3\.5 {
   -moz-column-gap: 0.875rem;
        column-gap: 0.875rem;
+}
+
+.gap-x-2 {
+  -moz-column-gap: 0.5rem;
+       column-gap: 0.5rem;
 }
 
 .truncate {
