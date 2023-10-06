@@ -114,6 +114,8 @@
 
 <style>
 
+  @import '@shoelace-style/shoelace/dist/themes/light.css';
+
   * { box-sizing: border-box; }
 
   :host {
