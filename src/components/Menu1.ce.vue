@@ -156,9 +156,12 @@ function getMenuItems() {
     if (code) {
       let href = `${location.pathname}${location.hash}`
       window.history.replaceState({}, '', href)
+      let url = `https://www.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
+      /*
       let url = window.location.hostname === 'localhost'
         ? `https://dev.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
         : `/gh-token?code=${code}&hostname=${window.location.hostname}`
+      */
       let resp = await fetch(url)
       if (resp.ok) {
         let token = await resp.text()
