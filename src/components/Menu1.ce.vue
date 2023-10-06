@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { computed, onMounted, ref, toRaw, watch } from 'vue'
+import { computed, onMounted, nextTick, ref, toRaw, watch } from 'vue'
 
 // @ts-ignore
 import { HSDropdown } from '../lib/preline/components/hs-dropdown'
@@ -21,10 +21,15 @@ const props = defineProps({
   logo: { type: String },
   title: { type: String },
   auth: { type: String },
+  contact: { type: String },
+  contactFormTitle: { type: String },
+  contactSubject: { type: String }
 })
 
 const user = ref<any>(null)
-const isLoggedIn = computed(() => user.value?.token && user.value?.provider === 'github' || tokenIsValid(user.value?.tokenExpiration))
+
+const isLoggedIn = computed(() => user.value?.token && (user.value?.provider === 'github' || tokenIsValid(user.value?.tokenExpiration)) || false)
+// watch(isLoggedIn, () => console.log(`isLoggedIn=${isLoggedIn.value}`))
 
 function tokenIsValid(expiration:number) {
   let isExpired = expiration <= Date.now()
@@ -36,7 +41,7 @@ function getMenuItems() {
     menuItems.value = Array.from(host.value.querySelectorAll('li'))
       .map((li: any) => {
         const a = li.querySelector('a') as HTMLAnchorElement
-        let label = a.innerText
+        let label = a.innerText.trim()
         let icon = li.querySelector('svg') as SVGElement
         return { label, icon, href: a.href }
       })
@@ -59,6 +64,20 @@ function getMenuItems() {
     if (user.value) localStorage.setItem('auth-user', JSON.stringify(user.value))
     else if (localStorage.getItem('auth-user')) localStorage.removeItem('auth-user')
   })
+
+  function menuItemSelected(item: any, evt:Event) {
+    evt.preventDefault()
+    let action = item.href.split('/').filter((x:string) => x).pop().toLowerCase()
+    action = location.host === action ? 'home' : action
+    // console.log('menuItemSelected', item, action)
+    if (action === 'contact') showContactForm()
+    else location.href = item.href
+  }
+
+  function showContactForm() {
+    let contactDialog = shadowRoot.value?.querySelector('ve-contact') as any
+    contactDialog._instance.exposed.show.value = true
+  }
 
   function login(evt:Event) {
     evt.preventDefault()
@@ -128,7 +147,7 @@ function getMenuItems() {
     'search.plant-humanities.org': 'e75df39d883077c1013f',
   }
 
-  function setupGithubAuth() {
+  async function setupGithubAuth() {
     let _user: any = localStorage.getItem('auth-user') && JSON.parse(localStorage.getItem('auth-user') || '{}' )
     if (_user?.provider === 'github') user.value = _user
     else user.value = null
@@ -139,10 +158,12 @@ function getMenuItems() {
       let url = window.location.hostname === 'localhost'
         ? `https://dev.juncture-digital.org/gh-token?code=${code}&hostname=${window.location.hostname}`
         : `/gh-token?code=${code}&hostname=${window.location.hostname}`
-      fetch(url)
-        .then(resp => resp.text())
-        .then(token => { if (token) getGhUserInfo(token) })
-        .catch(err => console.log('err', err))
+      let resp = await fetch(url)
+      if (resp.ok) {
+        let token = await resp.text()
+        let _user = await getGhUserInfo(token)
+        user.value = _user
+      }
     }
   }
 
@@ -161,17 +182,20 @@ function getMenuItems() {
   function ghLogout() {
     Object.keys(localStorage).forEach(key => localStorage.removeItem(key))
     user.value = null
-    location.href = ''
+    // location.href = ''
   }
 
-  function getGhUserInfo(token:string) {
-    return fetch('https://api.github.com/user' ,{
+  async function getGhUserInfo(token:string) {
+    let resp = await fetch('https://api.github.com/user' ,{
       headers: {
         Accept: 'application/vnd.github+json',
         Authorization: `token ${token}`
       }
-    }).then(resp => resp.json())
-    .then(info => user.value = {provider: 'github', username: info.login, name: info.name, email: info.email, token})
+    })
+    if (resp.ok) {
+      let info = await resp.json()
+      return { provider: 'github', username: info.login, name: info.name, email: info.email, token }
+    }
   }
 
 </script>
@@ -197,6 +221,7 @@ function getMenuItems() {
       <a v-for="item in menuItems" :key="item.href" 
         class="flex items-center gap-x-2 py-2 rounded-md text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
         :href="item.href"
+        @click="menuItemSelected(item, $event)"
       >
         <svg v-if="item.icon" v-html="item.icon.outerHTML" class="w-4 h-4 text-gray-500"></svg>
         <span v-else class="w-4"></span>
@@ -209,7 +234,7 @@ function getMenuItems() {
         @click="logout"
       >
         <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M224 256A128 128 0 1 0 224 0a128 128 0 1 0 0 256zm-45.7 48C79.8 304 0 383.8 0 482.3C0 498.7 13.3 512 29.7 512H418.3c16.4 0 29.7-13.3 29.7-29.7C448 383.8 368.2 304 269.7 304H178.3z"/></svg>
-        <span class="font-medium">({{user.name || user.email}})</span> <span class="font-medium">Logout</span>
+        <span class="font-medium">({{user?.name || user?.email}})</span> <span class="font-medium">Logout</span>
       </a>
       <a v-if="props.auth && !isLoggedIn"
         class="flex items-center gap-x-2 py-2 rounded-md text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
@@ -223,6 +248,8 @@ function getMenuItems() {
     </div>
 
   </nav>
+
+  <ve-contact :contact="props.contact" :title="props.contactFormTitle" :subject="props.contactSubject"></ve-contact>
 
 </template>
 

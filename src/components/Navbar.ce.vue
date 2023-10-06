@@ -19,7 +19,7 @@
         <ul v-html="navEl"></ul>
       </ve-menu>
       -->
-      <!-- <ve-menu1 v-if="navEl" auth="github" v-html="navEl"></ve-menu1> -->
+      <ve-menu1 v-if="navEl" auth="github" v-html="navEl"></ve-menu1>
 
     </div>
   </section>
@@ -51,10 +51,9 @@
   const shadow = computed(() => root?.value?.parentNode?.querySelector('.ve-navbar') as HTMLElement)
 
   const navEl = ref<string>()
-  watch(navEl, () => console.log('Navbar.navEl', toRaw(navEl.value)) )
+  // watch(navEl, () => console.log(toRaw(navEl.value)) )
 
   onMounted(() => {
-    // console.log('Navbar.onMounted', toRaw(props))
     applyProps()
     nextTick(() => navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML)
   })
@@ -104,6 +103,7 @@
     padding: 0;
     align-items: center;
     background-color: inherit;
+    padding-right: 2rem;
   }
 
   /*
