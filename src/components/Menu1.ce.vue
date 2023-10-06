@@ -202,6 +202,10 @@ function getMenuItems() {
     }
   }
 
+  function titleCase(word:string) {
+    return word[0].toUpperCase() + word.slice(1).toLowerCase()
+  }
+
 </script>
 
 <template>
@@ -212,7 +216,7 @@ function getMenuItems() {
       id="hs-dropdown-custom-icon-trigger" 
       type="button"
       aria-label="Site navigation menu"
-      class="hs-dropdown-toggle p-3 inline-flex justify-center items-center gap-2 rounded-md border font-medium bg-white text-gray-700 shadow-sm align-middle hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-600 transition-all text-sm dark:bg-slate-900 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800">
+      class="hs-dropdown-toggle p-3 inline-flex justify-center items-center gap-2 rounded-md border font-medium bg-white text-gray-700 shadow-lg align-middle hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white focus:ring-blue-600 transition-all text-lg dark:bg-slate-900 dark:hover:bg-slate-800 dark:border-gray-700 dark:text-gray-400 dark:hover:text-white dark:focus:ring-offset-gray-800">
       <svg class="w-4 h-4" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
         <path fill-rule="evenodd"
           d="M2.5 12a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5zm0-4a.5.5 0 0 1 .5-.5h10a.5.5 0 0 1 0 1H3a.5.5 0 0 1-.5-.5z" />
@@ -220,10 +224,10 @@ function getMenuItems() {
     </button>
 
     <div
-      class="hs-dropdown-menu transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-[15rem] bg-white shadow-md rounded-lg p-2 mt-2 dark:bg-gray-800 dark:border dark:border-gray-700" 
+      class="hs-dropdown-menu font-sans text-base transition-[opacity,margin] duration hs-dropdown-open:opacity-100 opacity-0 hidden min-w-[15rem] bg-white shadow-md rounded-lg p-2 mt-2 dark:bg-gray-800 dark:border dark:border-gray-700" 
       aria-labelledby="hs-dropdown-custom-icon-trigger">
       <a v-for="item in menuItems" :key="item.href" 
-        class="flex items-center gap-x-2 py-2 rounded-md text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
+        class="flex items-center gap-x-2 py-2 rounded-md font-sans text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
         :href="item.href"
         @click="menuItemSelected(item, $event)"
       >
@@ -233,7 +237,7 @@ function getMenuItems() {
       </a>
 
       <a v-if="props.auth && isLoggedIn"
-        class="flex items-center gap-x-2 py-2 rounded-md text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
+        class="flex items-center gap-x-2 py-2 rounded-md text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
         href="javascript;;" 
         @click="logout"
       >
@@ -241,12 +245,12 @@ function getMenuItems() {
         <span class="font-medium">({{user?.name || user?.email}})</span> <span class="font-medium">Logout</span>
       </a>
       <a v-if="props.auth && !isLoggedIn"
-        class="flex items-center gap-x-2 py-2 rounded-md text-sm text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
+        class="flex items-center gap-x-2 py-2 rounded-md text-gray-800 hover:bg-gray-100 focus:ring-2 focus:ring-blue-500 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-gray-300" 
         href="javascript;;" 
         @click="login"
       >
         <svg xmlns="http://www.w3.org/2000/svg" height="1em" viewBox="0 0 448 512"><!--! Font Awesome Free 6.4.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license (Commercial License) Copyright 2023 Fonticons, Inc. --><path d="M304 128a80 80 0 1 0 -160 0 80 80 0 1 0 160 0zM96 128a128 128 0 1 1 256 0A128 128 0 1 1 96 128zM49.3 464H398.7c-8.9-63.3-63.3-112-129-112H178.3c-65.7 0-120.1 48.7-129 112zM0 482.3C0 383.8 79.8 304 178.3 304h91.4C368.2 304 448 383.8 448 482.3c0 16.4-13.3 29.7-29.7 29.7H29.7C13.3 512 0 498.7 0 482.3z"/></svg>
-        <span class="font-medium">Login</span>
+        <span class="font-medium">Login with {{ titleCase(props.auth) }}</span>
       </a>
 
     </div>

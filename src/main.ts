@@ -1,5 +1,5 @@
-import './style.css'
-import './tailwind.css'
+// import './style.css'
+// import './tailwind.css'
 import { defineCustomElement } from 'vue'
 
 import '@shoelace-style/shoelace/dist/themes/light.css'

@@ -74,12 +74,12 @@
 <template>
 
   <div ref="root" class="hs-tooltip inline-block [--trigger:click] [--placement:top]">
-    <a class="hs-tooltip-toggle block text-center" href="javascript:;" title="Click for more information">
-      <span v-html="text" class="bg-yellow-100"></span>
+    <a class="hs-tooltip-toggle block text-center z-50" href="javascript:;" title="Click for more information">
+      <span v-html="text" class="border-b-2 border-[#444A1E] hover:bg-[#e1ecbe]"></span>
 
       <div class="hs-tooltip-content z-30 hs-tooltip-shown:opacity-100 hs-tooltip-shown:visible hidden opacity-0 transition-opacity absolute invisible max-w-xs bg-white border border-gray-100 text-left rounded-lg shadow-md dark:bg-gray-800 dark:border-gray-700" role="tooltip">
         <div class="flex flex-col bg-white border shadow-sm rounded-xl dark:bg-gray-800 dark:border-gray-700 dark:shadow-slate-700/[.7]">
-          <img class="w-full h-auto rounded-t-xl" :src="entity?.thumbnail" alt="Image Description">
+          <img v-if="entity?.thumbnail" class="w-full h-auto rounded-t-xl" :src="entity?.thumbnail" alt="Image Description">
           <div class="p-4 md:p-5">
             <h3 class="text-lg font-bold text-gray-800 dark:text-white">
               {{ label }}
