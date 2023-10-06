@@ -72,12 +72,17 @@ function getMenuItems() {
     action = location.host === action ? 'home' : action
     // console.log('menuItemSelected', item, action)
     if (action === 'contact') showContactForm()
+    else if (action === 'search') window.open(item.href, '_blank');
     else location.href = item.href
   }
 
   function showContactForm() {
     let contactDialog = shadowRoot.value?.querySelector('ve-contact') as any
     contactDialog._instance.exposed.show.value = true
+  }
+
+  function titleCase(word:string) {
+    return word[0].toUpperCase() + word.slice(1).toLowerCase()
   }
 
   function login(evt:Event) {
@@ -200,10 +205,6 @@ function getMenuItems() {
       let info = await resp.json()
       return { provider: 'github', username: info.login, name: info.name, email: info.email, token }
     }
-  }
-
-  function titleCase(word:string) {
-    return word[0].toUpperCase() + word.slice(1).toLowerCase()
   }
 
 </script>
