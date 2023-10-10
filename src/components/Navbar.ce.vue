@@ -19,7 +19,7 @@
         <ul v-html="navEl"></ul>
       </ve-menu>
       -->
-      <ve-menu1 v-if="navEl" auth="github" v-html="navEl"></ve-menu1>
+      <ve-menu1 v-if="navEl !== undefined" auth="github" v-html="navEl"></ve-menu1>
 
     </div>
   </section>
@@ -55,7 +55,21 @@
 
   onMounted(() => {
     applyProps()
-    nextTick(() => navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML)
+    nextTick(() => {
+      let ul = (host.value.querySelector('ul') as HTMLUListElement)
+      if (!ul && (window as any).config?.nav) {
+        ul = document.createElement('ul');
+        (window as any).config?.nav.forEach((item:any) => {
+          const li = document.createElement('li')
+          const a = document.createElement('a')
+          a.href = item.href
+          a.innerHTML = `${item.icon}${item.label}`
+          li.appendChild(a)
+          ul.appendChild(li)
+        })
+      }
+      navEl.value = ul.innerHTML
+    })
   })
 
   watch(props, () => applyProps())
