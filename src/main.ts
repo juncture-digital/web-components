@@ -30,8 +30,7 @@ import MediaCard from './components/MediaCard.ce.vue'
 import MediaSelector from './components/MediaSelector.ce.vue'
 import MediaViewer from './components/MediaViewer.ce.vue'
 import Menu from './components/Menu.ce.vue'
-import MenuTWP from './components/MenuTWP.ce.vue'
-import Menu1 from './components/Menu1.ce.vue'
+import MenuOld from './components/MenuOld.ce.vue'
 import Mermaid from './components/Mermaid.ce.vue'
 import Modal from './components/Modal.ce.vue'
 import Navbar from './components/Navbar.ce.vue'
@@ -74,8 +73,7 @@ function init() {
 	customElements.define('ve-media-card', defineCustomElement(MediaCard))
 	customElements.define('ve-media-selector', defineCustomElement(MediaSelector))
 	customElements.define('ve-menu', defineCustomElement(Menu))
-	customElements.define('ve-menu1', defineCustomElement(Menu1))
-	customElements.define('ve-menu-twp', defineCustomElement(MenuTWP))
+	customElements.define('ve-menu-old', defineCustomElement(MenuOld))
 	customElements.define('ve-mermaid', defineCustomElement(Mermaid))
 	customElements.define('ve-modal', defineCustomElement(Modal))
 	customElements.define('ve-navbar', defineCustomElement(Navbar))

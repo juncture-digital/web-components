@@ -44,10 +44,14 @@
   import '@shoelace-style/shoelace/dist/components/tooltip/tooltip.js'
 
   const props = defineProps({
-    searchDomain: { type: String }
+    searchDomain: { type: String },
+    searchKey: { type: String },
+    searchCx: { type: String }
   })
 
-  const searchEndpoint = '/search'
+  const key = ref(decrypt(props.searchDomain || '', props.searchKey || ''))
+
+  const searchEndpoint = 'https://www.googleapis.com/customsearch/v1'
 
   const root = ref<HTMLElement | null>(null)
   const shadowRoot = computed(() => root?.value?.parentNode)
@@ -59,8 +63,8 @@
   const totalResults = ref(0)
   const isVisible = ref(false)
 
+
   onMounted(() => init())
-  // onUpdated(() => init())
 
   function init() {
     searchInput.value = shadowRoot.value?.querySelector('#search-input') as HTMLInputElement
@@ -76,20 +80,26 @@
 
   function doSearch() {
     let query = searchInput.value?.value.replace(/ /,'%20')
-    let start = query === currentQuery.value ? searchResults.value.length + 1 : 1
-    let url = `${searchEndpoint}?domain=${props.searchDomain}&q=${query}&start=${start}`
+    let searchArgs: any = {
+      q: query,
+      start: query === currentQuery.value ? searchResults.value.length + 1 : 1,
+      key: key.value,
+      cx: props.searchCx
+    }
+    let qargs = Object.keys(searchArgs).map(k => `${k}=${searchArgs[k]}`).join('&')
+    let url = `${searchEndpoint}?${qargs}`
     fetch(url)
-    .then(res => res.json())
-    .then(results => {
-      totalResults.value = parseInt(results.searchInformation.totalResults)
-      let items = results.items.map((item:any) => {
-        let link = new URL(item.link)
-        item.link = `${location.origin}${link.pathname}`
-        return item
+      .then(res => res.json())
+      .then(results => {
+        totalResults.value = parseInt(results.searchInformation.totalResults)
+        let items = results.items.map((item:any) => {
+          let link = new URL(item.link)
+          item.link = `${location.origin}${link.pathname}`
+          return item
+        })
+        searchResults.value = query !== currentQuery.value ? items : [...searchResults.value, ...items]
+        currentQuery.value = query || ''
       })
-      searchResults.value = query !== currentQuery.value ? items : [...searchResults.value, ...items]
-      currentQuery.value = query || ''
-    })
   }
 
   function inputHandler(evt:KeyboardEvent) {
@@ -107,6 +117,33 @@
   function searchClicked() {
     isVisible.value = !isVisible.value
   }
+
+    function crypt (salt:string, text:string) {
+      const textToChars = (text:string) => text.split('').map((c) => c.charCodeAt(0));
+      const byteHex = (n:number) => ('0' + Number(n).toString(16)).substr(-2);
+      const applySaltToChar = (code:any) => textToChars(salt).reduce((a, b) => a ^ b, code);
+
+      return text
+        .split('')
+        .map(textToChars)
+        .map(applySaltToChar)
+        .map(byteHex)
+        .join('');
+  };
+
+  function decrypt(salt:string, encoded:string) {
+    const textToChars = (text:string) => text.split('').map((c) => c.charCodeAt(0));
+    const applySaltToChar = (code:any) => textToChars(salt).reduce((a, b) => a ^ b, code);
+    let match = encoded.match(/.{1,2}/g);
+    let decoded = match
+      ? match .map((hex) => parseInt(hex, 16))
+        .map(applySaltToChar)
+        .map((charCode) => String.fromCharCode(charCode))
+        .join('')
+      : ''
+    // console.log('decrypt', encoded, decoded)
+    return decoded
+  };
 
 </script>
 
@@ -147,7 +184,7 @@
     align-items: center;
   }
   .search-input {
-    height: 30px;
+    height: 42px;
     width: 250px;
     border-radius: 6px;
     padding: 3px 10px;
@@ -243,7 +280,7 @@
   .cancel {
     position: absolute;
     right: 0;
-    /* top: 4px; */
+    top: 4px;
     font-size: 16px;
     cursor: pointer;
   }

@@ -12,15 +12,16 @@
     ></ve-hero>
 
     <ve-navbar ref="navbar"
+      class="sticky z-10"
       :label="label"
       :subtitle="props.subtitle"
       :logo="props.logo"
       :url="props.url"
       :sticky="props.sticky ? '' : null"
       :search-domain="props.searchDomain"
+      :search-cx="props.searchCx"
+      :search-key="props.searchKey"
       :contact="props.contact"
-      :contact-form-title="props.contactFormTitle"
-      :contact-subject="props.contactSubject"
       :height="backgroundImage ? navbarHeight : height"
       :background="backgroundColor"
       :alpha="backgroundImage ? 0.2 : 0"
@@ -45,9 +46,9 @@
     logo: { type: String },
     url: { type: String },
     contact: { type: String },
-    contactFormTitle: { type: String },
-    contactSubject: { type: String },
     searchDomain: { type: String },
+    searchCx: { type: String },
+    searchKey: { type: String },
     entities: { type: String },
     sticky: { type: Boolean },
     background: { type: String },
@@ -80,6 +81,7 @@
   onUpdated(() => applyProps() )
 
   function applyProps() {
+    console.log('applyProps', props)
     entities.value = props.entities ? props.entities.split(/\s+/).filter(qid => qid) : []
     if (props.background !== undefined && (isURL(props.background) || isManifestShorthand(props.background))) {
       backgroundImage.value = props.background
@@ -113,9 +115,5 @@
 </script>
 
 <style>
-
-  .main {
-    width: 100%;
-  }
-
+  @import '../tailwind.css';
 </style>
