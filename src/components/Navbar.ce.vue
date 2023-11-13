@@ -56,7 +56,7 @@
 
   onMounted(() => {
     nextTick(() => {
-      console.log((window as any).config?.nav)
+      // console.log((window as any).config?.nav)
       let ul = (host.value.querySelector('ul') as HTMLUListElement)
       if (!ul && (window as any).config?.nav) {
         ul = document.createElement('ul');
