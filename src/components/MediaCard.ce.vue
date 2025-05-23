@@ -33,7 +33,7 @@
       </ul>
 
       <div class="card-links" style="margin-top:auto;">
-        <img src="https://juncture-digital.github.io/web-app/static/iiif.png" class="draggable-iiif" alt="IIIF manifest icon"
+        <img src="https://juncture-digital.io/juncture/static/images/iiif.png" class="draggable-iiif" alt="IIIF manifest icon"
           @click="copyTextToClipboard(manifest.id)" 
           @dragstart="onDrag"
         />
