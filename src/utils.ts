@@ -38,7 +38,7 @@ export function initTippy(el:any=null, force=false) {
   if (!tippyEntities && _entities.length > 0) {
     tippyEntities = _entities
     // console.log(`initTippy: entities=${tippyEntities.length}`)
-    console.log('initTippy: entities=')
+    console.log('Grouped Entities')
     const grouped = tippyEntities.reduce((acc: any, el: any) => {
       const key = el.getAttribute('data-popover-trigger')
       if (!acc[key]) acc[key] = []
