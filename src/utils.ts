@@ -38,22 +38,20 @@ export function initTippy(el:any=null, force=false) {
   if (!tippyEntities && _entities.length > 0) {
     tippyEntities = _entities
     // console.log(`initTippy: entities=${tippyEntities.length}`)
-    console.log('Grouped Entities')
+    // If we have a data-popover-trigger attribute, group by that value,
+    // otherwise default to 'mouseenter focus'
     const grouped = tippyEntities.reduce((acc: any, el: any) => {
-      const key = el.getAttribute('data-popover-trigger')
-      if (!acc.has(key)) acc.set(key, [])
-      acc.get(key).push(el)
+      const key = el.getAttribute('data-popover-trigger') || 'mouseenter focus'
+      if (!acc[key]) acc[key] = []
+      acc[key].push(el)
       return acc
-    }, new Map())
-    console.log(grouped)
-    grouped.forEach((value:any, key:any) => {
-      console.log(`Key: ${key}, type: ${typeof key}, Count: ${value.length}`)
-      console.log(`Elements: `, value)
-      const group = grouped.get(key)
+    }, {})
+    // Initialize tippy for each group, with the appropriate trigger
+    for (const key in grouped) {
       const config = {
         interactive: true,
         allowHTML: true,
-        trigger: key ? key : 'mouseenter focus',
+        trigger: key,
         delay: [null, null],
         onShow: (instance:any) => {
           let attrs = Array.from(instance.reference.attributes)
@@ -62,8 +60,8 @@ export function initTippy(el:any=null, force=false) {
           instance.setContent(`<ve-entity-card ${attrs} style="max-width:90vw;"></ve-entity-card>`)
         }
       }
-      tippy(grouped.get(key), config)
-    })
+      tippy(grouped[key], config)
+    }
   }
 }
 
