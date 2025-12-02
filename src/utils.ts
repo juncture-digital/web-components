@@ -41,22 +41,29 @@ export function initTippy(el:any=null, force=false) {
     console.log('Grouped Entities')
     const grouped = tippyEntities.reduce((acc: any, el: any) => {
       const key = el.getAttribute('data-popover-trigger')
-      if (!acc[key]) acc[key] = []
-      acc[key].push(el)
+      if (!acc.has(key)) acc.set(key, [])
+      acc.get(key).push(el)
       return acc
-    }, {})
+    }, new Map())
     console.log(grouped)
-    tippy(tippyEntities, {
-      // theme: 'light-border',
-      interactive: true,
-      allowHTML: true,
-      delay: [null, null],
-      onShow: (instance:any) => {
-        let attrs = Array.from(instance.reference.attributes)
-          .filter((attr:any) => validAttrs.has(attr.name))
-          .map((attr:any) => `${attr.name}="${attr.value}"`)
-        instance.setContent(`<ve-entity-card ${attrs} style="max-width:90vw;"></ve-entity-card>`)
+    grouped.forEach((value:any, key:any) => {
+      console.log(`Key: ${key}, Count: ${value.length}`)
+      console.log(`Elements: `, value)
+      const group = grouped.get(key)
+      const config = {
+        interactive: true,
+        allowHTML: true,
+        trigger: key ? key : 'mouseenter focus',
+        delay: [null, null],
+        onShow: (instance:any) => {
+          let attrs = Array.from(instance.reference.attributes)
+            .filter((attr:any) => validAttrs.has(attr.name))
+            .map((attr:any) => `${attr.name}="${attr.value}"`)
+          instance.setContent(`<ve-entity-card ${attrs} style="max-width:90vw;"></ve-entity-card>`)
+        }
       }
+      tippy(grouped[key], config)
+
     })
   }
 }
