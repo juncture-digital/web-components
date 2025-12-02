@@ -26,19 +26,21 @@ export default defineConfig(({mode})=> {
     },
     
     build: {
+      cssCodeSplit: false,
       rollupOptions: {
         input: {
           index: './index.html',
         },
         output: {
           dir: 'docs',
+          inlineDynamicImports: true,
+          entryFileNames: `js/index.js`,
           assetFileNames: (assetInfo) => {
-            let extType = assetInfo.name?.split('.').at(1)
-            if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(extType || '')) extType = 'img';
-            return `${extType}/[name][extname]`;
-          },
-          entryFileNames: `js/[name].js`,
-          chunkFileNames: 'js/[name]-[hash].js'
+            const ext = assetInfo.name?.split('.').pop()?.toLowerCase()
+            if (ext === 'css') return 'css/index.css'
+            if (/png|jpe?g|svg|gif|tiff|bmp|ico/i.test(ext || '')) return `img/[name][extname]`
+            return `assets/[name][extname]`
+          }
         }
       }
     }
