@@ -39,7 +39,13 @@ export function initTippy(el:any=null, force=false) {
     tippyEntities = _entities
     // console.log(`initTippy: entities=${tippyEntities.length}`)
     console.log('initTippy: entities=')
-    console.log(tippyEntities)
+    const grouped = tippyEntities.reduce((acc: any, el: any) => {
+      const key = el.getAttribute('data-popover-trigger')
+      if (!acc[key]) acc[key] = []
+      acc[key].push(el)
+      return acc
+    }, {})
+    console.log(grouped)
     tippy(tippyEntities, {
       // theme: 'light-border',
       interactive: true,
