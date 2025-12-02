@@ -47,7 +47,7 @@ export function initTippy(el:any=null, force=false) {
     }, new Map())
     console.log(grouped)
     grouped.forEach((value:any, key:any) => {
-      console.log(`Key: ${key}, Count: ${value.length}`)
+      console.log(`Key: ${key}, type: ${typeof key}, Count: ${value.length}`)
       console.log(`Elements: `, value)
       const group = grouped.get(key)
       const config = {
