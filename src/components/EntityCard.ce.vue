@@ -47,6 +47,7 @@
   onMounted(() =>  applyProps())
 
   function applyProps() {
+    console.log("TESTING THE DEPLOYMENT OF THIS FILE")
     if (props.qid && qid.value !== props.qid) qid.value = props.qid
     if (props.label) label.value = props.label
     if (props.description) description.value = props.description
