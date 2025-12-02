@@ -38,6 +38,8 @@ export function initTippy(el:any=null, force=false) {
   if (!tippyEntities && _entities.length > 0) {
     tippyEntities = _entities
     // console.log(`initTippy: entities=${tippyEntities.length}`)
+    console.log('initTippy: entities=')
+    console.log(tippyEntities)
     tippy(tippyEntities, {
       // theme: 'light-border',
       interactive: true,
