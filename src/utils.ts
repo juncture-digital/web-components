@@ -62,8 +62,7 @@ export function initTippy(el:any=null, force=false) {
           instance.setContent(`<ve-entity-card ${attrs} style="max-width:90vw;"></ve-entity-card>`)
         }
       }
-      tippy(grouped[key], config)
-
+      tippy(grouped.get(key), config)
     })
   }
 }
