@@ -79,7 +79,6 @@ export class Annotator {
   }
 
   toggleVisibility(evt:MouseEvent) {
-    // console.log('toggleVisibility')
     if (evt) evt.stopPropagation()
     this.setVisible(!this.visible)
   }
@@ -95,13 +94,15 @@ export class Annotator {
   }
 
   select(annoId:string) {
-    // console.log(`annotator.select=${annoId}`, this.selected?.id)
+    //console.log(`annotator.select=${annoId}`, this.selected?.id)
     if (annoId !== this.selected?.id) {
       this.deselect() 
       this.selected = this.annotorious.selectAnnotation(annoId)
       if (this.selected) {
         let annoEl = this.annoEl(annoId)
         if (annoEl) annoEl.style.visibility = 'visible'
+        let annoLayer = this.osd.element.querySelector('.a9s-annotation.selected') as HTMLElement
+        if (annoLayer) annoLayer.style.visibility = 'visible'
       }
     } else {
       this.deselect() 
@@ -119,17 +120,19 @@ export class Annotator {
     let content = JSON.stringify(this.annotorious.getAnnotations(), null, 2)
     // console.log(`saveAnnotations: acct=${this.acct} repo=${this.repo} ref=${this.ref} basePath=${this.basePath} imageId=${this.imageId}`, content)
     let resp = await this.ghClient.putFile(this.acct, this.repo, `${this.basePath}/${this.imageId}.json`, content, this.ref, false, this.sha)
-    console.log(resp)
   }
 
   async createAnnotation(anno:any) {
     anno.id = sha256(anno.id).slice(0,8)
     anno.target.id = this.imageId
+    this.saveAnnotations()
+    if (navigator.clipboard) navigator.clipboard.writeText(anno.id)
   }
 
   async updateAnnotation(anno:any) {
     anno.target.id = this.imageId
     this.saveAnnotations()
+    if (navigator.clipboard) navigator.clipboard.writeText(anno.id)
   }
 
   async deleteAnnotation(anno:any) {

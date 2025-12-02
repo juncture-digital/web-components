@@ -42,8 +42,7 @@
 
   const thumbnailWidth = computed(() => `${host.value.clientWidth * .33}px`)
 
-  watch(backgroundImage, () => host.value.style.width = '600px')
-
+  watch(backgroundImage, () => host.value.style.width = '572px')
 
   onMounted(() =>  applyProps())
 

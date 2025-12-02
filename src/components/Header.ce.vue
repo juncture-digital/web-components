@@ -12,20 +12,23 @@
     ></ve-hero>
 
     <ve-navbar ref="navbar"
+      class="sticky z-10"
       :label="label"
       :subtitle="props.subtitle"
       :logo="props.logo"
       :url="props.url"
       :sticky="props.sticky ? '' : null"
       :search-domain="props.searchDomain"
+      :search-cx="props.searchCx"
+      :search-key="props.searchKey"
       :contact="props.contact"
-      :height="height"
+      :height="backgroundImage ? navbarHeight : height"
       :background="backgroundColor"
-      :alpha="0.2"
+      :alpha="backgroundImage ? 0.2 : 0"
       :offset="backgroundImage ? navbarHeight : 0"
     >
 
-      <ul v-if="navEl" v-html="navEl"></ul>
+      <ul v-if="navEl" v-html="navEl.outerHTML"></ul>
 
     </ve-navbar>
 
@@ -44,6 +47,8 @@
     url: { type: String },
     contact: { type: String },
     searchDomain: { type: String },
+    searchCx: { type: String },
+    searchKey: { type: String },
     entities: { type: String },
     sticky: { type: Boolean },
     background: { type: String },
@@ -52,19 +57,23 @@
     position: { type: String }
   })
 
-  const navbarHeight = 80
+  const navbarHeight = 100
   const heroHeight = 400
   const manifestShorthandRegex = /^\w+:/
 
   const navbar = ref<HTMLElement | null>(null)
   const host = computed(() => (navbar.value?.getRootNode() as any)?.host)
+  watch(host, () => { navEl.value = host.value.querySelector('ul') })
 
   const label = ref<string>()
-  const navEl = ref<string>()
+  // const navEl = ref<string>()
   const entities = ref<string[]>([])
   const entity = ref<any>()
   const backgroundColor = ref<string>()
   const backgroundImage = ref<string>()
+
+  const navEl = ref<HTMLUListElement>()
+  // watch(navEl, () => { console.log(toRaw(navEl.value)) })
 
   const height = ref(props.height || navbarHeight)
 
@@ -72,6 +81,7 @@
   onUpdated(() => applyProps() )
 
   function applyProps() {
+    // console.log('applyProps', props)
     entities.value = props.entities ? props.entities.split(/\s+/).filter(qid => qid) : []
     if (props.background !== undefined && (isURL(props.background) || isManifestShorthand(props.background))) {
       backgroundImage.value = props.background
@@ -80,9 +90,9 @@
       backgroundColor.value = props.background || '#444'
     }
     if (props.label && props.label !== 'static') label.value = props.label
-    if (navbar.value) navbar.value.style.height = `${props.height || navbarHeight}px`
+    // if (navbar.value) navbar.value.style.height = `${props.height || navbarHeight}px`
     if (props.sticky) host.value.classList.add('sticky')
-    navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML
+    // navEl.value = (host.value.querySelector('ul') as HTMLUListElement)?.innerHTML
   }
 
   watch(entities, async () => {
@@ -105,9 +115,5 @@
 </script>
 
 <style>
-
-  .main {
-    width: 100%;
-  }
-
+  @import '../tailwind.css';
 </style>

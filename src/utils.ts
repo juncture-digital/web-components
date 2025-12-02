@@ -38,18 +38,30 @@ export function initTippy(el:any=null, force=false) {
   if (!tippyEntities && _entities.length > 0) {
     tippyEntities = _entities
     // console.log(`initTippy: entities=${tippyEntities.length}`)
-    tippy(tippyEntities, {
-      // theme: 'light-border',
-      interactive: true,
-      allowHTML: true,
-      delay: [null, null],
-      onShow: (instance:any) => {
-        let attrs = Array.from(instance.reference.attributes)
-          .filter((attr:any) => validAttrs.has(attr.name))
-          .map((attr:any) => `${attr.name}="${attr.value}"`)
-        instance.setContent(`<ve-entity-card ${attrs} style="max-width:90vw;"></ve-entity-card>`)
+    // If we have a data-popover-trigger attribute, group by that value,
+    // otherwise default to 'mouseenter focus'
+    const grouped = tippyEntities.reduce((acc: any, el: any) => {
+      const key = el.getAttribute('data-popover-trigger') || 'mouseenter focus'
+      if (!acc[key]) acc[key] = []
+      acc[key].push(el)
+      return acc
+    }, {})
+    // Initialize tippy for each group, with the appropriate trigger
+    for (const key in grouped) {
+      const config = {
+        interactive: true,
+        allowHTML: true,
+        trigger: key,
+        delay: [null, null],
+        onShow: (instance:any) => {
+          let attrs = Array.from(instance.reference.attributes)
+            .filter((attr:any) => validAttrs.has(attr.name))
+            .map((attr:any) => `${attr.name}="${attr.value}"`)
+          instance.setContent(`<ve-entity-card ${attrs} style="max-width:90vw;"></ve-entity-card>`)
+        }
       }
-    })
+      tippy(grouped[key], config)
+    }
   }
 }
 
@@ -72,10 +84,9 @@ export async function prezi2to3(manifest: any) {
 
 function observeNavbar(navbar:HTMLElement, target:HTMLElement) {
   const setTop = () => {
-    let top = parseInt(navbar.style.top.replace(/^-/,'').replace(/px$/,''))
-    let height = parseInt(navbar.style.height.replace(/px$/,''))
+    let top = parseInt(navbar.style.top.replace(/^-/,'').replace(/px$/,'')) || 0
+    let height = parseInt(navbar.style.height.replace(/px$/,'')) || navbar.clientHeight
     let topOffset = height - top
-    // if (target.style.top) topOffset += parseInt(target.style.marginTop.slice(0,-2))
     target.style.top = `${topOffset}px`
   }
   setTop()
@@ -86,7 +97,7 @@ function observeNavbar(navbar:HTMLElement, target:HTMLElement) {
 export function makeSticky(el:HTMLElement) {
   el.classList.add('sticky')
   el.style.position = 'sticky'
-  el.style.marginTop = '6px'
+  // el.style.marginTop = '6px'
   let stickyNavbar:any = document.querySelector('ve-navbar[sticky="true"]') as HTMLElement
   if (stickyNavbar) {
     observeNavbar(stickyNavbar, el)

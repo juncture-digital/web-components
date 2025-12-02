@@ -33,7 +33,7 @@
       </ul>
 
       <div class="card-links" style="margin-top:auto;">
-        <img src="https://juncture-digital.github.io/web-app/static/iiif.png" class="draggable-iiif" alt="IIIF manifest icon"
+        <img src="https://juncture-digital.io/juncture/static/images/iiif.png" class="draggable-iiif" alt="IIIF manifest icon"
           @click="copyTextToClipboard(manifest.id)" 
           @dragstart="onDrag"
         />
@@ -134,7 +134,6 @@
   const imageDialog = ref<SLDialog>()
   watch(imageDialog, (_dialog) => {
     _dialog?.addEventListener('sl-show', () => {
-      // console.log(imageDialog.value?.parentElement)
       if (imageDialog.value) imageDialog.value.panel.style.width = `${calcDialogWidth()}px`
     })
   })

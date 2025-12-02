@@ -77,7 +77,7 @@
 
   const props = defineProps({
     label: { type: String },
-    tabs: { type: String, default: 'markdown,html,preview' },
+    tabs: { type: String, default: 'markdown,html,wordpress,preview' },
     collapsible: { type: Boolean, default: false },
     open: { type: Boolean, default: false },
     prefix: { type: String },
@@ -108,7 +108,7 @@
 
   onMounted(() => {
     if (props.src) {
-      fetch(`https://dev.juncture-digital.org/${props.src}?fmt=md`)
+      fetch(`/${props.src}?fmt=md`)
         .then(resp => resp.text())
         .then(md => {
           markdown.value = md.replace(/>/g,'&gt;').replace(/</g,'&lt;')
@@ -118,7 +118,7 @@
 
   watch(host, () => {
     if (props.tabs) tabs.value = props.tabs.split(',')
-    else tabs.value = ['markdown', 'html', 'preview']
+    else tabs.value = ['markdown', 'html', 'wordpress', 'preview']
     let text = host.value.innerHTML
       .replace(/<pre v-pre="" data-lang="markup"><code class="lang-markup">/,'')
       .replace(/<\/code><\/pre>/, '')
@@ -187,7 +187,7 @@
   
   function getHTML() {
     html.value = ''
-    fetch('https://dev.juncture-digital.org/html/', {
+    fetch('/html/', {
       method: 'POST',
       body: JSON.stringify({
         prefix: `${props.prefix || ''}`,
@@ -215,7 +215,7 @@
   function getWxr() {
     if (html.value) {
       wxr.value = ''
-      fetch('https://dev.juncture-digital.org/wxr/', {
+      fetch('/wxr/', {
         method: 'POST',
         body: JSON.stringify({
           prefix: `${props.prefix || ''}`,

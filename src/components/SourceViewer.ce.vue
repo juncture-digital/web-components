@@ -77,7 +77,7 @@
 
   onMounted(() => {
     if (props.src) {
-      fetch(`https://dev.juncture-digital.org/${props.src}?fmt=md`)
+      fetch(`/${props.src}?fmt=md`)
         .then(resp => resp.text())
         .then(markdown => {
           markdown = markdown.replace(/>/g,'&gt;').replace(/</g,'&lt;')

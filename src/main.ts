@@ -1,4 +1,5 @@
 import './style.css'
+import './tailwind.css'
 import { defineCustomElement } from 'vue'
 
 import '@shoelace-style/shoelace/dist/themes/light.css'
@@ -13,6 +14,7 @@ import Contact from './components/Contact.ce.vue'
 import ContentSelector from './components/ContentSelector.ce.vue'
 import Entities from './components/Entities.ce.vue'
 import EntityCard from './components/EntityCard.ce.vue'
+import EntityInfobox from './components/EntityInfobox.ce.vue'
 import Essay from './components/Essay.ce.vue'
 import FAB from './components/FAB.ce.vue'
 import Footer from './components/Footer.ce.vue'
@@ -28,6 +30,7 @@ import MediaCard from './components/MediaCard.ce.vue'
 import MediaSelector from './components/MediaSelector.ce.vue'
 import MediaViewer from './components/MediaViewer.ce.vue'
 import Menu from './components/Menu.ce.vue'
+import MenuOld from './components/MenuOld.ce.vue'
 import Mermaid from './components/Mermaid.ce.vue'
 import Modal from './components/Modal.ce.vue'
 import Navbar from './components/Navbar.ce.vue'
@@ -38,9 +41,11 @@ import Snippet from './components/Snippet.ce.vue'
 import SourceViewer from './components/SourceViewer.ce.vue'
 import Spacer from './components/Spacer.ce.vue'
 import Starter from './components/Starter.ce.vue'
+import Trigger from './components/Trigger.ce.vue'
 import Version from './components/Version.ce.vue'
 import WikidataSearch from './components/WikidataSearch.ce.vue'
 import Window from './components/Window.ce.vue'
+import NewMenu from './components/MenuAuth.ce.vue'
 
 console.log(`juncture.web-components: version=${process.env.version}`)
 
@@ -52,6 +57,7 @@ function init() {
 	customElements.define('ve-content-selector', defineCustomElement(ContentSelector))
 	customElements.define('ve-entities', defineCustomElement(Entities))
 	customElements.define('ve-entity-card', defineCustomElement(EntityCard))
+	customElements.define('ve-entity-infobox', defineCustomElement(EntityInfobox))
 	customElements.define('ve-essay', defineCustomElement(Essay))
 	customElements.define('ve-fab', defineCustomElement(FAB))
 	customElements.define('ve-footer', defineCustomElement(Footer))
@@ -67,6 +73,7 @@ function init() {
 	customElements.define('ve-media-card', defineCustomElement(MediaCard))
 	customElements.define('ve-media-selector', defineCustomElement(MediaSelector))
 	customElements.define('ve-menu', defineCustomElement(Menu))
+	customElements.define('ve-menu-old', defineCustomElement(MenuOld))
 	customElements.define('ve-mermaid', defineCustomElement(Mermaid))
 	customElements.define('ve-modal', defineCustomElement(Modal))
 	customElements.define('ve-navbar', defineCustomElement(Navbar))
@@ -77,9 +84,11 @@ function init() {
 	customElements.define('ve-site-search', defineCustomElement(SiteSearch))
 	customElements.define('ve-spacer', defineCustomElement(Spacer))
 	customElements.define('ve-starter', defineCustomElement(Starter))
+	customElements.define('ve-trigger', defineCustomElement(Trigger))
 	customElements.define('ve-version', defineCustomElement(Version))
 	customElements.define('ve-wikidata-search', defineCustomElement(WikidataSearch))
 	customElements.define('ve-window', defineCustomElement(Window))
+	customElements.define('ve-new-menu', defineCustomElement(NewMenu))
 
 	document.body.style.transition = 'opacity 0.3s linear'
 	document.body.style.visibility = 'visible'
