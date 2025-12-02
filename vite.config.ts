@@ -34,7 +34,6 @@ export default defineConfig(({mode})=> {
         output: {
           dir: 'docs',
           inlineDynamicImports: true,
-          entryFileNames: `js/index.js`,
           assetFileNames: (assetInfo) => {
             const ext = assetInfo.name?.split('.').pop()?.toLowerCase()
             if (ext === 'css') return 'css/index.css'
