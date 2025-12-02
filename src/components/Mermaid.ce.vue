@@ -66,10 +66,12 @@
     mermaid.initialize({ startOnLoad: false });
     (async function () {
       let element = shadowRoot.value?.querySelector('#diagram')
-      const insertSvg = function (svgCode:any) {
-        if (element) element.innerHTML = svgCode
+      const { svg, bindFunctions } = await mermaid.render('diagram', diagramText)
+      if (element) {
+        element.innerHTML = svg;
+        bindFunctions?.(element);
       }
-      await mermaid.render('diagram', diagramText, insertSvg)
+
       // const graph = await mermaid.render('graphDiv', diagramText.value, insertSvg)
       // console.log(graph)
     })()

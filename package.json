@@ -25,7 +25,7 @@
     "leaflet": "^1.9.3",
     "leaflet-gesture-handling": "^1.2.2",
     "leaflet.control.opacity": "^1.6.0",
-    "mermaid": "^9.3.0",
+    "mermaid": "^10.0.0",
     "netlify-identity-widget": "^1.9.2",
     "openseadragon": "2.4.2",
     "pinia": "^2.1.6",
